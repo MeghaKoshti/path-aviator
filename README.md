@@ -1,45 +1,62 @@
-# Path Aviator
+# 🚀 Path Aviator
 
-A robust, AI-driven personalized learning platform built with Ruby on Rails 8. Path Aviator intelligently curates structured learning paths based on a user’s interests, skill level, and learning goals.
-
----
-
-## 🚀 Features
-
-- Intelligent onboarding with AI-based skill and interest profiling  
-- Dynamically generated learning playlists tailored to user needs  
-- Integration with diverse learning sources (e.g., video platforms, blogs, repositories)  
-- Bookmarking, progress tracking, and resume learning support  
-- Clean UI built with Hotwire (Turbo + Stimulus) and Tailwind CSS  
+**Path Aviator** is a robust AI-driven personalized learning platform, built with Ruby on Rails 8. It intelligently curates structured learning paths based on users’ interests, skills, and goals—aggregating content across platforms like YouTube, blogs, GitHub, and more.
 
 ---
 
-## 🧱 Tech Stack
+## 🧠 Core Features
 
-- **Ruby on Rails 8** (Unified backend and frontend)  
-- **Hotwire (Turbo + Stimulus)** for reactive UI  
-- **Tailwind CSS** for utility-first styling  
-- **PostgreSQL** for primary data store  
-- Built-in Rails tools: Solid Queue, Action Mailer, Action Text, etc.
+- 🔍 **AI-powered onboarding** for skill/interest detection  
+- 📚 **Dynamic learning playlists** tailored to user context  
+- 🔗 **Integrated content sources** (videos, docs, repos, blogs, courses)  
+- 🏷️ **Bookmarking, progress tracking, and smart resume**  
+- ⚡ **Reactive frontend** via Hotwire (Turbo + Stimulus)  
+- 🧘‍♀️ **Minimalist UI** styled with Tailwind CSS
+
+---
+
+## 🛠 Tech Stack
+
+| Layer        | Technology                       |
+|--------------|----------------------------------|
+| Backend      | Ruby on Rails 8.0.2              |
+| Frontend     | Hotwire (Turbo + Stimulus)       |
+| Styling      | Tailwind CSS (via Importmap + ESM)|
+| Database     | PostgreSQL (default), SQLite (dev)|
+| Job Queue    | Solid Queue                      |
+| Caching      | Solid Cache                      |
+| Asset Pipeline | Propshaft + Thruster           |
+| Deployment   | Kamal (Dockerized deploy)        |
+| Debugging    | Web Console, Debug gem           |
 
 ---
 
 ## 🚧 Getting Started
 
-### Prerequisites
+### ✅ Prerequisites
 
-- **Ruby 3.2.x+** (managed via rbenv or rvm)  
-- **PostgreSQL**  
-- **Node.js & Yarn** (for Tailwind & asset pipeline)
+Make sure the following are installed:
 
-### Setup the Project
+- **Ruby 3.2+** (recommended: 3.3.x) — via `rbenv` or `rvm`  
+- **Rails 8.0.2+**
+- **PostgreSQL** (or SQLite for local dev only)  
+- **Node.js & Yarn** (for Tailwind + Hotwire dependencies)
 
-```
+---
+
+### 📦 Setup Instructions
+
+```bash
+# Clone the repository
 git clone git@github.com:MeghaKoshti/path-aviator.git
 cd path-aviator
+
+# Install dependencies
 bundle install
 yarn install
-rails db:create db:migrate
-rails db:seed
-rails s
-```
+
+# Setup the database
+rails db:create db:migrate db:seed
+
+# Run the app
+rails server
