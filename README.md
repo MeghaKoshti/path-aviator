@@ -34,7 +34,7 @@ A robust, AI-driven personalized learning platform built with Ruby on Rails 8.
 
 ### Setup the Project
 
-bash
+```
 git clone git@github.com:MeghaKoshti/path-aviator.git
 cd path-aviator
 bundle install
@@ -42,3 +42,4 @@ yarn install
 rails db:create db:migrate
 rails db:seed
 rails s
+```
