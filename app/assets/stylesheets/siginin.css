@@ -1,0 +1,166 @@
+
+.signin-page .neural-network {
+  background-image:
+    radial-gradient(circle at 25% 40%, #f39c12 3px, transparent 4px),
+    radial-gradient(circle at 70% 60%, #f7dc6f 3px, transparent 4px),
+    radial-gradient(circle at 50% 20%, #fff9db 2px, transparent 3px);
+  background-size: 300px 300px, 240px 240px, 260px 260px;
+  animation: network-float 20s ease-in-out infinite;
+}
+
+.signin-page .signin-container {
+  animation: slide-up 0.6s ease-out;
+}
+
+.signin-page .logo-icon {
+  animation: logo-glow 2s ease-in-out infinite alternate;
+}
+
+.signin-page .input-group {
+  animation: fade-in-up 0.6s ease-out both;
+}
+
+.signin-page .input-group:nth-child(1) { 
+  animation-delay: 0.1s; 
+}
+
+.signin-page .input-group:nth-child(2) { 
+  animation-delay: 0.2s; 
+}
+
+.signin-page .form-options {
+  animation: fade-in-up 0.6s ease-out both;
+  animation-delay: 0.3s;
+}
+
+.signin-page .signin-button {
+  animation: fade-in-up 0.6s ease-out both;
+  animation-delay: 0.4s;
+  position: relative;
+  overflow: hidden;
+}
+
+.signin-page .signin-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.signin-page .signin-button:hover::before {
+  left: 100%;
+}
+
+.signin-page input {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.signin-page input:focus {
+  border-color: #f7dc6f !important;
+  box-shadow: 0 4px 12px rgba(247, 220, 111, 0.15) !important;
+  transform: translateY(-1px);
+}
+
+.signin-page input:hover {
+  border-color: #f7dc6f;
+  transform: translateY(-0.5px);
+}
+
+/* Password toggle button fix */
+.password-toggle-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.password-toggle-btn:focus {
+  outline: 2px solid #f7dc6f;
+  outline-offset: 2px;
+}
+
+/* Flash message animations */
+.flash-message {
+  animation: fade-in-up 0.4s ease-out;
+}
+
+/* Keyframe animations */
+@keyframes network-float {
+  0%, 100% { 
+    transform: translate(0, 0); 
+  }
+  33% { 
+    transform: translate(30px, -20px); 
+  }
+  66% { 
+    transform: translate(-20px, 30px); 
+  }
+}
+
+@keyframes slide-up {
+  from { 
+    opacity: 0; 
+    transform: translateY(30px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes logo-glow {
+  0% { 
+    box-shadow: 0 0 20px rgba(247, 220, 111, 0.3); 
+  }
+  100% { 
+    box-shadow: 0 0 30px rgba(247, 220, 111, 0.6); 
+  }
+}
+
+@keyframes fade-in-up {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+  .signin-page .signin-container {
+    margin: 1rem;
+    padding: 2rem;
+  }
+  
+  .signin-page h1 {
+    font-size: 2rem;
+  }
+  
+  .signin-page h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  .signin-page .neural-network,
+  .signin-page .signin-container,
+  .signin-page .logo-icon,
+  .signin-page .input-group,
+  .signin-page .form-options,
+  .signin-page .signin-button,
+  .flash-message {
+    animation: none;
+  }
+  
+  .signin-page input {
+    transition: none;
+  }
+}

@@ -1,11 +1,159 @@
-<%= tag.div(flash[:alert], style: "color:red") if flash[:alert] %>
-<%= tag.div(flash[:notice], style: "color:green") if flash[:notice] %>
+<%= content_for :title, "Sign In - Path Aviator" %>
+<%= content_for :meta_description, "Sign in to your Path Aviator account to continue your personalized learning journey" %>
 
-<%= form_with url: session_path do |form| %>
-  <%= form.email_field :email_address, required: true, autofocus: true, autocomplete: "username", placeholder: "Enter your email address", value: params[:email_address] %><br>
-  <%= form.password_field :password, required: true, autocomplete: "current-password", placeholder: "Enter your password", maxlength: 72 %><br>
-  <%= form.submit "Sign in" %>
+<div class="signin-page min-h-screen flex items-center justify-center relative overflow-x-hidden bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1462642109801-4ac2971a3a51?q=80&w=1973&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');">
+  <!-- Neural Network Background -->
+  <div class="absolute w-full h-full opacity-10 z-0 pointer-events-none neural-network" aria-hidden="true"></div>
+
+  <div class="signin-container bg-white/97 backdrop-blur-xl rounded-3xl shadow-2xl w-[90%] max-w-4xl p-10 relative z-10 border border-white/20">
+    <!-- Brand Section -->
+    <div class="text-center mb-8">
+      <div class="flex items-center justify-center gap-3 mb-4">
+        <div class="w-12 h-12 bg-gradient-to-br from-yellow-200 to-yellow-500 rounded-2xl flex items-center justify-center text-2xl relative overflow-hidden logo-icon" aria-hidden="true">
+          <div class="absolute -top-0.5 -left-0.5 -right-0.5 -bottom-0.5 bg-gradient-to-r from-yellow-200 via-yellow-500 to-rose-500 rounded-2xl -z-10"></div>
+          🧭
+        </div>
+        <h1 class="text-4xl font-extrabold bg-gradient-to-r from-yellow-200 to-yellow-500 bg-clip-text text-transparent tracking-tight">
+          Path Aviator
+        </h1>
+      </div>
+    </div>
+
+    <!-- Sign In Header -->
+    <div class="text-center mb-6">
+      <h2 class="text-3xl font-bold text-slate-800 mb-2">Welcome back!</h2>
+      <p class="text-slate-500 text-base leading-relaxed">Continue your personalized learning journey</p>
+    </div>
+
+    <!-- Flash Messages -->
+    <% if flash[:alert] %>
+      <div class="flash-message bg-gradient-to-r from-red-50 to-red-100 text-red-600 p-3 rounded-lg mb-5 text-sm border-l-4 border-red-600" role="alert" aria-live="polite">
+        <%= flash[:alert] %>
+      </div>
+    <% end %>
+
+    <% if flash[:notice] %>
+      <div class="flash-message bg-gradient-to-r from-green-50 to-green-100 text-green-600 p-3 rounded-lg mb-5 text-sm border-l-4 border-green-600" role="alert" aria-live="polite">
+        <%= flash[:notice] %>
+      </div>
+    <% end %>
+
+    <!-- Sign In Form -->
+    <%= form_with url: session_path, method: :post, local: true, id: "signin-form", class: "mb-5", data: { turbo: true } do |form| %>
+      <div class="input-group mb-5 relative">
+        <%= form.label :email, "Email Address", class: "block text-gray-700 mb-2 font-semibold text-sm" %>
+        <%= form.email_field :email, 
+            placeholder: "your.email@example.com", 
+            required: true,
+            autocomplete: "email",
+            id: "email",
+            class: "w-full p-4 border-2 border-gray-200 rounded-xl text-base transition-all duration-300 bg-white font-inherit focus:outline-none focus:border-yellow-200 focus:shadow-lg focus:shadow-yellow-200/15 focus:-translate-y-0.5",
+            aria_describedby: ("email-error" if @user&.errors&.include?(:email)) %>
+        
+        <% if @user&.errors&.include?(:email) %>
+          <div id="email-error" class="field-error text-red-500 text-sm mt-1" role="alert">
+            <%= @user.errors[:email].first %>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="input-group mb-5 relative">
+        <%= form.label :password, "Password", class: "block text-gray-700 mb-2 font-semibold text-sm" %>
+        <div class="relative">
+          <%= form.password_field :password, 
+              placeholder: "Enter your password", 
+              required: true, 
+              id: "password-field",
+              autocomplete: "current-password",
+              class: "w-full p-4 border-2 border-gray-200 rounded-xl text-base transition-all duration-300 bg-white font-inherit focus:outline-none focus:border-yellow-200 focus:shadow-lg focus:shadow-yellow-200/15 focus:-translate-y-0.5 pr-12",
+              aria_describedby: ("password-error" if @user&.errors&.include?(:password)) %>
+          
+          <button type="button" 
+                  id="password-toggle" 
+                  class="password-toggle-btn absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 cursor-pointer text-base transition-colors duration-200 w-5 h-5 flex items-center justify-center hover:text-yellow-500 focus:outline-none focus:ring-2 focus:ring-yellow-200 focus:ring-offset-2 rounded"
+                  aria-label="Show password"
+                  tabindex="0">
+            <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-4 h-4" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          </button>
+        </div>
+        
+        <% if @user&.errors&.include?(:password) %>
+          <div id="password-error" class="field-error text-red-500 text-sm mt-1" role="alert">
+            <%= @user.errors[:password].first %>
+          </div>
+        <% end %>
+      </div>
+
+      <div class="form-options flex justify-between items-center mb-7 text-sm">
+        <label class="flex items-center gap-2 text-slate-500 cursor-pointer">
+          <%= form.check_box :remember_me, class: "w-4 h-4 accent-yellow-500" %>
+          Remember me
+        </label>
+        <%= link_to "Forgot password?", 
+            new_password_path, 
+            class: "text-yellow-500 no-underline font-semibold transition-all duration-200 hover:text-yellow-600 hover:underline focus:outline-none focus:ring-2 focus:ring-yellow-200 focus:ring-offset-2 rounded" %>
+      </div>
+
+      <%= form.submit "Sign In to Dashboard", 
+          id: "signin-button", 
+          class: "signin-button w-full p-4 border-none rounded-xl text-base font-semibold cursor-pointer transition-all duration-300 font-inherit relative overflow-hidden bg-gradient-to-r from-yellow-200 to-yellow-500 text-white mb-6 hover:-translate-y-0.5 hover:shadow-xl hover:shadow-yellow-500/40 active:translate-y-0 focus:outline-none focus:ring-4 focus:ring-yellow-200 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed",
+          data: { disable_with: "Signing In..." } %>
+    <% end %>
+
+    <!-- Divider -->
+    <div class="text-center my-7 relative" aria-hidden="true">
+      <div class="absolute top-1/2 left-0 right-0 h-px bg-gray-200"></div>
+      <span class="bg-white/97 px-4 text-slate-500 text-sm font-medium">Or continue with</span>
+    </div>
+
+    <!-- Social Sign In -->
+    <div class="grid grid-cols-2 gap-3 mb-7">
+      <%= link_to "/auth/google_oauth2", 
+          method: :post, 
+          onclick: "return handleSocialSignin('google')", 
+          class: "flex items-center justify-center gap-2 p-3 border-2 border-gray-200 rounded-lg bg-white text-slate-500 no-underline text-sm font-semibold transition-all duration-300 hover:border-yellow-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10 focus:outline-none focus:ring-2 focus:ring-yellow-200 focus:ring-offset-2",
+          data: { turbo: false },
+          rel: "nofollow" do %>
+        <span aria-hidden="true">🔍</span>
+        <span>Google</span>
+      <% end %>
+      
+      <%= link_to "/auth/github", 
+          method: :post, 
+          onclick: "return handleSocialSignin('github')", 
+          class: "flex items-center justify-center gap-2 p-3 border-2 border-gray-200 rounded-lg bg-white text-slate-500 no-underline text-sm font-semibold transition-all duration-300 hover:border-yellow-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/10 focus:outline-none focus:ring-2 focus:ring-yellow-200 focus:ring-offset-2",
+          data: { turbo: false },
+          rel: "nofollow" do %>
+        <span aria-hidden="true">👨‍💻</span>
+        <span>GitHub</span>
+      <% end %>
+    </div>
+
+    <!-- Sign Up Link -->
+    <div class="text-center text-slate-500 text-sm">
+      Don't have an account? 
+      <%= link_to "Create one here", 
+          new_user_path, 
+          class: "text-yellow-500 no-underline font-semibold transition-colors duration-200 hover:text-yellow-600 hover:underline focus:outline-none focus:ring-2 focus:ring-yellow-200 focus:ring-offset-2 rounded" %>
+    </div>
+  </div>
+</div>
+
+<%# Include JavaScript only for this page %>
+<%= content_for :javascript do %>
+  <script>
+    // Inline critical JavaScript for immediate execution
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!document.querySelector('.signin-page')) return;
+      
+      // Auto-focus email field
+      const emailField = document.querySelector('#email');
+      if (emailField && !emailField.value) {
+        setTimeout(function() { emailField.focus(); }, 100);
+      }
+    });
+  </script>
 <% end %>
-<br>
-
-<%= link_to "Forgot password?", new_password_path %>
