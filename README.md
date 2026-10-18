@@ -1,62 +1,67 @@
 # 🚀 Path Aviator
 
-**Path Aviator** is a robust AI-driven personalized learning platform, built with Ruby on Rails 8. It intelligently curates structured learning paths based on users’ interests, skills, and goals—aggregating content across platforms like YouTube, blogs, GitHub, and more.
+**Path Aviator is an AI-powered learning platform (in progress) built with Ruby on Rails 8.** The goal: tell it what you want to learn, and it builds a structured learning path from YouTube videos, docs, blogs, GitHub repos and courses, then tracks your progress.
 
----
+![Path Aviator sign-in page](docs/screenshots/sign-in.jpg)
 
-## 🧠 Core Features
+## Status
 
-- 🔍 **AI-powered onboarding** for skill/interest detection  
-- 📚 **Dynamic learning playlists** tailored to user context  
-- 🔗 **Integrated content sources** (videos, docs, repos, blogs, courses)  
-- 🏷️ **Bookmarking, progress tracking, and smart resume**  
-- ⚡ **Reactive frontend** via Hotwire (Turbo + Stimulus)  
-- 🧘‍♀️ **Minimalist UI** styled with Tailwind CSS
+| Area | Status |
+|---|---|
+| Rails 8 app setup (Solid Queue, Solid Cache, Kamal) | ✅ Done |
+| Authentication (Rails 8 built-in: sessions, password reset) | ✅ Done |
+| Sign-in UI with Tailwind CSS | ✅ Done |
+| Sign-up page | 🚧 In progress (route exists, controller next) |
+| Google / GitHub sign-in | 📝 Planned (buttons in UI) |
+| AI onboarding to detect skills and interests | 📝 Planned |
+| Personalised learning playlists | 📝 Planned |
+| Bookmarks, progress tracking, smart resume | 📝 Planned |
 
----
+## Tech stack
 
-## 🛠 Tech Stack
+| Layer | Technology |
+|---|---|
+| Backend | Ruby on Rails 8.0 |
+| Auth | Rails 8 authentication generator (`has_secure_password`, sessions) |
+| Frontend | Hotwire (Turbo + Stimulus) with Importmap |
+| Styling | Tailwind CSS (`tailwindcss-rails`) |
+| Database | SQLite |
+| Background jobs | Solid Queue |
+| Caching | Solid Cache |
+| Assets | Propshaft + Thruster |
+| Deployment | Kamal (Docker) |
 
-| Layer        | Technology                       |
-|--------------|----------------------------------|
-| Backend      | Ruby on Rails 8.0.2              |
-| Frontend     | Hotwire (Turbo + Stimulus)       |
-| Styling      | Tailwind CSS (via Importmap + ESM)|
-| Database     | PostgreSQL (default), SQLite (dev)|
-| Job Queue    | Solid Queue                      |
-| Caching      | Solid Cache                      |
-| Asset Pipeline | Propshaft + Thruster           |
-| Deployment   | Kamal (Dockerized deploy)        |
-| Debugging    | Web Console, Debug gem           |
+## Getting started
 
----
+### Prerequisites
 
-## 🚧 Getting Started
+- Ruby 3.3 (see `.ruby-version`)
+- No Node.js needed (Importmap + `tailwindcss-rails`)
 
-### ✅ Prerequisites
-
-Make sure the following are installed:
-
-- **Ruby 3.2+** (recommended: 3.3.x) — via `rbenv` or `rvm`  
-- **Rails 8.0.2+**
-- **PostgreSQL** (or SQLite for local dev only)  
-- **Node.js & Yarn** (for Tailwind + Hotwire dependencies)
-
----
-
-### 📦 Setup Instructions
+### Setup
 
 ```bash
-# Clone the repository
 git clone git@github.com:MeghaKoshti/path-aviator.git
 cd path-aviator
 
-# Install dependencies
 bundle install
-yarn install
+bin/rails db:prepare
 
-# Setup the database
-rails db:create db:migrate db:seed
+bin/dev          # runs the Rails server + Tailwind watcher
+```
 
-# Run the app
-rails server
+Open http://localhost:3000/session/new.
+
+### Run tests
+
+```bash
+bin/rails test
+```
+
+## Author
+
+**Megha Koshti**, Ruby on Rails developer · [GitHub](https://github.com/MeghaKoshti) · [LinkedIn](https://www.linkedin.com/in/megha-koshti)
+
+## License
+
+[MIT](LICENSE)
