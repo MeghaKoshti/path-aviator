@@ -11,7 +11,8 @@ module ActiveSupport
     # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all
 
-    # Add more helper methods to be used by all tests here...
+    # Every test starts with fresh rate-limit counters (see config/environments/test.rb).
+    setup { ActionController::Base.cache_store.clear }
   end
 end
 

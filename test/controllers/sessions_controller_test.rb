@@ -35,6 +35,16 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[role=alert]", /Try another email address or password/
   end
 
+  test "sign-in attempts are rate limited after ten tries" do
+    10.times { sign_in_as users(:one), password: "wrong" }
+
+    sign_in_as users(:one)
+
+    assert_redirected_to new_session_url
+    assert_equal "Try again later.", flash[:alert]
+    assert cookies[:session_id].blank?
+  end
+
   test "signing out ends the session" do
     sign_in_as users(:one)
 

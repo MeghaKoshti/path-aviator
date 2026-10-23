@@ -16,6 +16,40 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
     assert_select "[role=status]", /Password reset instructions sent/
   end
 
+  test "an unknown email gets exactly the same answer as a known one" do
+    post passwords_path, params: { email_address: users(:one).email_address }
+    known = [ response.status, response.location, flash[:notice] ]
+
+    assert_no_enqueued_emails do
+      post passwords_path, params: { email_address: "nobody@example.com" }
+    end
+
+    assert_equal known, [ response.status, response.location, flash[:notice] ]
+  end
+
+  test "reset requests are rate limited per IP after five tries" do
+    5.times do |i|
+      post passwords_path, params: { email_address: "someone#{i}@example.com" }
+      assert_redirected_to new_session_path
+    end
+
+    assert_no_enqueued_emails do
+      post passwords_path, params: { email_address: users(:one).email_address }
+    end
+
+    assert_redirected_to new_password_path
+    assert_equal "Too many reset requests. Try again in a few minutes.", flash[:alert]
+  end
+
+  test "the reset rate limit is per IP" do
+    5.times { post passwords_path, params: { email_address: "nobody@example.com" } }
+
+    assert_enqueued_emails 1 do
+      post passwords_path, params: { email_address: users(:one).email_address }, env: { "REMOTE_ADDR" => "203.0.113.9" }
+    end
+    assert_redirected_to new_session_path
+  end
+
   test "reset form renders for a valid token" do
     get edit_password_path(users(:one).password_reset_token)
 

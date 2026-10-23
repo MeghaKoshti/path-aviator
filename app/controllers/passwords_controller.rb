@@ -2,6 +2,9 @@ class PasswordsController < ApplicationController
   layout "auth"
   allow_unauthenticated_access
   before_action :set_user_by_token, only: %i[ edit update ]
+  # Limits per IP, so the answer never depends on whether the email has an account.
+  rate_limit to: 5, within: 3.minutes, only: :create,
+    with: -> { redirect_to new_password_path, alert: "Too many reset requests. Try again in a few minutes." }
 
   def new
   end

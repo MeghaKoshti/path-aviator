@@ -68,6 +68,20 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_select "#user_password_error", /too short/
   end
 
+  test "sign-up attempts are rate limited after ten tries" do
+    10.times do
+      post registration_path, params: valid_params(password: "short", password_confirmation: "short")
+      assert_response :unprocessable_entity
+    end
+
+    assert_no_difference "User.count" do
+      post registration_path, params: valid_params
+    end
+
+    assert_redirected_to new_registration_url
+    assert_equal "Too many sign-up attempts. Try again in a few minutes.", flash[:alert]
+  end
+
   test "signed-in people are sent to their dashboard" do
     sign_in_as users(:one)
 
