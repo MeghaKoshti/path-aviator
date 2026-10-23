@@ -14,7 +14,8 @@
      data-controller="path-status"
      data-path-status-status-value="<%= learning_path.status %>"
      data-path-status-message-value="<%= status_message %>"
-     data-path-status-refresh-after-value="<%= learning_path.generating? ? 20_000 : 0 %>">
+     data-path-status-refresh-after-value="<%= learning_path.generating? ? 20_000 : 0 %>"
+     data-path-status-status-url-value="<%= learning_path_path(learning_path, format: :json) %>">
   <%# One partial per status: _generating, _ready, _failed. %>
   <%= render "learning_paths/#{learning_path.status}", learning_path: learning_path %>
 </div>

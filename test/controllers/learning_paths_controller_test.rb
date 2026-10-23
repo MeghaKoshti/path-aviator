@@ -28,6 +28,13 @@ class LearningPathsControllerTest < ActionDispatch::IntegrationTest
     assert_select "dd", "3 h a week"
   end
 
+  test "the path page can check its status as JSON" do
+    get learning_path_path(learning_paths(:sql), format: :json)
+
+    assert_response :success
+    assert_equal({ "status" => "generating" }, response.parsed_body)
+  end
+
   test "a ready path shows its steps, progress and resource links" do
     path = learning_paths(:rails)
 
@@ -61,6 +68,9 @@ class LearningPathsControllerTest < ActionDispatch::IntegrationTest
 
   test "someone else's path is not found" do
     get learning_path_path(learning_paths(:docker))
+    assert_response :not_found
+
+    get learning_path_path(learning_paths(:docker), format: :json)
     assert_response :not_found
   end
 

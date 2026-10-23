@@ -2,6 +2,11 @@ class LearningPathsController < ApplicationController
   before_action :set_learning_path
 
   def show
+    respond_to do |format|
+      format.html
+      # Polled by the path page while generating (path_status_controller.js).
+      format.json { render json: { status: @learning_path.status } }
+    end
   end
 
   # "Try again" on a failed path and "Regenerate" on a ready one. Steps and
