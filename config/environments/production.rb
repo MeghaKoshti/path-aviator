@@ -57,8 +57,13 @@ Rails.application.configure do
   # Set this to true and configure the email server for immediate delivery to raise delivery errors.
   # config.action_mailer.raise_delivery_errors = false
 
-  # Set host to be used by links generated in mailer templates (APP_HOST is set by config/deploy.yml).
-  config.action_mailer.default_url_options = { host: ENV.fetch("APP_HOST", "example.com"), protocol: "https" }
+  # The public address (APP_HOST is set by config/deploy.yml). Links built
+  # outside a request, in emails and in Turbo Stream broadcasts such as a
+  # path's share link, would otherwise point at example.org.
+  app_url = { host: ENV.fetch("APP_HOST", "example.com"), protocol: "https" }
+  config.action_mailer.default_url_options = app_url
+  config.action_controller.default_url_options = app_url
+  Rails.application.routes.default_url_options = app_url
 
   # Outgoing SMTP server for password-reset emails, configured from the environment.
   if ENV["SMTP_ADDRESS"].present?
