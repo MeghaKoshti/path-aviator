@@ -1,5 +1,6 @@
 <meta charset="utf-8">
-<title><%= content_for?(:title) ? "#{yield(:title)} | Path Aviator" : "Path Aviator: learning paths for anything" %></title>
+<%# safe_join, not string interpolation: the title is already escaped and must not be escaped twice. %>
+<title><%= content_for?(:title) ? safe_join([ yield(:title), "Path Aviator" ], " | ") : "Path Aviator: learning paths for anything" %></title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="<%= content_for?(:meta_description) ? yield(:meta_description) : "Tell Path Aviator what you want to learn and it plans a step-by-step route of courses, docs and practice, then tracks your progress." %>">
 <meta name="theme-color" content="#3f2daa">

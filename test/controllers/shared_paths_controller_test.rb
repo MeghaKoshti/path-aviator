@@ -24,6 +24,14 @@ class SharedPathsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", new_registration_path, text: "Plan my first path"
   end
 
+  test "a title with an ampersand or apostrophe is escaped once" do
+    @path.update!(title: "C & C++ for beginners: Riya's route")
+    get shared_path_path(@path.share_token)
+
+    assert_includes response.body, "<title>C &amp; C++ for beginners: Riya&#39;s route | Path Aviator</title>"
+    assert_select "title", "C & C++ for beginners: Riya's route | Path Aviator"
+  end
+
   test "private details stay private" do
     get shared_path_path(@path.share_token)
 
