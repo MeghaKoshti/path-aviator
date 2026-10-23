@@ -2,7 +2,7 @@ class PathStepsController < ApplicationController
   # Ticks a step on or off. Turbo gets back the updated route and progress;
   # without JavaScript the browser returns to the same step on the page.
   def toggle
-    @path_step = PathStep.joins(:learning_path).where(learning_paths: { user_id: Current.user.id }).find(params[:id])
+    @path_step = PathStep.owned_by(Current.user).find(params[:id])
     @path_step.toggle_completion!
     @learning_path = @path_step.learning_path.reload
 

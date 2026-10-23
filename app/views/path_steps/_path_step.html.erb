@@ -34,5 +34,7 @@
       <span class="sr-only">for “<%= path_step.title %>” (opens in a new tab)</span>
       <svg class="size-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4H4.75A.75.75 0 0 0 4 4.75v10.5c0 .41.34.75.75.75h10.5c.41 0 .75-.34.75-.75V12M11 4h5v5M16 4l-7 7"/></svg>
     <% end %>
+
+    <%= render "path_steps/notes/note", path_step: path_step %>
   </div>
 </li>

@@ -1,17 +1,23 @@
 class PathStep < ApplicationRecord
   RESOURCE_TYPES = %w[video article docs course practice].freeze
+  NOTE_MAX_LENGTH = 2_000
 
   belongs_to :learning_path, counter_cache: true
 
   scope :ordered, -> { order(:position) }
   scope :incomplete, -> { where(completed_at: nil) }
   scope :completed, -> { where.not(completed_at: nil) }
+  scope :owned_by, ->(user) { joins(:learning_path).where(learning_paths: { user_id: user.id }) }
+
+  # A blank note is stored as nil, so saving an empty box removes the note.
+  normalizes :note, with: ->(note) { note.strip.presence }
 
   validates :title, presence: true
   validates :position, numericality: { only_integer: true, greater_than: 0 },
                        uniqueness: { scope: :learning_path_id }
   validates :resource_type, inclusion: { in: RESOURCE_TYPES }
   validates :estimated_minutes, numericality: { only_integer: true, greater_than: 0 }
+  validates :note, length: { maximum: NOTE_MAX_LENGTH }
   validate :resource_url_must_be_http
 
   # completed_steps_count is kept in sync by these callbacks, which run inside

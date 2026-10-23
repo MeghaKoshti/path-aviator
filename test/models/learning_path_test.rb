@@ -91,6 +91,7 @@ class LearningPathTest < ActiveSupport::TestCase
     assert_difference -> { PathStep.count } => -4 do
       assert_enqueued_with(job: GenerateLearningPathJob, args: [ @path ]) { @path.regenerate! }
     end
+    assert_not PathStep.where.not(note: nil).exists?, "notes should go with the old steps"
 
     assert @path.generating?
     assert_equal 0, @path.path_steps_count

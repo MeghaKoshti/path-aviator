@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_23_050708) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_23_111920) do
   create_table "learning_goals", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "topic", null: false
@@ -50,6 +50,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_23_050708) do
     t.datetime "completed_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "note"
     t.index ["learning_path_id", "position"], name: "index_path_steps_on_learning_path_id_and_position", unique: true
   end
 

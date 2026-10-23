@@ -20,6 +20,7 @@
 | Dashboard of all your paths | ✅ Done |
 | Path management: try again, regenerate, delete | ✅ Done |
 | Account settings: profile, password, delete account | ✅ Done |
+| Private notes on each step, edited in place | ✅ Done |
 | Accessibility (WCAG 2.1 AA checks, keyboard) and responsive pass | ✅ Done |
 | CI: tests, system tests, RuboCop, Brakeman, importmap audit | ✅ Done |
 | Google / GitHub sign-in | 📝 Planned |

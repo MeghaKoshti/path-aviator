@@ -9,7 +9,7 @@ class PathManagementTest < ActionDispatch::IntegrationTest
   test "a ready path offers regenerate and delete, both behind a confirmation" do
     get learning_path_path(@path)
 
-    assert_select "form[action=?] button[data-turbo-confirm*='progress will be cleared']", regenerate_learning_path_path(@path), text: "Regenerate"
+    assert_select "form[action=?] button[data-turbo-confirm*='progress and notes will be cleared']", regenerate_learning_path_path(@path), text: "Regenerate"
     assert_select "form[action=?] input[name=_method][value=delete]", learning_path_path(@path)
     assert_select "form[action=?] button[data-turbo-confirm*='gone for good']", learning_path_path(@path), text: "Delete path"
   end

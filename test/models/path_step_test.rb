@@ -85,4 +85,20 @@ class PathStepTest < ActiveSupport::TestCase
       path_steps(:rails_intro).destroy
     end
   end
+
+  test "a note is optional, trimmed, and at most 2,000 characters" do
+    assert_nil build_step(note: "  \n ").note
+    assert_equal "Watch at 1.5x", build_step(note: " Watch at 1.5x ").note
+    assert build_step(note: "a" * 2_000).valid?
+    assert_not build_step(note: "a" * 2_001).valid?
+  end
+
+  test "ticking and unticking a step keeps its note" do
+    step = path_steps(:rails_intro)
+
+    step.toggle_completion!
+    step.toggle_completion!
+
+    assert_equal "Redo the blog with my own models.", step.reload.note
+  end
 end

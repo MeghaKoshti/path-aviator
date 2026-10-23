@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   end
   resources :path_steps, only: [] do
     patch :toggle, on: :member
+    resource :note, only: %i[ show edit update ], module: :path_steps
   end
   resource :dashboard, only: :show
   resource :settings, only: :show

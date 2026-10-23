@@ -7,6 +7,7 @@ rails_intro:
   resource_url: https://guides.rubyonrails.org/getting_started.html
   estimated_minutes: 90
   completed_at: <%= 1.day.ago.to_fs(:db) %>
+  note: Redo the blog with my own models.
 
 rails_models:
   learning_path: rails
