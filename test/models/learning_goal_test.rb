@@ -32,6 +32,12 @@ class LearningGoalTest < ActiveSupport::TestCase
     assert build_goal(hours_per_week: 40).valid?
   end
 
+  test "an out-of-range hours error reads like a sentence" do
+    goal = build_goal(hours_per_week: 41)
+    goal.validate
+    assert_equal [ "Hours per week must be between 1 and 40" ], goal.errors.full_messages_for(:hours_per_week)
+  end
+
   test "goal description is limited to 500 characters" do
     assert_not build_goal(goal_description: "a" * 501).valid?
     assert build_goal(goal_description: "a" * 500).valid?

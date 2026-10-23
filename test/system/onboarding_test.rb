@@ -56,7 +56,7 @@ class OnboardingTest < ApplicationSystemTestCase
     fill_in "Hours per week", with: "60"
     click_on "Plan my path"
 
-    assert_selector "#learning_goal_hours_per_week_error", text: "must be in 1..40"
+    assert_selector "#learning_goal_hours_per_week_error", text: "must be between 1 and 40"
     assert_selector "legend", text: "How much time can you give it?"
     assert_no_field "Topic"
   end

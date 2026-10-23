@@ -60,7 +60,7 @@ class LearningGoalsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :unprocessable_entity
     assert_select "form[data-start-step='2']"
-    assert_select "#learning_goal_hours_per_week_error", /must be in 1..40/
+    assert_select "#learning_goal_hours_per_week_error", /must be between 1 and 40/
     assert_select "[role=alert]", /Check the highlighted answer/
     assert_no_enqueued_jobs
   end

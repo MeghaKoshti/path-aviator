@@ -5,6 +5,10 @@ en:
         password_challenge: "Current password"
     errors:
       models:
+        learning_goal:
+          attributes:
+            hours_per_week:
+              in: "must be between 1 and 40"
         user:
           attributes:
             password_challenge:
