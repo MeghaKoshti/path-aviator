@@ -52,6 +52,10 @@ Rails.application.configure do
   # Append comments with runtime information tags to SQL queries in logs.
   config.active_record.query_log_tags_enabled = true
 
+  # Run jobs in-process so `bin/dev` is all you need locally. Production uses
+  # Solid Queue (inside Puma via SOLID_QUEUE_IN_PUMA, or `bin/jobs`).
+  config.active_job.queue_adapter = :async
+
   # Highlight code that enqueued background job in logs.
   config.active_job.verbose_enqueue_logs = true
 
