@@ -1,8 +1,11 @@
-<%# The note editor. Esc or Cancel closes it without saving (note_editor_controller.js). %>
+<%#
+  The note editor. Esc or Cancel closes it without saving, and ticking a step
+  leaves it (and the draft in it) alone (note_editor_controller.js).
+%>
 <%= turbo_frame_tag dom_id(path_step, :note), class: "mt-4 block" do %>
   <%= form_with model: path_step, url: path_step_note_path(path_step), method: :patch, namespace: dom_id(path_step),
         class: "max-w-prose space-y-3",
-        data: { controller: "note-editor", action: "keydown.esc->note-editor#cancel" } do |form| %>
+        data: { controller: "note-editor", action: "keydown.esc->note-editor#cancel turbo:before-morph-element@document->note-editor#keepDraft" } do |form| %>
     <%= render "shared/field", form: form, attribute: :note, as: :text_area,
           label: safe_join([ "Your note", tag.span(" for “#{path_step.title}”", class: "sr-only") ]),
           hint: "Only you can see it. Leave it empty to remove the note.",

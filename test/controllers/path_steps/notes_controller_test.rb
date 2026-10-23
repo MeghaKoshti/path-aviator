@@ -12,7 +12,8 @@ class PathSteps::NotesControllerTest < ActionDispatch::IntegrationTest
   test "the path page shows saved notes and an add button for the rest" do
     get learning_path_path(@path)
 
-    assert_select "turbo-frame##{dom_id(path_steps(:rails_intro), :note)}[data-turbo-permanent]" do
+    # Not permanent, or an open editor would outlive leaving the page.
+    assert_select "turbo-frame##{dom_id(path_steps(:rails_intro), :note)}:not([data-turbo-permanent])" do
       assert_select "p", text: "Redo the blog with my own models."
       assert_select "a[href=?]", edit_path_step_note_path(path_steps(:rails_intro)), text: "Edit note for “Getting Started with Rails”"
     end
@@ -23,7 +24,7 @@ class PathSteps::NotesControllerTest < ActionDispatch::IntegrationTest
     get edit_path_step_note_path(@step), headers: FRAME
 
     assert_response :success
-    assert_select "turbo-frame##{dom_id(@step, :note)} form[action=?][data-controller=note-editor]", path_step_note_path(@step) do
+    assert_select "turbo-frame##{dom_id(@step, :note)} form[action=?][data-controller=note-editor][data-action*='note-editor#keepDraft']", path_step_note_path(@step) do
       assert_select "textarea[name='path_step[note]'][maxlength='2000'][autofocus]"
       assert_select "label", text: "Your note for “Active Record basics”"
       assert_select "input[type=submit][value='Save note']"

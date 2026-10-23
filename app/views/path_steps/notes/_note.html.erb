@@ -1,11 +1,11 @@
 <%#
   A step's note, or the button to add one. Locals: path_step:, focus: (bool)
   focus: true puts keyboard focus back on the button after Save or Cancel.
-  The frame is permanent so ticking the step (which morphs the whole route)
-  leaves an open note editor, and anything typed in it, alone.
+  Not data-turbo-permanent: that would also keep an open editor when someone
+  leaves the page and comes back. The editor protects itself from morphs.
 %>
 <% focus = local_assigns.fetch(:focus, false) %>
-<%= turbo_frame_tag dom_id(path_step, :note), class: "mt-4 block", data: { turbo_permanent: true } do %>
+<%= turbo_frame_tag dom_id(path_step, :note), class: "mt-4 block" do %>
   <% if path_step.note %>
     <div class="max-w-prose rounded-control border-l-[3px] border-brand-300 bg-brand-50 py-3 pl-4 pr-2">
       <div class="flex items-center justify-between gap-3">

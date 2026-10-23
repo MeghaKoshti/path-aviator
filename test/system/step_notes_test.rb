@@ -43,4 +43,30 @@ class StepNotesTest < ApplicationSystemTestCase
     within("##{dom_id(step)}") { assert_text "Focus on validations." }
     assert evaluate_script("window.stillHere"), "the page reloaded"
   end
+
+  test "leaving with an editor open and coming back shows the saved note, not the draft" do
+    path = learning_paths(:rails)
+    noted, blank = path_steps(:rails_intro), path_steps(:rails_models)
+    sign_in_through_ui users(:one)
+    visit learning_path_path(path)
+
+    within("##{dom_id(noted)}") do
+      click_on "Edit"
+      find("textarea").fill_in with: "Draft I never saved"
+    end
+    within("##{dom_id(blank)}") do
+      click_on "Add note"
+      find("textarea").fill_in with: "Another draft"
+    end
+
+    click_on "Dashboard"
+    within("##{dom_id(path, :card)}") { click_on "Continue" }
+    assert_current_path learning_path_path(path)
+
+    assert_no_selector "textarea"
+    within("##{dom_id(noted)}") { assert_text "Redo the blog with my own models." }
+    within("##{dom_id(blank)}") { assert_link "Add note" }
+    assert_no_text "Draft I never saved"
+    assert_equal "Redo the blog with my own models.", noted.reload.note
+  end
 end
