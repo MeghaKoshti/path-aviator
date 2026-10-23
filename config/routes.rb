@@ -11,7 +11,11 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  # Defines the root path route ("/")
-  # root "posts#index"
-  resources :users, only: [ :new, :create ]
+  root "pages#home"
+
+  # Placeholder — implemented in feature stories (see PlaceholdersController).
+  get "dashboard", to: "placeholders#dashboard", as: :dashboard
+  get "registration/new", to: "placeholders#new_registration", as: :new_registration
+  get "learning_goals/new", to: "placeholders#new_learning_goal", as: :new_learning_goal
+  get "settings", to: "placeholders#settings", as: :settings
 end

@@ -1,38 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <title><%= content_for(:title) || "Path Aviator" %></title>
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta charset="UTF-8">
-
-    <%= csrf_meta_tags %>
-    <%= csp_meta_tag %>
-
-    <%= yield :head %>
-
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-    <link rel="preload" href="/assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin="anonymous">
-
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
-    <%= javascript_importmap_tags %>
+    <%= render "layouts/head" %>
   </head>
 
-  <body>
-    <% if flash.any? %>
-      <div class="fixed top-4 inset-x-0 z-50 flex justify-center">
-        <div class="px-4 py-2 bg-green-600 text-white rounded-md shadow">
-          <%= flash[:notice] || flash[:alert] %>
+  <body class="flex min-h-screen flex-col">
+    <%= render "layouts/skip_link" %>
+
+    <header class="sticky top-0 z-40 border-b border-line bg-surface-raised/95 backdrop-blur"
+            data-controller="disclosure" data-action="keydown->disclosure#closeWithKeyboard">
+      <div class="mx-auto flex h-16 max-w-6xl items-center gap-6 px-4 sm:px-6">
+        <%= render "shared/logo", href: dashboard_path %>
+
+        <nav aria-label="Main" class="hidden md:block">
+          <ul class="flex items-center gap-1">
+            <li><%= nav_link_to "Dashboard", dashboard_path %></li>
+            <li><%= nav_link_to "New path", new_learning_goal_path %></li>
+          </ul>
+        </nav>
+
+        <div class="ml-auto hidden md:block relative" data-controller="disclosure" data-action="keydown->disclosure#closeWithKeyboard">
+          <button type="button" class="flex items-center gap-2 rounded-full py-1 pl-1 pr-2.5 text-sm font-medium text-ink-muted hover:bg-surface-sunken hover:text-ink"
+                  aria-expanded="false" aria-controls="account-menu"
+                  data-disclosure-target="button" data-action="disclosure#toggle">
+            <span class="flex size-8 items-center justify-center rounded-full bg-brand-100 font-semibold text-brand-800" aria-hidden="true"><%= user_display_name(Current.user).first.upcase %></span>
+            <span class="sr-only">Account menu for</span>
+            <span class="max-w-40 truncate"><%= user_display_name(Current.user) %></span>
+            <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
+          </button>
+          <div id="account-menu" hidden data-disclosure-target="panel"
+               class="absolute right-0 mt-2 w-72 rounded-control border border-line bg-surface-raised p-2 shadow-pop">
+            <p class="truncate px-3 pb-2 pt-1 text-sm text-ink-subtle">Signed in as <span class="font-medium text-ink"><%= Current.user.email_address %></span></p>
+            <%= link_to "Settings", settings_path, class: "block rounded-md px-3 py-2 text-sm text-ink hover:bg-surface-sunken" %>
+            <%= button_to "Sign out", session_path, method: :delete, class: "block w-full cursor-pointer rounded-md px-3 py-2 text-left text-sm text-ink hover:bg-surface-sunken" %>
+          </div>
+        </div>
+
+        <button type="button" class="ml-auto -mr-2 inline-flex size-11 items-center justify-center rounded-control text-ink hover:bg-surface-sunken md:hidden"
+                aria-expanded="false" aria-controls="mobile-menu" aria-label="Menu"
+                data-disclosure-target="button" data-action="disclosure#toggle">
+          <svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+
+      <div id="mobile-menu" hidden data-disclosure-target="panel" class="border-t border-line px-4 pb-4 pt-2 md:hidden">
+        <nav aria-label="Main (mobile)">
+          <ul class="space-y-1">
+            <li><%= nav_link_to "Dashboard", dashboard_path, mobile: true %></li>
+            <li><%= nav_link_to "New path", new_learning_goal_path, mobile: true %></li>
+            <li><%= nav_link_to "Settings", settings_path, mobile: true %></li>
+          </ul>
+        </nav>
+        <div class="mt-3 border-t border-line pt-3">
+          <p class="truncate px-3 pb-2 text-sm text-ink-subtle">Signed in as <span class="font-medium text-ink"><%= Current.user.email_address %></span></p>
+          <%= ui_button "Sign out", session_path, method: :delete, variant: :secondary, block: true %>
         </div>
       </div>
-    <% end %>
-    <%= yield %>
+    </header>
+
+    <%= render "shared/flash" %>
+
+    <main id="main" tabindex="-1" class="flex-1 focus:outline-none">
+      <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
+        <%= yield %>
+      </div>
+    </main>
   </body>
 </html>

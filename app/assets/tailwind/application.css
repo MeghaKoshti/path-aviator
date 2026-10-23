@@ -1,1 +1,128 @@
 @import "tailwindcss";
+
+/*
+ * Path Aviator design tokens.
+ * Every colour, radius and shadow used in views comes from this block, so the
+ * default Tailwind palette is switched off on purpose (--color-*: initial).
+ * The look borrows from aeronautical charts: chart-paper neutrals, an indigo
+ * brand, and a single magenta "route" colour reserved for paths and waypoints.
+ */
+
+/* Archivo is self-hosted (OFL) so no third-party font request is made.
+   One variable file covers weight 100–900 and width 62–125%. */
+@font-face {
+  font-family: "Archivo";
+  src: url("/archivo-variable.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-style: normal;
+  font-display: swap;
+}
+
+@theme {
+  --font-sans: "Archivo", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-*: initial;
+  --color-white: #ffffff;
+
+  /* Text */
+  --color-ink: #15173a;
+  --color-ink-muted: #474b6b;
+  --color-ink-subtle: #5f6386;
+
+  /* Surfaces and lines */
+  --color-surface: #f5f6fa;
+  --color-surface-raised: #ffffff;
+  --color-surface-sunken: #eceef5;
+  --color-line: #dde0eb;
+  --color-line-strong: #8a8faa; /* 3:1 against surfaces, used for input borders */
+
+  /* Brand (indigo-violet) */
+  --color-brand-50: #f2f0fe;
+  --color-brand-100: #e4e0fc;
+  --color-brand-200: #cbc3f8;
+  --color-brand-300: #a99cf2;
+  --color-brand-400: #8574e8;
+  --color-brand-500: #6652dd;
+  --color-brand-600: #4f3bcb;
+  --color-brand-700: #3f2daa;
+  --color-brand-800: #302287;
+  --color-brand-900: #221862;
+  --color-brand-950: #160f45;
+
+  /* Route: aeronautical-chart magenta, only for route lines and waypoints */
+  --color-route: #b4277a;
+  --color-route-soft: #fbe8f2;
+
+  /* Status */
+  --color-success-50: #e8f6ee;
+  --color-success-600: #17784a;
+  --color-success-700: #105c38;
+  --color-warning-50: #fdf3e1;
+  --color-warning-600: #9a5b00;
+  --color-warning-700: #7a4700;
+  --color-danger-50: #fdecea;
+  --color-danger-600: #b42318;
+  --color-danger-700: #8f1c13;
+
+  --radius-control: 0.625rem;
+  --radius-panel: 1rem;
+
+  --shadow-panel: 0 1px 2px rgb(21 23 58 / 0.05), 0 12px 32px -16px rgb(21 23 58 / 0.22);
+  --shadow-pop: 0 2px 4px rgb(21 23 58 / 0.06), 0 18px 40px -12px rgb(21 23 58 / 0.32);
+
+  --animate-route-draw: route-draw 1.8s cubic-bezier(0.55, 0.05, 0.3, 1) 0.2s both;
+  --animate-toast-in: toast-in 0.24s ease-out both;
+
+  @keyframes route-draw {
+    from { stroke-dashoffset: 1000; }
+    to { stroke-dashoffset: 0; }
+  }
+
+  @keyframes toast-in {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-surface text-ink font-sans antialiased;
+  }
+
+  /* One visible focus ring for everything, keyboard users only. */
+  :focus-visible {
+    outline: 3px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--color-brand-100);
+  }
+}
+
+/* Expanded Archivo for headings: reads like airport signage. */
+@utility type-display {
+  font-stretch: 125%;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.08;
+}
+
+/* Faint chart-paper grid, drawn with CSS gradients (no image files). */
+@utility bg-chart-grid {
+  background-image:
+    linear-gradient(var(--color-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-line) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: -1px -1px;
+}
+
+/* Turbo's page-load bar, in brand colour instead of its default blue. */
+.turbo-progress-bar {
+  background-color: var(--color-brand-500);
+}

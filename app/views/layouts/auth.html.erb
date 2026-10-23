@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%= render "layouts/head" %>
+  </head>
+
+  <body class="relative min-h-screen overflow-x-hidden">
+    <%= render "layouts/skip_link" %>
+
+    <%# Chart-paper backdrop with a faint route sweeping across it. Decorative only. %>
+    <div class="pointer-events-none absolute inset-0 -z-10 bg-chart-grid [mask-image:radial-gradient(ellipse_at_top,black,transparent_70%)]" aria-hidden="true"></div>
+    <svg class="pointer-events-none absolute left-0 top-0 -z-10 h-80 w-full text-route/30" viewBox="0 0 1200 320" preserveAspectRatio="none" fill="none" aria-hidden="true">
+      <path d="M-20 280 C 240 280, 300 90, 560 110 S 900 250, 1220 40" stroke="currentColor" stroke-width="2" stroke-dasharray="6 9" vector-effect="non-scaling-stroke"/>
+    </svg>
+
+    <%= render "shared/flash" %>
+
+    <div class="mx-auto flex min-h-screen w-full max-w-md flex-col px-4 py-10 sm:py-16">
+      <div class="mb-8 flex justify-center"><%= render "shared/logo" %></div>
+
+      <main id="main" tabindex="-1" class="focus:outline-none">
+        <div class="rounded-panel border border-line bg-surface-raised p-6 shadow-panel sm:p-8">
+          <%= yield %>
+        </div>
+        <% if content_for?(:below_card) %>
+          <div class="mt-6 text-center text-sm text-ink-muted"><%= yield :below_card %></div>
+        <% end %>
+      </main>
+    </div>
+  </body>
+</html>

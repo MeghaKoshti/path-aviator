@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <%= render "layouts/head" %>
+  </head>
+
+  <body class="flex min-h-screen flex-col">
+    <%= render "layouts/skip_link" %>
+
+    <header class="mx-auto flex h-18 w-full max-w-6xl items-center gap-3 px-4 sm:px-6">
+      <%= render "shared/logo" %>
+      <nav aria-label="Account" class="ml-auto flex items-center gap-1 sm:gap-2">
+        <%= ui_button "Sign in", new_session_path, variant: :ghost, size: :sm %>
+        <%= ui_button "Get started", new_registration_path, size: :sm %>
+      </nav>
+    </header>
+
+    <%= render "shared/flash" %>
+
+    <main id="main" tabindex="-1" class="flex-1 focus:outline-none">
+      <%= yield %>
+    </main>
+
+    <footer class="border-t border-line">
+      <div class="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-ink-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <p>Path Aviator, built by Megha Koshti with Ruby on Rails.</p>
+        <%= link_to "Source on GitHub", "https://github.com/MeghaKoshti/path-aviator", class: "font-medium text-brand-700 underline-offset-4 hover:underline" %>
+      </div>
+    </footer>
+  </body>
+</html>
