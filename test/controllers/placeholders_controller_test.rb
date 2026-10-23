@@ -30,11 +30,4 @@ class PlaceholdersControllerTest < ActionDispatch::IntegrationTest
       assert_response :success
     end
   end
-
-  test "registration placeholder is public" do
-    get new_registration_path
-
-    assert_response :success
-    assert_select "a[href=?]", new_session_path, text: "Sign in"
-  end
 end

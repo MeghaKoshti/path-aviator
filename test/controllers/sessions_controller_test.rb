@@ -20,6 +20,14 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert cookies[:session_id].present?
   end
 
+  test "people who never finished onboarding are sent there after signing in" do
+    user = User.create!(email_address: "new@example.com", password: "long-enough-pw")
+
+    sign_in_as user, password: "long-enough-pw"
+
+    assert_redirected_to new_learning_goal_url
+  end
+
   test "a wrong password shows an alert toast" do
     sign_in_as users(:one), password: "wrong"
     follow_redirect!

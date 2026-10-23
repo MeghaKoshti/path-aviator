@@ -1,0 +1,35 @@
+<% content_for :title, "Create your account" %>
+<% content_for :meta_description, "Create a free Path Aviator account and plan a step-by-step learning path in about a minute." %>
+
+<h1 class="type-display text-2xl text-ink sm:text-[1.75rem]">Create your account</h1>
+<p class="mt-2 text-pretty text-ink-muted">Next, you’ll tell us what you want to learn and we’ll plan the route.</p>
+
+<% invalid = first_invalid_field(@user, %i[name email_address password password_confirmation]) %>
+<%= form_with model: @user, url: registration_path, class: "mt-8 space-y-5" do |form| %>
+  <% if @user.errors.any? %>
+    <p class="rounded-control bg-danger-50 px-4 py-3 text-sm font-medium text-danger-700" role="alert">
+      <%= pluralize(@user.errors.count, "thing needs", plural: "things need") %> fixing before we can create your account.
+    </p>
+  <% end %>
+
+  <%= render "shared/field", form: form, attribute: :name, label: "Name (optional)",
+        hint: "We’ll use it to greet you.",
+        input: { autofocus: invalid.nil? || invalid == :name, autocomplete: "name", maxlength: 100 } %>
+
+  <%= render "shared/field", form: form, attribute: :email_address, label: "Email", as: :email_field,
+        input: { required: true, autofocus: invalid == :email_address, autocomplete: "username", placeholder: "you@example.com" } %>
+
+  <%= render "shared/field", form: form, attribute: :password, label: "Password", as: :password_field, reveal: true,
+        hint: "At least 8 characters.",
+        input: { required: true, autofocus: invalid == :password, autocomplete: "new-password", minlength: 8, maxlength: 72 } %>
+
+  <%= render "shared/field", form: form, attribute: :password_confirmation, label: "Confirm password", as: :password_field,
+        input: { required: true, autofocus: invalid == :password_confirmation, autocomplete: "new-password", maxlength: 72 } %>
+
+  <%= form.submit "Create account", class: ui_button_classes(size: :lg, block: true), data: { disable_with: "Creating your account…" } %>
+<% end %>
+
+<% content_for :below_card do %>
+  Already have an account?
+  <%= link_to "Sign in", new_session_path, class: "font-semibold text-brand-700 underline-offset-4 hover:underline" %>
+<% end %>

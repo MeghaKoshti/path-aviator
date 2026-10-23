@@ -12,6 +12,12 @@ module ApplicationHelper
     link_to label, path, class: classes, aria: { current: ("page" if current) }
   end
 
+  # After a failed submit, focus goes to the first invalid field (in form order)
+  # so keyboard and screen reader users land on what needs fixing.
+  def first_invalid_field(record, fields_in_order)
+    fields_in_order.find { |field| record.errors.include?(field) }
+  end
+
   def user_display_name(user)
     user.try(:name).presence || user.email_address
   end
