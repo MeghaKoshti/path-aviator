@@ -2,7 +2,9 @@ Rails.application.routes.draw do
   resource :session
   resource :registration, only: %i[ new create ]
   resources :learning_goals, only: %i[ new create ]
-  resources :learning_paths, only: :show
+  resources :learning_paths, only: :show do
+    post :regenerate, on: :member
+  end
   resources :passwords, param: :token
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 

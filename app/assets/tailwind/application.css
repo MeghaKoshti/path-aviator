@@ -73,10 +73,28 @@
 
   --animate-route-draw: route-draw 1.8s cubic-bezier(0.55, 0.05, 0.3, 1) 0.2s both;
   --animate-toast-in: toast-in 0.24s ease-out both;
+  --animate-route-march: route-march 0.9s linear infinite;
+  --animate-waypoint: waypoint 1.8s ease-in-out infinite;
+  --animate-cruise: cruise 3s ease-in-out infinite;
 
   @keyframes route-draw {
     from { stroke-dashoffset: 1000; }
     to { stroke-dashoffset: 0; }
+  }
+
+  /* Dash pattern is 6 + 7 = 13 units, so one cycle moves the dashes exactly one repeat. */
+  @keyframes route-march {
+    to { stroke-dashoffset: -13; }
+  }
+
+  @keyframes waypoint {
+    0%, 100% { fill: var(--color-surface-raised); }
+    50% { fill: var(--color-route); }
+  }
+
+  @keyframes cruise {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
   }
 
   @keyframes toast-in {

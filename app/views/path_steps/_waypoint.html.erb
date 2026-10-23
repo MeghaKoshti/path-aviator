@@ -1,0 +1,7 @@
+<% done = path_step.completed? %>
+<span class="<%= class_names("relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full border-2", done ? "border-route bg-route text-white" : "border-line-strong bg-surface") %>">
+  <% if done %>
+    <svg class="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>
+    <span class="sr-only">Done:</span>
+  <% end %>
+</span>

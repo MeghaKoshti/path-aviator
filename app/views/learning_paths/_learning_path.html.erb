@@ -1,10 +1,20 @@
-<%# Minimal markup so Turbo broadcasts have something to render; restyled in the feature story. %>
-<div id="<%= dom_id(learning_path) %>">
-  <h2><%= learning_path.title.presence || learning_path.learning_goal.topic %></h2>
-  <p>Status: <%= learning_path.status %></p>
-  <% if learning_path.ready? %>
-    <p><%= learning_path.progress_percent %>% complete</p>
-  <% elsif learning_path.failed? %>
-    <p><%= learning_path.error_message %></p>
-  <% end %>
+<%#
+  The whole path page body. GenerateLearningPathJob re-renders this partial
+  and broadcasts it (replace by dom_id) when the path is ready or has failed,
+  so it must not depend on the request (no Current, no params).
+%>
+<%
+  status_message = case learning_path.status
+                   when "ready" then "Your path is ready: #{pluralize(learning_path.path_steps_count, "step")}."
+                   when "failed" then "We couldn’t plan this path. You can try again."
+                   else "Planning your path to #{learning_path.learning_goal.topic}. This page updates when it’s ready."
+                   end
+%>
+<div id="<%= dom_id(learning_path) %>"
+     data-controller="path-status"
+     data-path-status-status-value="<%= learning_path.status %>"
+     data-path-status-message-value="<%= status_message %>"
+     data-path-status-refresh-after-value="<%= learning_path.generating? ? 20_000 : 0 %>">
+  <%# One partial per status: _generating, _ready, _failed. %>
+  <%= render "learning_paths/#{learning_path.status}", learning_path: learning_path %>
 </div>
