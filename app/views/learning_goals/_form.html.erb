@@ -1,0 +1,103 @@
+<%#
+  One form, three fieldsets. The onboarding Stimulus controller shows one
+  fieldset at a time; without JavaScript all three show and the form still works.
+%>
+<%
+  steps = [
+    { title: "Topic", fields: %i[topic] },
+    { title: "Level", fields: %i[current_level] },
+    { title: "Time", fields: %i[hours_per_week goal_description] }
+  ]
+  start_step = steps.index { |step| step[:fields].any? { |field| learning_goal.errors.include?(field) } }
+  levels = {
+    "beginner" => [ "Beginner", "New to it, or I’ve only dabbled." ],
+    "intermediate" => [ "Intermediate", "I’ve built something small with it." ],
+    "advanced" => [ "Advanced", "I use it regularly and want more depth." ]
+  }
+  level_error = learning_goal.errors.full_messages_for(:current_level).first
+%>
+
+<%= form_with model: learning_goal, data: { onboarding_target: "form", start_step: start_step, action: "submit->onboarding#submit" } do |form| %>
+  <%# Waypoint stepper: the three questions as legs of a route. %>
+  <ol class="mb-6 flex items-start" aria-label="Onboarding steps">
+    <% steps.each_with_index do |step, index| %>
+      <li class="group relative flex flex-1 flex-col items-center text-center" data-onboarding-target="waypoint" data-state="<%= index.zero? ? "current" : "todo" %>">
+        <% if index < steps.size - 1 %>
+          <span class="absolute left-1/2 top-3.5 w-full border-t-2 border-dashed border-line-strong/50 group-data-[state=done]:border-solid group-data-[state=done]:border-route" aria-hidden="true"></span>
+        <% end %>
+        <span class="relative flex size-7 items-center justify-center rounded-full border-2 border-line-strong/60 bg-surface text-xs font-semibold text-ink-subtle
+                     group-data-[state=current]:border-route group-data-[state=current]:bg-surface-raised group-data-[state=current]:text-route group-data-[state=current]:ring-4 group-data-[state=current]:ring-route-soft
+                     group-data-[state=done]:border-route group-data-[state=done]:bg-route group-data-[state=done]:text-white" aria-hidden="true"><%= index + 1 %></span>
+        <span class="mt-2 text-sm font-medium text-ink-muted group-data-[state=current]:text-ink"><%= step[:title] %></span>
+      </li>
+    <% end %>
+  </ol>
+
+  <p class="sr-only" aria-live="polite" data-onboarding-target="status"></p>
+
+  <div class="rounded-panel border border-line bg-surface-raised p-6 shadow-panel sm:p-8">
+    <% if learning_goal.errors.any? %>
+      <p class="mb-6 rounded-control bg-danger-50 px-4 py-3 text-sm font-medium text-danger-700" role="alert">
+        Check the highlighted answer<%= "s" if learning_goal.errors.attribute_names.size > 1 %> before we plan your path.
+      </p>
+    <% end %>
+
+    <div class="space-y-10">
+      <fieldset data-onboarding-target="step" data-title="Topic" class="space-y-5">
+        <legend class="type-display mb-5 text-xl text-ink">What do you want to learn?</legend>
+        <%= render "shared/field", form: form, attribute: :topic, label: "Topic",
+              hint: "A skill, tool or subject, like “SQL for analytics” or “Spanish for travel”.",
+              input: { required: true, minlength: 3, maxlength: 100, autofocus: start_step.nil? || start_step.zero?, autocomplete: "off" } %>
+
+        <div hidden data-onboarding-target="suggestions">
+          <p class="mb-2 text-sm text-ink-subtle" id="topic-suggestions-label">Or start with a popular one:</p>
+          <ul class="flex flex-wrap gap-2" aria-labelledby="topic-suggestions-label">
+            <% [ "Ruby on Rails", "SQL for analytics", "System design", "Docker", "TypeScript" ].each do |topic| %>
+              <li>
+                <button type="button" class="rounded-full border border-line-strong/50 px-3 py-1.5 text-sm font-medium text-ink-muted hover:border-brand-600 hover:text-brand-700"
+                        data-action="onboarding#suggest" data-topic="<%= topic %>"><%= topic %></button>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      </fieldset>
+
+      <fieldset data-onboarding-target="step" data-title="Level" aria-describedby="<%= "current_level_error" if level_error %>">
+        <legend class="type-display mb-5 text-xl text-ink">Where are you starting from?</legend>
+        <div class="grid gap-3">
+          <% levels.each do |value, (label, description)| %>
+            <label class="flex cursor-pointer items-start gap-3 rounded-control border border-line-strong/50 p-4 transition-colors hover:border-brand-400
+                          has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50 has-[:focus-visible]:outline-3 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-brand-500">
+              <%= form.radio_button :current_level, value, class: "mt-1 size-4 shrink-0 accent-brand-600 focus-visible:outline-none" %>
+              <span>
+                <span class="block font-semibold text-ink"><%= label %></span>
+                <span class="mt-0.5 block text-sm text-ink-muted"><%= description %></span>
+              </span>
+            </label>
+          <% end %>
+        </div>
+        <% if level_error %>
+          <p id="current_level_error" class="mt-3 text-sm font-medium text-danger-600"><%= level_error %></p>
+        <% end %>
+      </fieldset>
+
+      <fieldset data-onboarding-target="step" data-title="Time" class="space-y-5">
+        <legend class="type-display mb-5 text-xl text-ink">How much time can you give it?</legend>
+        <%= render "shared/field", form: form, attribute: :hours_per_week, label: "Hours per week", as: :number_field,
+              hint: "Between 1 and 40. Three to six hours a week is a steady pace.",
+              input: { required: true, min: 1, max: 40, step: 1, inputmode: "numeric", class: "max-w-32" } %>
+        <%= render "shared/field", form: form, attribute: :goal_description, label: "Your goal (optional)", as: :text_area,
+              hint: "What would make this worth it? For example: “Build and deploy a portfolio app”. Up to 500 characters.",
+              input: { rows: 3, maxlength: 500 } %>
+      </fieldset>
+    </div>
+
+    <div class="mt-8 flex flex-col-reverse gap-3 border-t border-line pt-6 sm:flex-row sm:items-center">
+      <%= ui_button "Back", variant: :ghost, hidden: true, data: { onboarding_target: "back", action: "onboarding#back" } %>
+      <div class="flex flex-col gap-3 sm:ml-auto sm:flex-row">
+        <%= ui_button "Continue", hidden: true, size: :lg, data: { onboarding_target: "next", action: "onboarding#next" } %>
+        <%= form.button "Plan my path", class: ui_button_classes(size: :lg), data: { onboarding_target: "submit", turbo_submits_with: "Planning your path…" } %>
+      </div>
+    </div>
+  </div>
+<% end %>

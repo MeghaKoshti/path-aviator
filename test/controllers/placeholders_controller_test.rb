@@ -2,7 +2,7 @@ require "test_helper"
 
 class PlaceholdersControllerTest < ActionDispatch::IntegrationTest
   test "app pages require sign-in" do
-    [ dashboard_path, new_learning_goal_path, settings_path ].each do |path|
+    [ dashboard_path, settings_path ].each do |path|
       get path
       assert_redirected_to new_session_path
     end
@@ -25,7 +25,7 @@ class PlaceholdersControllerTest < ActionDispatch::IntegrationTest
   test "placeholder pages render for signed-in users" do
     sign_in_as users(:one)
 
-    [ new_learning_goal_path, settings_path ].each do |path|
+    [ settings_path ].each do |path|
       get path
       assert_response :success
     end

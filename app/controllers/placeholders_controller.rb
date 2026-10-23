@@ -6,10 +6,6 @@ class PlaceholdersController < ApplicationController
     render_placeholder "Your dashboard is on its way", "Your learning paths will appear here once path planning is live."
   end
 
-  def new_learning_goal
-    render_placeholder "Planning new paths is coming soon", "You’ll be able to pick a topic, level and weekly hours here."
-  end
-
   def settings
     render_placeholder "Account settings are coming soon", "You’ll be able to update your name, email and password here."
   end

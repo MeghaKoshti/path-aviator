@@ -1,6 +1,8 @@
 Rails.application.routes.draw do
   resource :session
   resource :registration, only: %i[ new create ]
+  resources :learning_goals, only: %i[ new create ]
+  resources :learning_paths, only: :show
   resources :passwords, param: :token
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -16,6 +18,5 @@ Rails.application.routes.draw do
 
   # Placeholder — implemented in feature stories (see PlaceholdersController).
   get "dashboard", to: "placeholders#dashboard", as: :dashboard
-  get "learning_goals/new", to: "placeholders#new_learning_goal", as: :new_learning_goal
   get "settings", to: "placeholders#settings", as: :settings
 end
