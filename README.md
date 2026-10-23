@@ -4,7 +4,7 @@
 
 **Path Aviator is an AI-powered learning planner built with Ruby on Rails 8.** Tell it what you want to learn, your current level and the hours you have each week. It plans a step-by-step route of courses, docs, videos, articles and practice, then tracks your progress as you tick steps off.
 
-![Path Aviator sign-in page](docs/screenshots/sign-in.jpg)
+![A Path Aviator learning path for Ruby on Rails, three of eight steps done, with progress and time left](docs/screenshots/path.jpg)
 
 ## Status
 
@@ -23,6 +23,30 @@
 | Accessibility (WCAG 2.1 AA checks, keyboard) and responsive pass | ✅ Done |
 | CI: tests, system tests, RuboCop, Brakeman, importmap audit | ✅ Done |
 | Google / GitHub sign-in | 📝 Planned |
+
+## Screenshots
+
+<table>
+  <tr>
+    <td width="50%"><b>Landing</b><br><img src="docs/screenshots/landing.jpg" alt="Landing page: hero with a sample route and the three how-it-works steps"></td>
+    <td width="50%"><b>Dashboard</b><br><img src="docs/screenshots/dashboard.jpg" alt="Dashboard with a finished Git path and a Rails path at 38 percent"></td>
+  </tr>
+  <tr>
+    <td><b>Onboarding</b><br><img src="docs/screenshots/onboarding.jpg" alt="Onboarding step two of three: choosing the starting level"></td>
+    <td><b>Learning path</b><br><img src="docs/screenshots/path.jpg" alt="Learning path with ticked steps, progress and the next step highlighted"></td>
+  </tr>
+  <tr>
+    <td><b>Generating</b><br><img src="docs/screenshots/generating.jpg" alt="Planning state while the AI builds the path"></td>
+    <td><b>Settings</b><br><img src="docs/screenshots/settings.jpg" alt="Account settings: profile and password"></td>
+  </tr>
+  <tr>
+    <td><b>Sign up</b><br><img src="docs/screenshots/sign-up.jpg" alt="Sign-up form"></td>
+    <td><b>Sign in</b><br><img src="docs/screenshots/sign-in.jpg" alt="Sign-in form"></td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center"><b>Mobile</b><br><img src="docs/screenshots/mobile.jpg" alt="Learning path on a 375 pixel wide phone screen" width="300"></td>
+  </tr>
+</table>
 
 ## Tech stack
 
