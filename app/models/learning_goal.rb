@@ -1,5 +1,6 @@
 class LearningGoal < ApplicationRecord
   belongs_to :user
+  has_one :learning_path, dependent: :destroy
 
   enum :current_level, { beginner: 0, intermediate: 1, advanced: 2 }, validate: true
 

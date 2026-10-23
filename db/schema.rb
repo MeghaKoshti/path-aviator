@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_23_050520) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_23_050708) do
   create_table "learning_goals", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "topic", null: false
@@ -20,6 +20,37 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_23_050520) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["user_id"], name: "index_learning_goals_on_user_id"
+  end
+
+  create_table "learning_paths", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "learning_goal_id", null: false
+    t.string "title"
+    t.text "summary"
+    t.integer "status", default: 0, null: false
+    t.string "error_message"
+    t.text "raw_response"
+    t.integer "path_steps_count", default: 0, null: false
+    t.integer "completed_steps_count", default: 0, null: false
+    t.datetime "generated_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["learning_goal_id"], name: "index_learning_paths_on_learning_goal_id", unique: true
+    t.index ["user_id"], name: "index_learning_paths_on_user_id"
+  end
+
+  create_table "path_steps", force: :cascade do |t|
+    t.integer "learning_path_id", null: false
+    t.integer "position", null: false
+    t.string "title", null: false
+    t.text "description"
+    t.string "resource_type", null: false
+    t.string "resource_url", null: false
+    t.integer "estimated_minutes", null: false
+    t.datetime "completed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["learning_path_id", "position"], name: "index_path_steps_on_learning_path_id_and_position", unique: true
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -41,5 +72,8 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_23_050520) do
   end
 
   add_foreign_key "learning_goals", "users"
+  add_foreign_key "learning_paths", "learning_goals"
+  add_foreign_key "learning_paths", "users"
+  add_foreign_key "path_steps", "learning_paths"
   add_foreign_key "sessions", "users"
 end

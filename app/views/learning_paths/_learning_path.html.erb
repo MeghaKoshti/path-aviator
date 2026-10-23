@@ -1,0 +1,10 @@
+<%# Minimal markup so Turbo broadcasts have something to render; restyled in the feature story. %>
+<div id="<%= dom_id(learning_path) %>">
+  <h2><%= learning_path.title.presence || learning_path.learning_goal.topic %></h2>
+  <p>Status: <%= learning_path.status %></p>
+  <% if learning_path.ready? %>
+    <p><%= learning_path.progress_percent %>% complete</p>
+  <% elsif learning_path.failed? %>
+    <p><%= learning_path.error_message %></p>
+  <% end %>
+</div>

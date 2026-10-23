@@ -1,6 +1,8 @@
 class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
+  # Paths are declared first so they are destroyed before the goals they point to.
+  has_many :learning_paths, dependent: :destroy
   has_many :learning_goals, dependent: :destroy
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }

@@ -1,0 +1,21 @@
+# Counter columns are set by hand here because fixtures bypass callbacks.
+rails:
+  user: one
+  learning_goal: rails
+  title: Ruby on Rails from zero to deploy
+  summary: Learn the Rails basics, build a CRUD app and ship it.
+  status: ready
+  path_steps_count: 4
+  completed_steps_count: 1
+  generated_at: <%= 2.days.ago.to_fs(:db) %>
+
+sql:
+  user: one
+  learning_goal: sql
+  status: generating
+
+docker:
+  user: two
+  learning_goal: docker
+  status: failed
+  error_message: We couldn't build this path. Please try again.
