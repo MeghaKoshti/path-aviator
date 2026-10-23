@@ -4,7 +4,7 @@
 
 **Path Aviator is an AI-powered learning planner built with Ruby on Rails 8.** Tell it what you want to learn, your current level and the hours you have each week. It plans a step-by-step route of courses, docs, videos, articles and practice, then tracks your progress as you tick steps off.
 
-![A Path Aviator learning path for Ruby on Rails, three of eight steps done, with progress and time left](docs/screenshots/path.jpg)
+![A Path Aviator learning path for Ruby on Rails, three of eight steps done, with private notes, progress, time left and a share link](docs/screenshots/path.jpg)
 
 ## Status
 
@@ -32,11 +32,15 @@
 <table>
   <tr>
     <td width="50%"><b>Landing</b><br><img src="docs/screenshots/landing.jpg" alt="Landing page: hero with a sample route and the three how-it-works steps"></td>
-    <td width="50%"><b>Dashboard</b><br><img src="docs/screenshots/dashboard.jpg" alt="Dashboard with a finished Git path and a Rails path at 38 percent"></td>
+    <td width="50%"><b>Dashboard</b><br><img src="docs/screenshots/dashboard.jpg" alt="Dashboard: this week's time against a 6 hour goal, the days learned, a 3-day streak, and two path cards"></td>
   </tr>
   <tr>
+    <td><b>Learning path</b><br><img src="docs/screenshots/path.jpg" alt="Learning path with ticked steps, private notes, progress, the next step highlighted and the share panel"></td>
+    <td><b>Shared path</b><br><img src="docs/screenshots/share.jpg" alt="Public read-only page of a shared path: title, summary, progress and steps, with no notes or email"></td>
+  </tr>
+  <tr>
+    <td><b>Step notes</b><br><img src="docs/screenshots/notes.jpg" alt="A saved note on a finished step and the note editor open on the next step"></td>
     <td><b>Onboarding</b><br><img src="docs/screenshots/onboarding.jpg" alt="Onboarding step two of three: choosing the starting level"></td>
-    <td><b>Learning path</b><br><img src="docs/screenshots/path.jpg" alt="Learning path with ticked steps, progress and the next step highlighted"></td>
   </tr>
   <tr>
     <td><b>Generating</b><br><img src="docs/screenshots/generating.jpg" alt="Planning state while the AI builds the path"></td>
@@ -84,6 +88,8 @@ flowchart LR
 2. The job asks Gemini for a strict JSON plan. `PathGenerator::Validator` checks it: 6 to 12 steps, required fields, a known resource type, http(s) links and positive minutes. A bad answer gets one retry. After that the path is marked `failed` with a friendly message and a "Try again" button.
 3. When the job finishes, it broadcasts the re-rendered path partial. The page swaps from the planning animation to the route without a reload, and a polite live region tells screen reader users.
 4. Ticking a step sends a `PATCH` and gets back Turbo Streams that update the route, the progress panel and the time left. Counter caches keep the dashboard to a fixed number of queries.
+5. Each step has a private note, edited in place inside a Turbo Frame (Esc cancels). The dashboard's "This week" panel works out time against the weekly goal and the streak from when steps were ticked.
+6. Sharing gives a path a random token and a public, `noindex` page at `/p/:token` with the steps and progress only. "New link" swaps the token and "Stop sharing" clears it, so old links 404.
 
 Without a `GEMINI_API_KEY` (and always in tests), a built-in fake generator returns a realistic sample path, so the whole flow works offline.
 
