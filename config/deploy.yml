@@ -60,10 +60,11 @@ env:
     # When you start using multiple servers, you should split out job processing to a dedicated machine.
     SOLID_QUEUE_IN_PUMA: true
 
-    # 1 = create the public demo account and reset its progress on every boot.
+    # 1 = create the public demo account and reset it on every boot and nightly.
     # 0 (the default) = no demo account: the seeds skip it in production, even
     # on the first boot when Rails seeds the brand-new database.
     SEED_DEMO: "<%= ENV.fetch("SEED_DEMO", "0") %>"
+    DEMO_EMAIL: "<%= ENV.fetch("DEMO_EMAIL", "demo@pathaviator.dev") %>"
 
     # Outgoing email for password resets. Leave SMTP_ADDRESS empty to skip.
     SMTP_ADDRESS: "<%= ENV["SMTP_ADDRESS"] %>"

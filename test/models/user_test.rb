@@ -61,4 +61,24 @@ class UserTest < ActiveSupport::TestCase
     user.sessions.create!(ip_address: "127.0.0.1", user_agent: "test")
     assert_difference("Session.count", -1) { user.destroy }
   end
+
+  test "demo? matches the demo email in any case, and DEMO_EMAIL can change it" do
+    assert build_user(email_address: "Demo@PathAviator.dev").demo?
+    assert_not users(:one).demo?
+    assert_not User.new.demo?
+
+    with_env("DEMO_EMAIL" => "try@example.com") do
+      assert build_user(email_address: "try@example.com").demo?
+      assert_not build_user(email_address: "demo@pathaviator.dev").demo?
+    end
+  end
+
+  private
+    def with_env(vars)
+      old = vars.keys.to_h { |key| [ key, ENV[key] ] }
+      vars.each { |key, value| ENV[key] = value }
+      yield
+    ensure
+      old.each { |key, value| ENV[key] = value }
+    end
 end

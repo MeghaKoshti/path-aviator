@@ -118,6 +118,8 @@ Open http://localhost:3000 and sign in with the demo account:
 |---|---|
 | `demo@pathaviator.dev` | `pathaviator-demo` |
 
+The demo account is shared, so its name, email and password can't be changed, it can't be deleted, and password reset emails are never sent for it. Everything else (planning paths, notes, ticking steps, sharing) works as for any account.
+
 ### Background jobs
 
 - **Development:** jobs run inside the Rails server (Active Job `:async` adapter), so `bin/dev` is all you need. Live updates use the in-process Action Cable adapter.
@@ -180,7 +182,8 @@ Add an `A` record, for example `pathaviator.example.com → 203.0.113.10`, and w
 | `APP_HOST` | Yes | `deploy.yml`, app | Your domain: the HTTPS certificate, links in emails and Rails host checks |
 | `RAILS_MASTER_KEY` | Yes | secret | Contents of `config/master.key` |
 | `GEMINI_API_KEY` | No | secret | Real AI generation. Without it the built-in sample generator is used |
-| `SEED_DEMO` | No | app | `1` creates the public demo account and resets it on every boot. Default `0`: no demo account in production |
+| `SEED_DEMO` | No | app | `1` creates the public demo account and resets it on every boot and every night. Default `0`: no demo account in production |
+| `DEMO_EMAIL` | No | app | Sign-in email of the demo account. Defaults to `demo@pathaviator.dev` |
 | `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME` | No | app | Outgoing email for password resets. Port defaults to 587 |
 | `SMTP_PASSWORD` | No | secret | SMTP password or API key |
 | `MAILER_FROM` | No | app | Sender address. Defaults to `Path Aviator <no-reply@APP_HOST>` |
@@ -217,11 +220,15 @@ bin/kamal smoke                            # one real Gemini call, nothing saved
 
 ### 5. The demo account
 
-In production the demo account (`demo@pathaviator.dev` / `pathaviator-demo`) is opt-in, so a private install never gets a login everyone knows. Deploy with `SEED_DEMO=1` to create it and reset its progress on every boot, or run `bin/kamal seed` to create or reset it once. To remove it later (and unset `SEED_DEMO`):
+In production the demo account (`demo@pathaviator.dev` / `pathaviator-demo`) is opt-in, so a private install never gets a login everyone knows. Deploy with `SEED_DEMO=1` to create it and reset it on every boot, or run `bin/kamal seed` to create or reset it once.
+
+With `SEED_DEMO=1`, `ResetDemoAccountJob` also runs every night at 3am UTC (`config/recurring.yml`): progress, notes and sharing go back to the seeded state, and paths visitors added are deleted. Visitors can't lock others out: the demo account's settings (name, email, password, deletion) are refused by the server, and a password reset request for it sends nothing.
+
+To remove it later (and unset `SEED_DEMO`):
 
 ```bash
 bin/kamal console
-User.find_by(email_address: "demo@pathaviator.dev")&.destroy
+User.find_by(email_address: DemoAccount.email)&.destroy
 ```
 
 ### 6. Day to day

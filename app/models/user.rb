@@ -20,4 +20,10 @@ class User < ApplicationRecord
   def onboarded?
     learning_goals.exists?
   end
+
+  # The shared demo account everyone signs in to. Its sign-in details and the
+  # account itself are locked; the learning features work as for anyone.
+  def demo?
+    email_address.to_s.casecmp?(DemoAccount.email)
+  end
 end

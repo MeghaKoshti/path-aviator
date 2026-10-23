@@ -31,7 +31,8 @@ module UiHelper
 
   INPUT_BASE = "block w-full rounded-control border bg-surface-raised px-3.5 py-2.5 text-base text-ink " \
                "placeholder:text-ink-subtle transition-colors " \
-               "focus:border-brand-600 focus-visible:outline-brand-500".freeze
+               "focus:border-brand-600 focus-visible:outline-brand-500 " \
+               "disabled:cursor-not-allowed disabled:bg-surface-sunken disabled:text-ink-muted".freeze
 
   # Classes for anything that should look like a button, e.g. `form.submit "Save", class: ui_button_classes`.
   def ui_button_classes(variant: :primary, size: :md, block: false, extra: nil)

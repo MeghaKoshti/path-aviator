@@ -29,6 +29,8 @@ class SettingsControllerTest < ActionDispatch::IntegrationTest
     assert_select "form[action=?] input[name=_method][value=delete]", settings_account_path
     assert_select "label[for=confirmation]", "Type DELETE or your email to confirm"
     assert_select "p", /2 learning paths/
+    assert_select "#demo-locked-note", 0
+    assert_select "fieldset[disabled]", 0
   end
 
   # Profile

@@ -1,36 +1,50 @@
 <% content_for :title, "Settings" %>
+<%# The demo account's forms are disabled here and refused by the controllers. %>
+<% locked = Current.user.demo? %>
+<% fieldset = { disabled: locked, aria: { describedby: ("demo-locked-note" if locked) }, class: "min-w-0 space-y-5" } %>
 
 <div class="mx-auto max-w-2xl">
   <h1 class="type-display text-3xl text-ink sm:text-4xl">Settings</h1>
   <p class="mt-2 text-ink-muted">Manage how you sign in to Path Aviator.</p>
 
+  <% if locked %>
+    <p id="demo-locked-note" class="mt-6 flex items-start gap-3 rounded-control border border-brand-300 bg-brand-50 p-4 text-pretty text-brand-800">
+      <svg class="mt-0.5 size-5 shrink-0" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4.25" y="8.75" width="11.5" height="7.5" rx="1.5"/><path d="M7 8.75V6.5a3 3 0 0 1 6 0v2.25"/></svg>
+      <%= SettingsController::DEMO_LOCKED_NOTICE %>
+    </p>
+  <% end %>
+
   <div class="mt-8 space-y-6">
     <%= render "shared/card", title: "Profile" do %>
       <% invalid = first_invalid_field(@profile, %i[name email_address password_challenge]) %>
-      <%= form_with model: @profile, url: settings_profile_path, method: :patch, namespace: "profile", class: "space-y-5" do |form| %>
-        <%= render "shared/field", form: form, attribute: :name, label: "Name (optional)",
-              input: { autocomplete: "name", maxlength: 100, autofocus: invalid == :name } %>
-        <%= render "shared/field", form: form, attribute: :email_address, label: "Email", as: :email_field,
-              hint: "You sign in with this address.",
-              input: { required: true, autocomplete: "username", autofocus: invalid == :email_address } %>
-        <%= render "shared/field", form: form, attribute: :password_challenge, label: "Current password", as: :password_field, reveal: true,
-              hint: "Only needed if you change your email.",
-              input: { autocomplete: "current-password", maxlength: 72, value: nil, autofocus: invalid == :password_challenge } %>
-        <%= form.submit "Save profile", class: ui_button_classes, data: { turbo_submits_with: "Saving…" } %>
+      <%= form_with model: @profile, url: settings_profile_path, method: :patch, namespace: "profile" do |form| %>
+        <%= tag.fieldset(**fieldset) do %>
+          <%= render "shared/field", form: form, attribute: :name, label: "Name (optional)",
+                input: { autocomplete: "name", maxlength: 100, autofocus: invalid == :name } %>
+          <%= render "shared/field", form: form, attribute: :email_address, label: "Email", as: :email_field,
+                hint: "You sign in with this address.",
+                input: { required: true, autocomplete: "username", autofocus: invalid == :email_address } %>
+          <%= render "shared/field", form: form, attribute: :password_challenge, label: "Current password", as: :password_field, reveal: true,
+                hint: "Only needed if you change your email.",
+                input: { autocomplete: "current-password", maxlength: 72, value: nil, autofocus: invalid == :password_challenge } %>
+          <%= form.submit "Save profile", class: ui_button_classes, data: { turbo_submits_with: "Saving…" } %>
+        <% end %>
       <% end %>
     <% end %>
 
     <%= render "shared/card", title: "Password" do %>
       <% invalid = first_invalid_field(@password_change, %i[password_challenge password password_confirmation]) %>
-      <%= form_with model: @password_change, url: settings_password_path, method: :patch, scope: :user, namespace: "password_change", class: "space-y-5" do |form| %>
-        <%= render "shared/field", form: form, attribute: :password_challenge, label: "Current password", as: :password_field, reveal: true,
-              input: { required: true, autocomplete: "current-password", maxlength: 72, value: nil, autofocus: invalid == :password_challenge } %>
-        <%= render "shared/field", form: form, attribute: :password, label: "New password", as: :password_field, reveal: true,
-              hint: "At least 8 characters. You’ll stay signed in here; other devices are signed out.",
-              input: { required: true, autocomplete: "new-password", minlength: 8, maxlength: 72, autofocus: invalid == :password } %>
-        <%= render "shared/field", form: form, attribute: :password_confirmation, label: "Confirm new password", as: :password_field,
-              input: { required: true, autocomplete: "new-password", maxlength: 72, autofocus: invalid == :password_confirmation } %>
-        <%= form.submit "Change password", class: ui_button_classes, data: { turbo_submits_with: "Changing…" } %>
+      <%= form_with model: @password_change, url: settings_password_path, method: :patch, scope: :user, namespace: "password_change" do |form| %>
+        <%= tag.fieldset(**fieldset) do %>
+          <%= render "shared/field", form: form, attribute: :password_challenge, label: "Current password", as: :password_field, reveal: true,
+                input: { required: true, autocomplete: "current-password", maxlength: 72, value: nil, autofocus: invalid == :password_challenge } %>
+          <%= render "shared/field", form: form, attribute: :password, label: "New password", as: :password_field, reveal: true,
+                hint: "At least 8 characters. You’ll stay signed in here; other devices are signed out.",
+                input: { required: true, autocomplete: "new-password", minlength: 8, maxlength: 72, autofocus: invalid == :password } %>
+          <%= render "shared/field", form: form, attribute: :password_confirmation, label: "Confirm new password", as: :password_field,
+                input: { required: true, autocomplete: "new-password", maxlength: 72, autofocus: invalid == :password_confirmation } %>
+          <%= form.submit "Change password", class: ui_button_classes, data: { turbo_submits_with: "Changing…" } %>
+        <% end %>
       <% end %>
     <% end %>
 
@@ -40,11 +54,13 @@
         This deletes your account, <%= pluralize(Current.user.learning_paths.count, "learning path") %> and all your progress.
         It can’t be undone.
       </p>
-      <%= form_with url: settings_account_path, method: :delete, class: "mt-5 space-y-5" do |form| %>
-        <%= render "shared/field", form: form, attribute: :confirmation, label: "Type DELETE or your email to confirm",
-              error: @deletion_error,
-              input: { required: true, autocomplete: "off", autocapitalize: "characters", spellcheck: false, autofocus: @deletion_error.present? } %>
-        <%= form.submit "Delete my account", class: ui_button_classes(variant: :danger), data: { turbo_submits_with: "Deleting…" } %>
+      <%= form_with url: settings_account_path, method: :delete, class: "mt-5" do |form| %>
+        <%= tag.fieldset(**fieldset) do %>
+          <%= render "shared/field", form: form, attribute: :confirmation, label: "Type DELETE or your email to confirm",
+                error: @deletion_error,
+                input: { required: true, autocomplete: "off", autocapitalize: "characters", spellcheck: false, autofocus: @deletion_error.present? } %>
+          <%= form.submit "Delete my account", class: ui_button_classes(variant: :danger), data: { turbo_submits_with: "Deleting…" } %>
+        <% end %>
       <% end %>
     </section>
   </div>
