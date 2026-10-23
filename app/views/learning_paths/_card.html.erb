@@ -9,7 +9,7 @@
   title_id = dom_id(learning_path, :card_title)
 %>
 <li id="<%= dom_id(learning_path, :card) %>" class="flex">
-<article aria-labelledby="<%= title_id %>" class="flex w-full flex-col rounded-panel border border-line bg-surface-raised p-5 shadow-panel sm:p-6">
+<article aria-labelledby="<%= title_id %>" class="flex w-full min-w-0 flex-col rounded-panel border border-line bg-surface-raised p-5 shadow-panel sm:p-6">
   <div class="flex flex-wrap items-center gap-2">
     <% if learning_path.generating? %>
       <%= ui_badge "Planning…", :brand %>

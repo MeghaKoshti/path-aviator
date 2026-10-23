@@ -110,6 +110,8 @@
 
   body {
     @apply bg-surface text-ink font-sans antialiased;
+    /* Topics, names and AI titles can contain one very long word (or a URL). */
+    overflow-wrap: break-word;
   }
 
   /* One visible focus ring for everything, keyboard users only. */

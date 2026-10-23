@@ -5,7 +5,7 @@
 
 <div class="mt-8">
   <% if @learning_paths.any? %>
-    <ul id="learning_path_cards" class="grid gap-5 md:grid-cols-2 xl:grid-cols-3" role="list">
+    <ul id="learning_path_cards" class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3" role="list">
       <%= render partial: "learning_paths/card", collection: @learning_paths, as: :learning_path %>
     </ul>
   <% else %>
