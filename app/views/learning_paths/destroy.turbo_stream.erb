@@ -1,0 +1,7 @@
+<%# Deleted from the dashboard: drop the card without a reload. %>
+<%= turbo_stream.remove dom_id(@learning_path, :card) %>
+<%= turbo_stream.replace "dashboard_header", partial: "dashboards/header", locals: { learning_paths: @learning_paths, focus: true } %>
+<% if @learning_paths.none? %>
+  <%= turbo_stream.replace "learning_path_cards", partial: "dashboards/empty_state" %>
+<% end %>
+<%= turbo_stream.replace "flash", partial: "shared/flash" %>

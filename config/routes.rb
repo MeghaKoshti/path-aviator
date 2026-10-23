@@ -2,7 +2,7 @@ Rails.application.routes.draw do
   resource :session
   resource :registration, only: %i[ new create ]
   resources :learning_goals, only: %i[ new create ]
-  resources :learning_paths, only: :show do
+  resources :learning_paths, only: %i[ show destroy ] do
     post :regenerate, on: :member
   end
   resources :path_steps, only: [] do

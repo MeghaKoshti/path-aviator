@@ -1,32 +1,14 @@
 <% content_for :title, "Dashboard" %>
 <%= turbo_stream_from Current.user, :learning_paths %>
 
-<div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-  <div>
-    <h1 class="type-display text-3xl text-ink sm:text-4xl">Your learning paths</h1>
-    <% if @learning_paths.any? %>
-      <p class="mt-2 text-ink-muted">
-        <%= pluralize(@learning_paths.size, "path") %>,
-        <%= @learning_paths.count(&:completed?) %> complete.
-      </p>
-    <% end %>
-  </div>
-  <% if @learning_paths.any? %>
-    <%= ui_button "Start another path", new_learning_goal_path, class: "shrink-0" %>
-  <% end %>
-</div>
+<%= render "dashboards/header", learning_paths: @learning_paths %>
 
 <div class="mt-8">
   <% if @learning_paths.any? %>
     <ul id="learning_path_cards" class="grid gap-5 md:grid-cols-2 xl:grid-cols-3" role="list">
-      <% @learning_paths.each do |learning_path| %>
-        <li class="flex"><%= render "learning_paths/card", learning_path: learning_path %></li>
-      <% end %>
+      <%= render partial: "learning_paths/card", collection: @learning_paths, as: :learning_path %>
     </ul>
   <% else %>
-    <%= render "shared/empty_state",
-          title: "No paths yet",
-          body: "Tell us what you want to learn, your level and the time you have. Path Aviator plans the route.",
-          action_label: "Plan your first path", action_href: new_learning_goal_path %>
+    <%= render "dashboards/empty_state" %>
   <% end %>
 </div>

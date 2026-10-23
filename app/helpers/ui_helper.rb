@@ -11,6 +11,7 @@ module UiHelper
     secondary: "bg-surface-raised text-ink ring-1 ring-inset ring-line-strong hover:bg-surface-sunken",
     ghost: "text-ink-muted hover:bg-surface-sunken hover:text-ink",
     danger: "bg-danger-600 text-white shadow-sm hover:bg-danger-700",
+    danger_ghost: "text-danger-700 hover:bg-danger-50", # quiet destructive action next to a primary one
     inverse: "bg-white text-brand-800 shadow-sm hover:bg-brand-50" # on dark brand backgrounds
   }.freeze
 

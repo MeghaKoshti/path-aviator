@@ -1,0 +1,33 @@
+require "application_system_test_case"
+
+class PathManagementSystemTest < ApplicationSystemTestCase
+  test "deleting a path from the dashboard removes its card in place" do
+    path = learning_paths(:rails)
+    sign_in_through_ui users(:one)
+    assert_selector "##{dom_id(path, :card)}"
+
+    accept_confirm(/gone for good/) do
+      within("##{dom_id(path, :card)}") { click_on "Delete" }
+    end
+
+    assert_no_selector "##{dom_id(path, :card)}"
+    assert_text "Deleted “#{path.title}”"
+    assert_text "1 path, 0 complete."
+    # Focus moves to the page heading instead of being lost with the card.
+    assert_equal "Your learning paths", evaluate_script("document.activeElement.textContent").strip
+    assert_current_path dashboard_path
+  end
+
+  test "regenerating a ready path asks first, then shows the planning state" do
+    path = learning_paths(:rails)
+    sign_in_through_ui users(:one)
+    visit learning_path_path(path)
+
+    dismiss_confirm { click_on "Regenerate" }
+    assert_text "1 of 4"
+
+    accept_confirm { click_on "Regenerate" }
+    assert_selector "h1", text: "Charting your route to Ruby on Rails"
+    assert path.reload.generating?
+  end
+end

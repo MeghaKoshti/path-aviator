@@ -4,11 +4,29 @@ class LearningPathsController < ApplicationController
   def show
   end
 
-  # "Try again" on a failed path. Steps and progress are thrown away and the
-  # generation job runs again.
+  # "Try again" on a failed path and "Regenerate" on a ready one. Steps and
+  # progress are thrown away and the generation job runs again.
   def regenerate
     @learning_path.regenerate! unless @learning_path.generating?
     redirect_to @learning_path, status: :see_other
+  end
+
+  # A path only exists for its goal, so the goal goes too.
+  def destroy
+    @learning_path.learning_goal.destroy!
+    notice = "Deleted “#{@learning_path.title.presence || @learning_path.learning_goal.topic}”."
+
+    respond_to do |format|
+      format.turbo_stream do
+        if params[:from] == "dashboard"
+          @learning_paths = Current.user.learning_paths
+          flash.now[:notice] = notice
+        else
+          redirect_to dashboard_path, notice: notice, status: :see_other
+        end
+      end
+      format.html { redirect_to dashboard_path, notice: notice, status: :see_other }
+    end
   end
 
   private

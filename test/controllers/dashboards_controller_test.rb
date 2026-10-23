@@ -27,7 +27,7 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     get dashboard_path
 
     assert_select "turbo-cable-stream-source[signed-stream-name=?]", Turbo::StreamsChannel.signed_stream_name([ users(:one), :learning_paths ])
-    assert_select "article[id^=card_learning_path_]", 2
+    assert_select "li[id^=card_learning_path_]", 2
     assert_select "##{dom_id(learning_paths(:docker), :card)}", false
     assert_select "##{dom_id(rails, :card)}" do
       assert_select "h2 a[href=?]", learning_path_path(rails), text: rails.title
