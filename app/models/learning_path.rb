@@ -32,6 +32,16 @@ class LearningPath < ApplicationRecord
     ready? && path_steps_count.positive? && completed_steps_count >= path_steps_count
   end
 
+  # Throws away the current steps (and progress) and asks the generator again.
+  def regenerate!
+    transaction do
+      path_steps.delete_all
+      update!(status: :generating, completed_steps_count: 0, error_message: nil, raw_response: nil, generated_at: nil)
+    end
+    reload
+    GenerateLearningPathJob.perform_later(self)
+  end
+
   def broadcast_refresh
     broadcast_replace_to [ user, :learning_paths ],
       target: ActionView::RecordIdentifier.dom_id(self),

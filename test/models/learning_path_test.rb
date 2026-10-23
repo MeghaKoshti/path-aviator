@@ -3,6 +3,7 @@ require "test_helper"
 require "turbo/broadcastable/test_helper"
 
 class LearningPathTest < ActiveSupport::TestCase
+  include ActiveJob::TestHelper
   include Turbo::Broadcastable::TestHelper
 
   setup do
@@ -84,6 +85,38 @@ class LearningPathTest < ActiveSupport::TestCase
     assert_difference -> { LearningPath.count } => -2, -> { LearningGoal.count } => -2 do
       users(:one).destroy
     end
+  end
+
+  test "regenerate! clears steps and progress and queues a new generation" do
+    assert_difference -> { PathStep.count } => -4 do
+      assert_enqueued_with(job: GenerateLearningPathJob, args: [ @path ]) { @path.regenerate! }
+    end
+
+    assert @path.generating?
+    assert_equal 0, @path.path_steps_count
+    assert_equal 0, @path.completed_steps_count
+    assert_nil @path.generated_at
+    assert_nil @path.raw_response
+    assert_empty @path.path_steps
+
+    @path.reload
+    assert_equal [ 0, 0 ], [ @path.path_steps_count, @path.completed_steps_count ]
+  end
+
+  test "regenerate! on a failed path clears the error" do
+    path = learning_paths(:docker)
+    path.regenerate!
+    assert path.reload.generating?
+    assert_nil path.error_message
+  end
+
+  test "regenerate! followed by the job produces a fresh ready path" do
+    perform_enqueued_jobs { @path.regenerate! }
+
+    @path.reload
+    assert @path.ready?
+    assert_equal 8, @path.path_steps_count
+    assert_equal 0, @path.progress_percent
   end
 
   test "broadcast_refresh replaces the path card on the user's stream" do
