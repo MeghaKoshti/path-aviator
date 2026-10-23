@@ -4,7 +4,9 @@ require "turbo/broadcastable/test_helper"
 class GenerateLearningPathJobTest < ActiveJob::TestCase
   include Turbo::Broadcastable::TestHelper
 
-  # Replays canned responses (strings or exceptions) one per generator call.
+  # Replays canned responses one per generator call. A response can be a
+  # string, an exception to raise, or a proc that runs (simulating something
+  # happening during the API call) and returns one of those.
   class ScriptedClient
     attr_reader :calls
 
@@ -16,6 +18,7 @@ class GenerateLearningPathJobTest < ActiveJob::TestCase
     def generate(_goal)
       @calls += 1
       response = @responses.shift
+      response = response.call if response.respond_to?(:call)
       response.is_a?(Exception) ? raise(response) : response
     end
   end
@@ -30,6 +33,15 @@ class GenerateLearningPathJobTest < ActiveJob::TestCase
 
   def valid_json
     PathGenerator::Fake.new.generate(@path.learning_goal)
+  end
+
+  def json_titled(title)
+    JSON.parse(valid_json).merge("title" => title).to_json
+  end
+
+  # Deletes through a fresh record, like a web request would while the job runs.
+  def delete_path_elsewhere
+    LearningGoal.find(@path.learning_goal_id).destroy!
   end
 
   def stream
@@ -129,5 +141,46 @@ class GenerateLearningPathJobTest < ActiveJob::TestCase
     @path.destroy
 
     assert_nothing_raised { perform_enqueued_jobs }
+  end
+
+  test "exits quietly when the path is deleted during generation" do
+    PathGenerator.client = ScriptedClient.new(-> { delete_path_elsewhere; valid_json })
+
+    assert_no_turbo_stream_broadcasts(stream) do
+      assert_nothing_raised { GenerateLearningPathJob.perform_now(@path) }
+    end
+    assert_not LearningPath.exists?(@path.id)
+    assert_empty PathStep.where(learning_path_id: @path.id)
+  end
+
+  test "exits quietly when the path is deleted and the generator then fails" do
+    PathGenerator.client = ScriptedClient.new(-> { delete_path_elsewhere; RuntimeError.new("boom") })
+
+    assert_nothing_raised { GenerateLearningPathJob.perform_now(@path) }
+    assert_not LearningPath.exists?(@path.id)
+  end
+
+  test "a slower job never overwrites steps a newer job already saved" do
+    newer_job = -> { GenerateLearningPathJob.perform_now(LearningPath.find(@path.id)); json_titled("Stale path") }
+    PathGenerator.client = ScriptedClient.new(newer_job, json_titled("Fresh path"))
+
+    GenerateLearningPathJob.perform_now(@path)
+    @path.reload
+
+    assert @path.ready?
+    assert_equal "Fresh path", @path.title
+    assert_equal 8, @path.path_steps.count
+  end
+
+  test "a slower job that fails doesn't mark a newer job's finished path as failed" do
+    newer_job = -> { GenerateLearningPathJob.perform_now(LearningPath.find(@path.id)); PathGenerator::Timeout.new("slow") }
+    PathGenerator.client = ScriptedClient.new(newer_job, json_titled("Fresh path"))
+
+    GenerateLearningPathJob.perform_now(@path)
+    @path.reload
+
+    assert @path.ready?
+    assert_nil @path.error_message
+    assert_equal "Fresh path", @path.title
   end
 end

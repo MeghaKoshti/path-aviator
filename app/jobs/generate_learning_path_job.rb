@@ -13,11 +13,12 @@ class GenerateLearningPathJob < ApplicationJob
   rescue PathGenerator::Error => e
     mark_failed(learning_path, e)
   rescue StandardError => e
-    # Don't leave the user looking at a spinner forever; re-raise so the error is still reported.
+    # Don't leave the user looking at a spinner forever; re-raise so the error
+    # is still reported, unless the path was simply deleted while we worked.
     mark_failed(learning_path, e)
-    raise
+    raise if LearningPath.exists?(learning_path.id)
   ensure
-    learning_path.broadcast_refresh
+    refresh_and_broadcast(learning_path)
   end
 
   private
@@ -34,13 +35,19 @@ class GenerateLearningPathJob < ApplicationJob
       end
     end
 
+    # The generator call can take a while, so the path is re-read under a lock
+    # first: it may have been deleted, or a newer job (e.g. from a double-clicked
+    # "Regenerate") may already have filled it. Either way this result is dropped.
     def save_result(learning_path, result)
       LearningPath.transaction do
-        learning_path.path_steps.delete_all
+        current = LearningPath.lock.find_by(id: learning_path.id)
+        next unless current&.generating?
+
+        current.path_steps.delete_all
         result.steps.each.with_index(1) do |step, position|
-          learning_path.path_steps.create!(step.merge(position: position))
+          current.path_steps.create!(step.merge(position: position))
         end
-        learning_path.update!(
+        current.update!(
           title: result.title,
           summary: result.summary,
           raw_response: result.raw,
@@ -49,18 +56,25 @@ class GenerateLearningPathJob < ApplicationJob
           status: :ready
         )
       end
-      learning_path.reload
     end
 
+    # Only a path that is still generating is marked failed, so a late failure
+    # can't clobber a path that a newer job already finished.
     def mark_failed(learning_path, error)
       Rails.logger.error("[GenerateLearningPathJob] path #{learning_path.id} failed: #{error.class}: #{error.message}")
-      learning_path.update_columns(
+      LearningPath.where(id: learning_path.id, status: LearningPath.statuses[:generating]).update_all(
         status: LearningPath.statuses[:failed],
         error_message: FAILURE_MESSAGE,
         raw_response: error.try(:raw),
         updated_at: Time.current
       )
-      # Drop any attributes left over from a rolled-back save before broadcasting.
-      learning_path.reload
+    end
+
+    # Reload so the broadcast shows what is really saved, not attributes left
+    # over from a rolled-back save. A deleted path has nothing left to show.
+    def refresh_and_broadcast(learning_path)
+      learning_path.reload.broadcast_refresh
+    rescue ActiveRecord::RecordNotFound
+      Rails.logger.info("[GenerateLearningPathJob] path #{learning_path.id} was deleted while generating")
     end
 end
