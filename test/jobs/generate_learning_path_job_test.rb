@@ -58,8 +58,8 @@ class GenerateLearningPathJobTest < ActiveJob::TestCase
 
     streams = capture_turbo_stream_broadcasts(stream) { GenerateLearningPathJob.perform_now(@path) }
 
-    assert_equal 1, streams.size
-    assert_equal "replace", streams.first["action"]
+    assert_equal 2, streams.size, "path page and dashboard card"
+    assert_equal %w[replace replace], streams.map { |stream| stream["action"] }
     assert_includes streams.first.to_html, "SQL for analytics"
   end
 
@@ -77,7 +77,7 @@ class GenerateLearningPathJobTest < ActiveJob::TestCase
     client = ScriptedClient.new("not json", "still not json")
     PathGenerator.client = client
 
-    assert_turbo_stream_broadcasts(stream, count: 1) { GenerateLearningPathJob.perform_now(@path) }
+    assert_turbo_stream_broadcasts(stream, count: 2) { GenerateLearningPathJob.perform_now(@path) }
     @path.reload
 
     assert_equal 2, client.calls
@@ -91,7 +91,7 @@ class GenerateLearningPathJobTest < ActiveJob::TestCase
     client = ScriptedClient.new(PathGenerator::Timeout.new("slow"), valid_json)
     PathGenerator.client = client
 
-    assert_turbo_stream_broadcasts(stream, count: 1) { GenerateLearningPathJob.perform_now(@path) }
+    assert_turbo_stream_broadcasts(stream, count: 2) { GenerateLearningPathJob.perform_now(@path) }
 
     assert_equal 1, client.calls
     assert @path.reload.failed?

@@ -5,6 +5,10 @@ Rails.application.routes.draw do
   resources :learning_paths, only: :show do
     post :regenerate, on: :member
   end
+  resources :path_steps, only: [] do
+    patch :toggle, on: :member
+  end
+  resource :dashboard, only: :show
   resources :passwords, param: :token
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -19,6 +23,5 @@ Rails.application.routes.draw do
   root "pages#home"
 
   # Placeholder — implemented in feature stories (see PlaceholdersController).
-  get "dashboard", to: "placeholders#dashboard", as: :dashboard
   get "settings", to: "placeholders#settings", as: :settings
 end

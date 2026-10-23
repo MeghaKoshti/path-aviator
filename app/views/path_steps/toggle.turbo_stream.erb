@@ -1,0 +1,9 @@
+<%# Morph keeps the ticked checkbox focused while the route around it changes. %>
+<%= turbo_stream.replace dom_id(@learning_path, :steps), method: :morph,
+      partial: "learning_paths/steps", locals: { learning_path: @learning_path } %>
+<%= turbo_stream.replace dom_id(@learning_path, :progress),
+      partial: "learning_paths/progress", locals: { learning_path: @learning_path } %>
+<%= turbo_stream.update "path-announcer" do %>
+  <%= @path_step.completed? ? "Marked “#{@path_step.title}” as done." : "Marked “#{@path_step.title}” as not done." %>
+  <%= @learning_path.completed_steps_count %> of <%= @learning_path.path_steps_count %> steps done.
+<% end %>

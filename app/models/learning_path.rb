@@ -42,10 +42,16 @@ class LearningPath < ApplicationRecord
     GenerateLearningPathJob.perform_later(self)
   end
 
+  # Both the path page and the dashboard listen on this stream; each page only
+  # has one of the two targets, so the other replace is ignored there.
   def broadcast_refresh
     broadcast_replace_to [ user, :learning_paths ],
       target: ActionView::RecordIdentifier.dom_id(self),
       partial: "learning_paths/learning_path",
+      locals: { learning_path: self }
+    broadcast_replace_to [ user, :learning_paths ],
+      target: ActionView::RecordIdentifier.dom_id(self, :card),
+      partial: "learning_paths/card",
       locals: { learning_path: self }
   end
 

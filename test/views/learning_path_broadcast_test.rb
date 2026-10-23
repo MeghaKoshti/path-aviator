@@ -25,6 +25,14 @@ class LearningPathBroadcastTest < ActiveSupport::TestCase
     assert_includes html, %(data-path-status-status-value="generating")
   end
 
+  test "the dashboard card is broadcast alongside the page" do
+    path = learning_paths(:rails)
+
+    html = broadcast_html(path)
+
+    assert_includes html, %(<turbo-stream action="replace" target="#{dom_id(path, :card)}">)
+  end
+
   test "a failed path broadcasts the retry button" do
     path = learning_paths(:docker)
 
@@ -37,7 +45,7 @@ class LearningPathBroadcastTest < ActiveSupport::TestCase
   private
     def broadcast_html(path)
       broadcasts = capture_turbo_stream_broadcasts([ path.user, :learning_paths ]) { path.broadcast_refresh }
-      assert_equal 1, broadcasts.size
-      broadcasts.first.to_html
+      assert_equal 2, broadcasts.size, "path page and dashboard card"
+      broadcasts.map(&:to_html).join
     end
 end

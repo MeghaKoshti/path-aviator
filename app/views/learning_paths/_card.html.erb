@@ -1,0 +1,76 @@
+<%#
+  Dashboard card for one path. Also broadcast by LearningPath#broadcast_refresh,
+  so it must not depend on the request (no Current, no params).
+%>
+<%
+  goal = learning_path.learning_goal
+  steps = learning_path.ready? ? learning_path.path_steps.to_a : []
+  next_step = learning_path.next_step if learning_path.ready?
+  title_id = dom_id(learning_path, :card_title)
+%>
+<article id="<%= dom_id(learning_path, :card) %>" aria-labelledby="<%= title_id %>"
+         class="flex w-full flex-col rounded-panel border border-line bg-surface-raised p-5 shadow-panel sm:p-6">
+  <div class="flex flex-wrap items-center gap-2">
+    <% if learning_path.generating? %>
+      <%= ui_badge "Planning…", :brand %>
+    <% elsif learning_path.failed? %>
+      <%= ui_badge "Couldn’t plan", :danger %>
+    <% elsif learning_path.completed? %>
+      <%= ui_badge "Complete", :success %>
+    <% end %>
+    <%= ui_badge goal_level_label(goal) %>
+    <%= ui_badge goal_pace_label(goal) %>
+  </div>
+
+  <h2 id="<%= title_id %>" class="mt-3 text-lg font-semibold text-balance text-ink">
+    <%= link_to learning_path.title.presence || goal.topic, learning_path_path(learning_path), class: "rounded-sm hover:text-brand-700" %>
+  </h2>
+
+  <% if learning_path.ready? %>
+    <%# The route in miniature: one waypoint per step, filled once flown. %>
+    <div class="mt-4 flex items-center" role="img" aria-label="<%= learning_path.completed_steps_count %> of <%= learning_path.path_steps_count %> steps done">
+      <% steps.each_with_index do |step, index| %>
+        <% if index.positive? %>
+          <span class="<%= class_names("h-0 flex-1 border-t-2", step.completed? ? "border-route" : "border-dashed border-line-strong/50") %>"></span>
+        <% end %>
+        <span class="<%= class_names("size-3 shrink-0 rounded-full border-2",
+                                     step.completed? ? "border-route bg-route" : step == next_step ? "border-route bg-surface-raised ring-3 ring-route-soft" : "border-line-strong/70 bg-surface-raised") %>"></span>
+      <% end %>
+    </div>
+
+    <dl class="mt-4 grid grid-cols-2 gap-3 text-sm">
+      <div>
+        <dt class="text-ink-subtle">Complete</dt>
+        <dd class="mt-0.5 text-base font-semibold tabular-nums text-ink"><%= learning_path.progress_percent %>%</dd>
+      </div>
+      <div>
+        <dt class="text-ink-subtle">Time left</dt>
+        <dd class="mt-0.5 text-base font-semibold tabular-nums text-ink"><%= learning_path.completed? ? "None" : format_minutes(learning_path.remaining_minutes) %></dd>
+      </div>
+    </dl>
+
+    <% if next_step %>
+      <p class="mt-4 text-sm text-ink-muted">Up next: <span class="font-medium text-ink"><%= next_step.title %></span></p>
+    <% end %>
+  <% elsif learning_path.generating? %>
+    <p class="mt-3 text-sm text-pretty text-ink-muted">Charting your route. This usually takes under a minute.</p>
+  <% else %>
+    <p class="mt-3 text-sm text-pretty text-ink-muted"><%= learning_path.error_message.presence || "Something went wrong while planning this path." %></p>
+  <% end %>
+
+  <div class="mt-auto flex items-center gap-2 pt-5">
+    <% if next_step %>
+      <%= ui_button nil, learning_path_path(learning_path, anchor: dom_id(next_step)), size: :sm do %>
+        Continue<span class="sr-only"> <%= learning_path.title %></span>
+      <% end %>
+    <% elsif learning_path.completed? %>
+      <%= ui_button nil, learning_path_path(learning_path), variant: :secondary, size: :sm do %>
+        Review<span class="sr-only"> <%= learning_path.title %></span>
+      <% end %>
+    <% else %>
+      <%= ui_button nil, learning_path_path(learning_path), variant: :secondary, size: :sm do %>
+        View<span class="sr-only"> <%= goal.topic %> path</span>
+      <% end %>
+    <% end %>
+  </div>
+</article>

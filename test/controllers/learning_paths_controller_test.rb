@@ -42,6 +42,9 @@ class LearningPathsControllerTest < ActionDispatch::IntegrationTest
     assert_select "##{dom_id(path, :progress)} a[href=?]", "##{dom_id(path_steps(:rails_models))}", text: "Active Record basics"
     assert_select "a[href=?][target=_blank][rel='noopener noreferrer']", path_steps(:rails_hotwire).resource_url, text: /Watch the video/
     assert_select "##{dom_id(path_steps(:rails_models))}", text: /Up next/
+    assert_select "form[action=?] button[role=checkbox][aria-checked=true][aria-labelledby=?]",
+      toggle_path_step_path(path_steps(:rails_intro)), dom_id(path_steps(:rails_intro), :title)
+    assert_select "form[action=?] button[role=checkbox][aria-checked=false]", toggle_path_step_path(path_steps(:rails_models))
   end
 
   test "a failed path explains what happened and offers to try again" do

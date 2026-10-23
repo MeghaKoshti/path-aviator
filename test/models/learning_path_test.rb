@@ -119,12 +119,12 @@ class LearningPathTest < ActiveSupport::TestCase
     assert_equal 0, @path.progress_percent
   end
 
-  test "broadcast_refresh replaces the path card on the user's stream" do
+  test "broadcast_refresh replaces the path page and its dashboard card on the user's stream" do
     streams = capture_turbo_stream_broadcasts([ @path.user, :learning_paths ]) { @path.broadcast_refresh }
 
-    assert_equal 1, streams.size
-    assert_equal "replace", streams.first["action"]
-    assert_equal ActionView::RecordIdentifier.dom_id(@path), streams.first["target"]
-    assert_includes streams.first.to_html, @path.title
+    assert_equal %w[replace replace], streams.map { |stream| stream["action"] }
+    assert_equal [ ActionView::RecordIdentifier.dom_id(@path), ActionView::RecordIdentifier.dom_id(@path, :card) ],
+      streams.map { |stream| stream["target"] }
+    assert streams.all? { |stream| stream.to_html.include?(@path.title) }
   end
 end

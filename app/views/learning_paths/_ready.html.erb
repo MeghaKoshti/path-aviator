@@ -23,7 +23,7 @@
   <section class="min-w-0 lg:col-start-1" aria-labelledby="<%= dom_id(learning_path, :route_heading) %>">
     <h2 id="<%= dom_id(learning_path, :route_heading) %>" class="text-lg font-semibold text-ink">Your route</h2>
     <p class="mt-1 text-sm text-ink-muted">
-      <%= pluralize(steps.size, "step") %>, about <%= format_minutes(steps.sum(&:estimated_minutes)) %> in total.
+      <%= pluralize(steps.size, "step") %>, about <%= format_minutes(steps.sum(&:estimated_minutes)) %> in total. Tick a step when you’ve finished it.
     </p>
     <%= render "learning_paths/steps", learning_path: learning_path, steps: steps %>
   </section>

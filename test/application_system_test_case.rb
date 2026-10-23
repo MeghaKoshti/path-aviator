@@ -8,6 +8,9 @@ class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
     options.add_argument("--no-sandbox") if ENV["CHROME_NO_SANDBOX"]
   end
 
+  # First renders in the test server can be slow on shared CI machines.
+  Capybara.default_max_wait_time = 5
+
   if ENV["CHROMEDRIVER_PATH"]
     Selenium::WebDriver::Chrome::Service.driver_path = ENV["CHROMEDRIVER_PATH"]
   end
