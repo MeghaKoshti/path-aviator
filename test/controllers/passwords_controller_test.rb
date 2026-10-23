@@ -30,4 +30,38 @@ class PasswordsControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to new_password_path
   end
+
+  test "resetting the password signs out every existing session" do
+    user = users(:one)
+    sign_in_as user
+    token = user.password_reset_token
+
+    put password_path(token), params: { password: "a-brand-new-pw", password_confirmation: "a-brand-new-pw" }
+
+    assert_redirected_to new_session_path
+    assert user.reload.authenticate("a-brand-new-pw")
+    assert_empty user.sessions
+    get dashboard_path
+    assert_redirected_to new_session_path
+  end
+
+  test "a short or mismatched new password explains what's wrong" do
+    token = users(:one).password_reset_token
+
+    put password_path(token), params: { password: "short", password_confirmation: "short" }
+    assert_redirected_to edit_password_path(token)
+    assert_equal "Password is too short (minimum is 8 characters)", flash[:alert]
+
+    put password_path(token), params: { password: "a-brand-new-pw", password_confirmation: "something-else" }
+    assert_equal "Password confirmation doesn't match Password", flash[:alert]
+  end
+
+  test "a blank new password is refused instead of reported as reset" do
+    token = users(:one).password_reset_token
+
+    put password_path(token), params: { password: "", password_confirmation: "" }
+
+    assert_redirected_to edit_password_path(token)
+    assert_equal "Enter a new password.", flash[:alert]
+  end
 end

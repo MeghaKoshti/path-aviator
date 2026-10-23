@@ -18,10 +18,15 @@ class PasswordsController < ApplicationController
   end
 
   def update
-    if @user.update(params.permit(:password, :password_confirmation))
+    # has_secure_password silently ignores a blank password, so check it here.
+    if params[:password].blank?
+      redirect_to edit_password_path(params[:token]), alert: "Enter a new password."
+    elsif @user.update(params.permit(:password, :password_confirmation))
+      # Anyone still signed in with the old password is signed out.
+      @user.sessions.destroy_all
       redirect_to new_session_path, notice: "Password has been reset."
     else
-      redirect_to edit_password_path(params[:token]), alert: "Passwords did not match."
+      redirect_to edit_password_path(params[:token]), alert: @user.errors.full_messages.to_sentence
     end
   end
 
