@@ -3,6 +3,10 @@
 
 <%= render "dashboards/header", learning_paths: @learning_paths %>
 
+<% if @learning_paths.any? %>
+  <div class="mt-8"><%= render "dashboards/learning_stats", stats: @learning_stats %></div>
+<% end %>
+
 <div class="mt-8">
   <% if @learning_paths.any? %>
     <ul id="learning_path_cards" class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3" role="list">

@@ -7,5 +7,6 @@ class DashboardsController < ApplicationController
       .includes(:learning_goal, :path_steps)
       .order(updated_at: :desc)
       .load
+    @learning_stats = LearningStats.new(Current.user)
   end
 end

@@ -18,6 +18,7 @@
 | AI path generation (Gemini, background job, live Turbo Stream updates) | ✅ Done |
 | Progress tracking: tick steps, % complete, time left, "Continue" | ✅ Done |
 | Dashboard of all your paths | ✅ Done |
+| Weekly stats: time against your goal, days learned, streak | ✅ Done |
 | Path management: try again, regenerate, delete | ✅ Done |
 | Account settings: profile, password, delete account | ✅ Done |
 | Private notes on each step, edited in place | ✅ Done |

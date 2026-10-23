@@ -49,6 +49,43 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", new_learning_goal_path, text: "Plan your first path"
   end
 
+  test "shows this week's time against the weekly goal, the week and the streak" do
+    sign_in_as users(:one)
+    path_steps(:rails_intro).update!(completed_at: Time.current)
+
+    get dashboard_path
+
+    assert_select "section#learning_stats[aria-labelledby=learning_stats_heading]" do
+      assert_select "h2", "This week"
+      assert_select "p", "1 h 30 min"
+      assert_select "p", text: /of your 6 h weekly goal/
+      assert_select "svg[role=img][aria-label=?]", "25% of your weekly goal"
+      assert_select "ol[aria-label='Days this week'] > li", 7
+      assert_select "li .sr-only", text: /\(today\):\s+steps done/
+      assert_select "p", text: /1\s+day in a row/
+      assert_select "p", text: "You learned something today."
+    end
+  end
+
+  test "this week's panel invites a first tick when nothing is done yet" do
+    sign_in_as users(:one)
+    path_steps(:rails_intro).update!(completed_at: nil)
+
+    get dashboard_path
+
+    assert_select "#learning_stats", text: /Tick a step when you finish it/
+    assert_select "#learning_stats svg", false
+  end
+
+  test "no stats panel before the first path" do
+    sign_in_as users(:two)
+    users(:two).learning_paths.destroy_all
+
+    get dashboard_path
+
+    assert_select "#learning_stats", false
+  end
+
   test "the number of queries doesn't grow with the number of paths" do
     sign_in_as users(:one)
     before = count_queries { get dashboard_path }

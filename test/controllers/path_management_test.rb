@@ -45,6 +45,8 @@ class PathManagementTest < ActionDispatch::IntegrationTest
     assert_select "turbo-stream[action=replace][target=dashboard_header] template", text: /1 path, 0 complete/
     assert_select "turbo-stream[action=replace][target=flash] template [role=status]", text: /Deleted/
     assert_select "turbo-stream[target=learning_path_cards]", false
+    # Its finished step no longer counts this week.
+    assert_select "turbo-stream[action=replace][target=learning_stats] template", text: /Tick a step when you finish it/
     assert_not LearningPath.exists?(@path.id)
   end
 
@@ -54,6 +56,7 @@ class PathManagementTest < ActionDispatch::IntegrationTest
     delete learning_path_path(@path), params: { from: "dashboard" }, as: :turbo_stream
 
     assert_select "turbo-stream[action=replace][target=learning_path_cards] template", text: /No paths yet/
+    assert_select "turbo-stream[action=remove][target=learning_stats]"
   end
 
   test "the dashboard card has delete, and failed paths have try again" do

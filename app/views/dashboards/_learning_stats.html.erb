@@ -1,0 +1,87 @@
+<%#
+  "This week": time learned against the weekly goal, the week drawn as a
+  route of seven day waypoints, and the streak. Re-rendered over a Turbo
+  Stream after a path is deleted from the dashboard. Locals: stats:
+%>
+<%
+  week_label = "#{l(stats.week_start, format: "%-d %b")} to #{l(stats.week_start + 6, format: "%-d %b")}"
+  goal = stats.weekly_goal_minutes
+%>
+<section id="learning_stats" aria-labelledby="learning_stats_heading"
+         class="rounded-panel border border-line bg-surface-raised p-5 shadow-panel sm:p-6">
+  <div class="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+    <h2 id="learning_stats_heading" class="text-lg font-semibold text-ink">This week</h2>
+    <p class="text-sm text-ink-subtle"><%= week_label %></p>
+  </div>
+
+  <% if stats.empty? %>
+    <p class="mt-2 max-w-prose text-pretty text-ink-muted">
+      Tick a step when you finish it and your time this week<%= " against your #{format_minutes(goal)} goal" if goal.positive? %> and your streak show up here.
+    </p>
+  <% else %>
+    <div class="mt-5 grid gap-6 md:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)_minmax(0,1fr)] md:items-center md:gap-8">
+      <%# Weekly goal: the ring is a picture of the sentence beside it. %>
+      <div class="flex items-center gap-4">
+        <div class="relative size-18 shrink-0">
+          <svg class="size-18 -rotate-90" viewBox="0 0 72 72" role="img" aria-label="<%= stats.goal_percent %>% of your weekly goal">
+            <circle cx="36" cy="36" r="30" fill="none" class="stroke-surface-sunken" stroke-width="8"/>
+            <% if stats.goal_percent.positive? %>
+              <circle cx="36" cy="36" r="30" fill="none" pathLength="100" stroke-dasharray="<%= stats.goal_percent %> 100" stroke-linecap="round"
+                      class="<%= stats.goal_reached? ? "stroke-success-600" : "stroke-brand-600" %>" stroke-width="8"/>
+            <% end %>
+          </svg>
+          <span class="absolute inset-0 flex items-center justify-center text-sm font-semibold tabular-nums text-ink" aria-hidden="true"><%= stats.goal_percent %>%</span>
+        </div>
+        <div class="min-w-0">
+          <p class="text-2xl font-semibold tabular-nums text-ink"><%= format_minutes(stats.minutes_this_week) %></p>
+          <p class="text-sm text-ink-muted">
+            <% if goal.positive? %>
+              <%= stats.goal_reached? ? "Weekly goal of #{format_minutes(goal)} reached" : "of your #{format_minutes(goal)} weekly goal" %>
+            <% else %>
+              learned this week
+            <% end %>
+          </p>
+        </div>
+      </div>
+
+      <%# The week as a route: a filled waypoint for each day with a finished step. %>
+      <ol class="flex items-start" aria-label="Days this week">
+        <% stats.week.each_with_index do |day, index| %>
+          <li class="flex flex-1 flex-col items-center gap-1.5">
+            <span class="relative flex h-6 w-full items-center justify-center">
+              <% if index.positive? %>
+                <span class="<%= class_names("absolute right-1/2 left-[-50%] top-1/2 border-t-2", day.active && stats.week[index - 1].active ? "border-route" : "border-dashed border-line-strong/50") %>" aria-hidden="true"></span>
+              <% end %>
+              <span class="<%= class_names("relative size-4 rounded-full border-2",
+                                           day.active ? "border-route bg-route" : day.future ? "border-line-strong/40 bg-surface-raised" : "border-line-strong/80 bg-surface-raised",
+                                           "ring-3 ring-route-soft": day.today) %>" aria-hidden="true"></span>
+            </span>
+            <span class="<%= class_names("text-xs tabular-nums", day.today ? "font-semibold text-ink" : "text-ink-subtle") %>" aria-hidden="true"><%= l(day.date, format: "%a") %></span>
+            <span class="sr-only">
+              <%= l(day.date, format: "%A") %><%= " (today)" if day.today %>:
+              <%= day.active ? "steps done" : day.future ? "still to come" : "no steps" %>
+            </span>
+          </li>
+        <% end %>
+      </ol>
+
+      <div class="flex items-center gap-3 md:justify-end">
+        <p class="type-display text-4xl tabular-nums text-ink" aria-hidden="true"><%= stats.streak %></p>
+        <div>
+          <p class="font-semibold text-ink">
+            <span class="sr-only"><%= stats.streak %></span> <%= stats.streak == 1 ? "day in a row" : "days in a row" %>
+          </p>
+          <p class="text-sm text-pretty text-ink-muted">
+            <% if stats.streak.zero? %>
+              Tick a step to start a streak.
+            <% elsif stats.active_today? %>
+              You learned something today.
+            <% else %>
+              Tick a step today to keep it going.
+            <% end %>
+          </p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</section>

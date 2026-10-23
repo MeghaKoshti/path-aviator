@@ -25,6 +25,7 @@ class LearningPathsController < ApplicationController
       format.turbo_stream do
         if params[:from] == "dashboard"
           @learning_paths = Current.user.learning_paths
+          @learning_stats = LearningStats.new(Current.user)
           flash.now[:notice] = notice
         else
           redirect_to dashboard_path, notice: notice, status: :see_other
