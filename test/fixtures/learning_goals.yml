@@ -1,0 +1,18 @@
+rails:
+  user: one
+  topic: Ruby on Rails
+  current_level: beginner
+  hours_per_week: 6
+  goal_description: Build and deploy a small SaaS app with Hotwire.
+
+sql:
+  user: one
+  topic: SQL for analytics
+  current_level: intermediate
+  hours_per_week: 3
+
+docker:
+  user: two
+  topic: Docker
+  current_level: advanced
+  hours_per_week: 10

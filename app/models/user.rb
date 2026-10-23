@@ -1,6 +1,7 @@
 class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
+  has_many :learning_goals, dependent: :destroy
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
   normalizes :name, with: ->(name) { name.strip.presence }
@@ -12,4 +13,9 @@ class User < ApplicationRecord
   # has_secure_password already requires one on create.
   validates :password, length: { minimum: 8 }, allow_nil: true
   validates :name, length: { maximum: 100 }, allow_nil: true
+
+  # A user without a goal still needs to go through onboarding.
+  def onboarded?
+    learning_goals.exists?
+  end
 end

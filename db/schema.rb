@@ -10,7 +10,18 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_10_23_050423) do
+ActiveRecord::Schema[8.0].define(version: 2026_10_23_050520) do
+  create_table "learning_goals", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "topic", null: false
+    t.integer "current_level", default: 0, null: false
+    t.integer "hours_per_week", null: false
+    t.text "goal_description"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_learning_goals_on_user_id"
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "ip_address"
@@ -29,5 +40,6 @@ ActiveRecord::Schema[8.0].define(version: 2026_10_23_050423) do
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
+  add_foreign_key "learning_goals", "users"
   add_foreign_key "sessions", "users"
 end
