@@ -2,6 +2,13 @@
 # Safe to run any number of times: records are looked up before being created,
 # and re-running resets the demo progress to the state below.
 
+# In production the demo account is opt-in. db:prepare seeds every brand-new
+# database, and a private install shouldn't get a login everyone knows.
+if Rails.env.production? && ENV["SEED_DEMO"] != "1"
+  puts "Skipped the demo account. Run with SEED_DEMO=1 to create it."
+  return
+end
+
 demo = User.find_or_initialize_by(email_address: "demo@pathaviator.dev")
 demo.update!(name: "Demo Learner", password: "pathaviator-demo")
 

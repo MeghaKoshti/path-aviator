@@ -32,6 +32,14 @@ class DeployConfigTest < ActiveSupport::TestCase
     assert_match %r{\Astorage/}, ActiveRecord::Base.configurations.configs_for(env_name: "production", name: "primary").database
   end
 
+  test "the demo account is off unless SEED_DEMO is set, and the seed alias opts in" do
+    config = deploy_config
+
+    assert_equal "0", config.dig("env", "clear", "SEED_DEMO")
+    assert_equal "1", deploy_config(DEPLOY_ENV.merge("SEED_DEMO" => "1")).dig("env", "clear", "SEED_DEMO")
+    assert_match(/\bSEED_DEMO=1 bin\/rails db:seed\b/, config.dig("aliases", "seed"))
+  end
+
   test "a different registry can be chosen" do
     assert_equal "ghcr.io", deploy_config(DEPLOY_ENV.merge("KAMAL_REGISTRY_SERVER" => "ghcr.io")).dig("registry", "server")
   end

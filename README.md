@@ -174,7 +174,7 @@ Add an `A` record, for example `pathaviator.example.com → 203.0.113.10`, and w
 | `APP_HOST` | Yes | `deploy.yml`, app | Your domain: the HTTPS certificate, links in emails and Rails host checks |
 | `RAILS_MASTER_KEY` | Yes | secret | Contents of `config/master.key` |
 | `GEMINI_API_KEY` | No | secret | Real AI generation. Without it the built-in sample generator is used |
-| `SEED_DEMO` | No | app | `1` re-runs the seeds (demo account) on every boot. Default `0` |
+| `SEED_DEMO` | No | app | `1` creates the public demo account and resets it on every boot. Default `0`: no demo account in production |
 | `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME` | No | app | Outgoing email for password resets. Port defaults to 587 |
 | `SMTP_PASSWORD` | No | secret | SMTP password or API key |
 | `MAILER_FROM` | No | app | Sender address. Defaults to `Path Aviator <no-reply@APP_HOST>` |
@@ -211,7 +211,7 @@ bin/kamal smoke                            # one real Gemini call, nothing saved
 
 ### 5. The demo account
 
-Rails seeds a brand-new database on its first boot, so `demo@pathaviator.dev` / `pathaviator-demo` exists after the first deploy. To bring it back or reset its progress, run `bin/kamal seed`, or deploy with `SEED_DEMO=1` to reset it on every boot. For a private install, remove it:
+In production the demo account (`demo@pathaviator.dev` / `pathaviator-demo`) is opt-in, so a private install never gets a login everyone knows. Deploy with `SEED_DEMO=1` to create it and reset its progress on every boot, or run `bin/kamal seed` to create or reset it once. To remove it later (and unset `SEED_DEMO`):
 
 ```bash
 bin/kamal console

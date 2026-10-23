@@ -1,8 +1,17 @@
 require "test_helper"
+require "minitest/mock"
 
 class SeedsTest < ActiveSupport::TestCase
   def demo_user
     User.find_by!(email_address: "demo@pathaviator.dev")
+  end
+
+  def seed_in_production(seed_demo:)
+    old = ENV["SEED_DEMO"]
+    ENV["SEED_DEMO"] = seed_demo
+    Rails.stub(:env, ActiveSupport::EnvironmentInquirer.new("production")) { Rails.application.load_seed }
+  ensure
+    ENV["SEED_DEMO"] = old
   end
 
   test "creates the demo account with an in-progress and a completed path" do
@@ -46,6 +55,15 @@ class SeedsTest < ActiveSupport::TestCase
     assert_no_changes(counts) { Rails.application.load_seed }
     assert_equal token, demo_user.learning_paths.order(:id).first.share_token, "the demo share link should keep working"
     assert_equal [ 8, 3 ], demo_user.learning_paths.order(:id).first.then { [ _1.path_steps_count, _1.completed_steps_count ] }
+  end
+
+  test "in production the demo account is only seeded with SEED_DEMO=1" do
+    assert_output(/SEED_DEMO=1/) { seed_in_production(seed_demo: nil) }
+    assert_output(/SEED_DEMO=1/) { seed_in_production(seed_demo: "0") }
+    assert_not User.exists?(email_address: "demo@pathaviator.dev")
+
+    seed_in_production(seed_demo: "1")
+    assert demo_user.authenticate("pathaviator-demo")
   end
 
   test "re-seeding resets demo progress, notes and sharing" do
