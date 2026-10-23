@@ -14,7 +14,8 @@
   error = local_assigns[:error] || (object.errors.full_messages_for(attribute).first if object.respond_to?(:errors))
   hint_id = "#{field_id}_hint" if hint
   error_id = "#{field_id}_error" if error
-  # No explicit id: the builder's default matches field_id, including any form namespace.
+  # No explicit id (or label "for"): Rails would prefix the form namespace a second
+  # time. The builder defaults already match field_id, namespace included.
   input_options = input.merge(
     class: class_names(ui_input_classes(invalid: error.present?), input[:class], "pr-12": reveal),
     aria: { invalid: error.present? || nil, describedby: [ hint_id, error_id ].compact.join(" ").presence }
@@ -22,7 +23,7 @@
   input_options[:data] = (input[:data] || {}).merge(password_visibility_target: "input") if reveal
 %>
 <div class="space-y-1.5">
-  <%= form.label attribute, label, for: field_id, class: "block text-sm font-semibold text-ink" %>
+  <%= form.label attribute, label, class: "block text-sm font-semibold text-ink" %>
 
   <% if reveal %>
     <div class="relative" data-controller="password-visibility">
