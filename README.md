@@ -145,6 +145,98 @@ CHROME_BIN=/path/to/chrome CHROMEDRIVER_PATH=/path/to/chromedriver bin/rails tes
 # add CHROME_NO_SANDBOX=1 when running as root, e.g. inside a container
 ```
 
+## Deploy
+
+Path Aviator runs as one Docker container on one small VPS, deployed with [Kamal 2](https://kamal-deploy.org). The container serves the app with Puma behind Thruster and runs the Solid Queue jobs inside Puma (`SOLID_QUEUE_IN_PUMA`). The SQLite databases live on a persistent Docker volume. `kamal-proxy` in front handles HTTPS with a free Let's Encrypt certificate and only sends traffic to a new version once `/up` answers.
+
+Nothing server-specific is committed: `config/deploy.yml` reads the server, registry and domain from your shell, and `.kamal/secrets` reads the secrets from your shell.
+
+### 1. What you need
+
+- A VPS with Ubuntu 24.04, 1–2 GB RAM and your SSH key, for example a Hetzner Cloud CX22 or a DigitalOcean Basic droplet. Allow ports 22, 80 and 443 in its firewall. Kamal installs Docker on it for you.
+- A domain or subdomain you can add DNS records to.
+- A container registry account: Docker Hub with an [access token](https://docs.docker.com/security/for-developers/access-tokens/), or GitHub's `ghcr.io` with a token that has `write:packages`.
+- Docker on your own machine (Kamal builds the `amd64` image there; on Apple Silicon this is emulated and slower).
+- `config/master.key`. If you don't have it, run `rm config/credentials.yml.enc && bin/rails credentials:edit` to create a new key; the app keeps nothing else in credentials.
+
+### 2. Point your domain at the server
+
+Add an `A` record, for example `pathaviator.example.com → 203.0.113.10`, and wait until `dig +short pathaviator.example.com` shows the server's IP. Let's Encrypt checks this during the first deploy. On Cloudflare, use "DNS only" (grey cloud) or set SSL/TLS to "Full".
+
+### 3. Set the environment
+
+| Variable | Required | Used by | What it is |
+|---|---|---|---|
+| `KAMAL_SERVER_IP` | Yes | `deploy.yml` | The VPS's public IP address |
+| `KAMAL_REGISTRY_USERNAME` | Yes | `deploy.yml` | Registry user; the image is pushed as `<user>/path_aviator` |
+| `KAMAL_REGISTRY_PASSWORD` | Yes | secret | Registry access token |
+| `KAMAL_REGISTRY_SERVER` | No | `deploy.yml` | Registry host, e.g. `ghcr.io`. Docker Hub when unset |
+| `APP_HOST` | Yes | `deploy.yml`, app | Your domain: the HTTPS certificate, links in emails and Rails host checks |
+| `RAILS_MASTER_KEY` | Yes | secret | Contents of `config/master.key` |
+| `GEMINI_API_KEY` | No | secret | Real AI generation. Without it the built-in sample generator is used |
+| `SEED_DEMO` | No | app | `1` re-runs the seeds (demo account) on every boot. Default `0` |
+| `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME` | No | app | Outgoing email for password resets. Port defaults to 587 |
+| `SMTP_PASSWORD` | No | secret | SMTP password or API key |
+| `MAILER_FROM` | No | app | Sender address. Defaults to `Path Aviator <no-reply@APP_HOST>` |
+
+Keep them in a file that git ignores (the `/.env*` rule covers `.env.deploy`) and load it before each Kamal command:
+
+```bash
+# .env.deploy (never commit this file)
+export KAMAL_SERVER_IP=203.0.113.10
+export KAMAL_REGISTRY_USERNAME=your-docker-hub-user
+export KAMAL_REGISTRY_PASSWORD=your-access-token
+export APP_HOST=pathaviator.example.com
+export RAILS_MASTER_KEY=$(cat config/master.key)
+export GEMINI_API_KEY=your-gemini-key   # optional
+export SEED_DEMO=1                      # optional: public demo
+```
+
+```bash
+source .env.deploy
+```
+
+### 4. First deploy
+
+```bash
+bin/kamal setup
+```
+
+This installs Docker on the server, builds and pushes the image, starts `kamal-proxy`, gets the certificate and boots the app. On boot, `bin/docker-entrypoint` runs `db:prepare` (plus `db:seed` when `SEED_DEMO=1`). Check it:
+
+```bash
+curl https://pathaviator.example.com/up   # 200 when the app is healthy
+bin/kamal smoke                            # one real Gemini call, nothing saved
+```
+
+### 5. The demo account
+
+Rails seeds a brand-new database on its first boot, so `demo@pathaviator.dev` / `pathaviator-demo` exists after the first deploy. To bring it back or reset its progress, run `bin/kamal seed`, or deploy with `SEED_DEMO=1` to reset it on every boot. For a private install, remove it:
+
+```bash
+bin/kamal console
+User.find_by(email_address: "demo@pathaviator.dev")&.destroy
+```
+
+### 6. Day to day
+
+| Command | What it does |
+|---|---|
+| `bin/kamal deploy` | Ship the committed code (Kamal builds from the current git commit) |
+| `bin/kamal logs` | Follow the app logs |
+| `bin/kamal console` | Rails console on the server |
+| `bin/kamal rollback <version>` | Go back to an earlier image (see `bin/kamal app images`) |
+
+Everything the app stores is in the `path_aviator_storage` volume (`/var/lib/docker/volumes/path_aviator_storage/_data` on the server). Turn on your provider's server backups, or copy a consistent snapshot with `bin/kamal app exec --reuse "sqlite3 storage/production.sqlite3 '.backup storage/backup.sqlite3'"` and download it.
+
+### Try the production image locally
+
+```bash
+docker build -t path_aviator .
+docker run --rm -p 8080:80 -e SECRET_KEY_BASE=$(openssl rand -hex 64) -e SOLID_QUEUE_IN_PUMA=true -e SEED_DEMO=1 path_aviator
+curl http://localhost:8080/up
+```
+
 ## Author
 
 **Megha Koshti**, Ruby on Rails developer · [GitHub](https://github.com/MeghaKoshti) · [LinkedIn](https://www.linkedin.com/in/megha-koshti)
