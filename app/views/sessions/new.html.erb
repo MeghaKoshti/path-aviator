@@ -16,7 +16,7 @@
     </p>
   </div>
 
-  <%= form.submit "Sign in", class: ui_button_classes(size: :lg, block: true), data: { disable_with: "Signing in…" } %>
+  <%= form.submit "Sign in", class: ui_button_classes(size: :lg, block: true), data: { turbo_submits_with: "Signing in…" } %>
 <% end %>
 
 <% content_for :below_card do %>

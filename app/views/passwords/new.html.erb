@@ -7,7 +7,7 @@
   <%= render "shared/field", form: form, attribute: :email_address, label: "Email", as: :email_field,
         input: { value: params[:email_address], required: true, autofocus: true, autocomplete: "username", placeholder: "you@example.com" } %>
 
-  <%= form.submit "Email me a reset link", class: ui_button_classes(size: :lg, block: true), data: { disable_with: "Sending…" } %>
+  <%= form.submit "Email me a reset link", class: ui_button_classes(size: :lg, block: true), data: { turbo_submits_with: "Sending…" } %>
 <% end %>
 
 <% content_for :below_card do %>

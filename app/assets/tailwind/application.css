@@ -118,6 +118,13 @@
     outline-offset: 2px;
   }
 
+  /* transition-colors also animates outline-color, which starts at currentColor
+     (white on primary buttons). Starting from the brand colour makes the ring
+     appear at full strength straight away. */
+  :where(a, button, input, select, textarea, summary, [tabindex]) {
+    outline-color: var(--color-brand-500);
+  }
+
   ::selection {
     background: var(--color-brand-100);
   }

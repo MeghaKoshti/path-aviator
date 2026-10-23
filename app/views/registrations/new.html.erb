@@ -26,7 +26,7 @@
   <%= render "shared/field", form: form, attribute: :password_confirmation, label: "Confirm password", as: :password_field,
         input: { required: true, autofocus: invalid == :password_confirmation, autocomplete: "new-password", maxlength: 72 } %>
 
-  <%= form.submit "Create account", class: ui_button_classes(size: :lg, block: true), data: { disable_with: "Creating your account…" } %>
+  <%= form.submit "Create account", class: ui_button_classes(size: :lg, block: true), data: { turbo_submits_with: "Creating your account…" } %>
 <% end %>
 
 <% content_for :below_card do %>

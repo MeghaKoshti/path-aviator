@@ -29,6 +29,8 @@ class ProgressTrackingTest < ApplicationSystemTestCase
       assert_link "Hotwire walkthrough"
     end
     assert_selector "##{dom_id(path_steps(:rails_models), :toggle)}[aria-checked=true]"
+    # Focus stays on the checkbox (Turbo disables the button mid-request, which would drop it).
+    assert_equal dom_id(path_steps(:rails_models), :toggle), evaluate_script("document.activeElement.id")
     assert_selector "#path-announcer", text: "Marked “Active Record basics” as done.", visible: :all
     assert evaluate_script("window.stillHere"), "the page reloaded"
     assert path_steps(:rails_models).reload.completed?

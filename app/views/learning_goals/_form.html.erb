@@ -54,7 +54,7 @@
           <ul class="flex flex-wrap gap-2" aria-labelledby="topic-suggestions-label">
             <% [ "Ruby on Rails", "SQL for analytics", "System design", "Docker", "TypeScript" ].each do |topic| %>
               <li>
-                <button type="button" class="rounded-full border border-line-strong/50 px-3 py-1.5 text-sm font-medium text-ink-muted hover:border-brand-600 hover:text-brand-700"
+                <button type="button" class="rounded-full border border-line-strong/50 px-3 py-1.5 pointer-coarse:py-2.5 text-sm font-medium text-ink-muted hover:border-brand-600 hover:text-brand-700"
                         data-action="onboarding#suggest" data-topic="<%= topic %>"><%= topic %></button>
               </li>
             <% end %>
@@ -92,9 +92,10 @@
       </fieldset>
     </div>
 
-    <div class="mt-8 flex flex-col-reverse gap-3 border-t border-line pt-6 sm:flex-row sm:items-center">
+    <%# Back sits before Continue in both the DOM and the layout, so tab order matches what people see. %>
+    <div class="mt-8 flex items-center gap-3 border-t border-line pt-6">
       <%= ui_button "Back", variant: :ghost, hidden: true, data: { onboarding_target: "back", action: "onboarding#back" } %>
-      <div class="flex flex-col gap-3 sm:ml-auto sm:flex-row">
+      <div class="ml-auto flex gap-3">
         <%= ui_button "Continue", hidden: true, size: :lg, data: { onboarding_target: "next", action: "onboarding#next" } %>
         <%= form.button "Plan my path", class: ui_button_classes(size: :lg), data: { onboarding_target: "submit", turbo_submits_with: "Planning your path…" } %>
       </div>

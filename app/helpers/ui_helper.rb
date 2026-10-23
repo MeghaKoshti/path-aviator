@@ -16,7 +16,7 @@ module UiHelper
   }.freeze
 
   BUTTON_SIZES = {
-    sm: "px-3 py-1.5 text-sm",
+    sm: "px-3 py-1.5 text-sm pointer-coarse:min-h-10", # roomier tap target on touch screens
     md: "px-4 py-2.5 text-[0.9375rem]",
     lg: "px-6 py-3.5 text-base"
   }.freeze

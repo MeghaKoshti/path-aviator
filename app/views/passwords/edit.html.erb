@@ -11,7 +11,7 @@
   <%= render "shared/field", form: form, attribute: :password_confirmation, label: "Confirm new password", as: :password_field,
         input: { required: true, autocomplete: "new-password", maxlength: 72 } %>
 
-  <%= form.submit "Save new password", class: ui_button_classes(size: :lg, block: true), data: { disable_with: "Saving…" } %>
+  <%= form.submit "Save new password", class: ui_button_classes(size: :lg, block: true), data: { turbo_submits_with: "Saving…" } %>
 <% end %>
 
 <% content_for :below_card do %>
