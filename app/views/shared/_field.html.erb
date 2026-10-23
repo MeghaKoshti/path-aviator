@@ -14,8 +14,8 @@
   error = local_assigns[:error] || (object.errors.full_messages_for(attribute).first if object.respond_to?(:errors))
   hint_id = "#{field_id}_hint" if hint
   error_id = "#{field_id}_error" if error
+  # No explicit id: the builder's default matches field_id, including any form namespace.
   input_options = input.merge(
-    id: field_id,
     class: class_names(ui_input_classes(invalid: error.present?), input[:class], "pr-12": reveal),
     aria: { invalid: error.present? || nil, describedby: [ hint_id, error_id ].compact.join(" ").presence }
   )

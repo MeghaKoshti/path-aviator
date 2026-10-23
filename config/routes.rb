@@ -9,6 +9,12 @@ Rails.application.routes.draw do
     patch :toggle, on: :member
   end
   resource :dashboard, only: :show
+  resource :settings, only: :show
+  namespace :settings do
+    resource :profile, only: :update
+    resource :password, only: :update
+    resource :account, only: :destroy
+  end
   resources :passwords, param: :token
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -21,7 +27,4 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   root "pages#home"
-
-  # Placeholder — implemented in feature stories (see PlaceholdersController).
-  get "settings", to: "placeholders#settings", as: :settings
 end
