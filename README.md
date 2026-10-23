@@ -22,6 +22,7 @@
 | Path management: try again, regenerate, delete | ✅ Done |
 | Account settings: profile, password, delete account | ✅ Done |
 | Private notes on each step, edited in place | ✅ Done |
+| Public read-only share links for a path (turn off any time) | ✅ Done |
 | Accessibility (WCAG 2.1 AA checks, keyboard) and responsive pass | ✅ Done |
 | CI: tests, system tests, RuboCop, Brakeman, importmap audit | ✅ Done |
 | Google / GitHub sign-in | 📝 Planned |

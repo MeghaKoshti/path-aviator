@@ -128,4 +128,27 @@ class LearningPathTest < ActiveSupport::TestCase
       streams.map { |stream| stream["target"] }
     assert streams.all? { |stream| stream.to_html.include?(@path.title) }
   end
+
+  test "paths are private until shared, and a new link replaces the old" do
+    goal = users(:two).learning_goals.create!(topic: "Rust", current_level: :beginner, hours_per_week: 2)
+    assert_nil goal.create_learning_path!(user: users(:two)).share_token
+    assert_not @path.shared?
+
+    @path.share!
+    first = @path.share_token
+    assert @path.shared?
+    assert_equal 24, first.length
+
+    @path.share!
+    assert_not_equal first, @path.share_token
+
+    @path.unshare!
+    assert_not @path.reload.shared?
+  end
+
+  test "owner_first_name is the first word of the name, or nil" do
+    assert_equal "Riya", @path.owner_first_name
+    @path.user.name = nil
+    assert_nil @path.owner_first_name
+  end
 end

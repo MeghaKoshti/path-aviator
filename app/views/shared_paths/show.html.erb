@@ -1,0 +1,56 @@
+<% content_for :title, @learning_path.title %>
+<% content_for :meta_description, @learning_path.summary.to_s.truncate(160) %>
+<% content_for :head do %>
+  <meta name="robots" content="noindex">
+<% end %>
+<%
+  steps = @learning_path.path_steps.to_a
+  next_step = @learning_path.next_step
+  owner = @learning_path.owner_first_name
+%>
+
+<div class="mx-auto max-w-3xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
+  <header>
+    <p class="text-ink-muted"><%= owner ? "#{owner} is following this learning path" : "A learning path from Path Aviator" %></p>
+    <h1 class="type-display mt-3 text-3xl text-balance text-ink sm:text-[2.5rem]"><%= @learning_path.title %></h1>
+    <% if @learning_path.summary.present? %>
+      <p class="mt-4 text-lg leading-relaxed text-pretty text-ink-muted"><%= @learning_path.summary %></p>
+    <% end %>
+  </header>
+
+  <section class="mt-8 rounded-panel border border-line bg-surface-raised p-5 shadow-panel" aria-label="Progress">
+    <%= render "shared/progress_bar", value: @learning_path.progress_percent, label: "Progress on this path" %>
+    <dl class="mt-4 grid grid-cols-2 gap-4">
+      <div>
+        <dt class="text-sm text-ink-subtle">Steps done</dt>
+        <dd class="mt-0.5 text-xl font-semibold tabular-nums text-ink"><%= @learning_path.completed_steps_count %> of <%= @learning_path.path_steps_count %></dd>
+      </div>
+      <div>
+        <dt class="text-sm text-ink-subtle">Total time</dt>
+        <dd class="mt-0.5 text-xl font-semibold tabular-nums text-ink"><%= format_minutes(steps.sum(&:estimated_minutes)) %></dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="mt-10" aria-labelledby="route_heading">
+    <h2 id="route_heading" class="text-lg font-semibold text-ink">The route</h2>
+    <p class="mt-1 text-sm text-ink-muted"><%= pluralize(steps.size, "step") %> of courses, docs and practice, in order.</p>
+    <ol class="mt-6">
+      <% steps.each do |step| %>
+        <%= render "path_steps/path_step", path_step: step, up_next: step == next_step, last: step == steps.last, read_only: true %>
+      <% end %>
+    </ol>
+  </section>
+
+  <aside class="mt-12 rounded-panel bg-brand-800 p-6 text-white sm:p-8" aria-labelledby="own_path_heading">
+    <h2 id="own_path_heading" class="type-display text-2xl text-balance">Plan a route of your own</h2>
+    <p class="mt-2 max-w-prose text-pretty text-brand-100">Tell Path Aviator what you want to learn, your level and the time you have. It plans the steps and tracks your progress.</p>
+    <div class="mt-6">
+      <% if authenticated? %>
+        <%= ui_button "Plan a new path", new_learning_goal_path, variant: :inverse %>
+      <% else %>
+        <%= ui_button "Plan my first path", new_registration_path, variant: :inverse %>
+      <% end %>
+    </div>
+  </aside>
+</div>

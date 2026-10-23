@@ -32,6 +32,26 @@ class LearningPath < ApplicationRecord
     ready? && path_steps_count.positive? && completed_steps_count >= path_steps_count
   end
 
+  # Sharing gives the path a read-only public page at /p/:token. A token means
+  # shared, nil means private. (has_secure_token would fill one in for every
+  # new path, sharing them all by default, so the same generator is used here.)
+  def shared?
+    share_token.present?
+  end
+
+  # Turns sharing on, or swaps in a new link so the old one stops working.
+  def share!
+    update!(share_token: self.class.generate_unique_secure_token)
+  end
+
+  def unshare!
+    update!(share_token: nil)
+  end
+
+  def owner_first_name
+    user.name.to_s.split.first
+  end
+
   # Throws away the current steps (and progress) and asks the generator again.
   def regenerate!
     transaction do

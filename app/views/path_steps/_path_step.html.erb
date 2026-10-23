@@ -1,16 +1,29 @@
-<%# One leg of the route. Locals: path_step:, up_next: (bool), last: (bool) %>
-<% done = path_step.completed? %>
+<%#
+  One leg of the route. Locals: path_step:, up_next: (bool), last: (bool)
+  read_only: true for the public share page: no checkbox and no note.
+%>
+<%
+  done = path_step.completed?
+  read_only = local_assigns.fetch(:read_only, false)
+%>
 <li id="<%= dom_id(path_step) %>" class="relative flex scroll-mt-24 gap-4 <%= "pb-6" unless last %>">
   <% unless last %>
     <%# Route line down to the next waypoint: solid once this leg is flown. %>
     <span class="<%= class_names("absolute bottom-0 left-[15px] top-9 border-l-2", done ? "border-route" : "border-dashed border-line-strong/50") %>" aria-hidden="true"></span>
   <% end %>
 
-  <%= render "path_steps/waypoint", path_step: path_step %>
+  <% if read_only %>
+    <span class="<%= class_names("relative z-10 flex size-8 shrink-0 self-start items-center justify-center rounded-full border-2",
+                                 done ? "border-route bg-route text-white" : "border-ink-subtle bg-surface text-transparent") %>">
+      <svg class="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>
+    </span>
+  <% else %>
+    <%= render "path_steps/waypoint", path_step: path_step %>
+  <% end %>
 
   <div class="<%= class_names("min-w-0 flex-1 rounded-panel", up_next ? "border border-route/30 bg-surface-raised p-5 shadow-panel" : "px-1 pb-2 pt-1") %>">
     <div class="flex flex-wrap items-center gap-2 text-sm text-ink-subtle">
-      <span>Step <%= path_step.position %></span>
+      <span>Step <%= path_step.position %><%= tag.span(", done", class: "sr-only") if read_only && done %></span>
       <%= ui_badge resource_type_label(path_step.resource_type) %>
       <span class="inline-flex items-center gap-1 tabular-nums">
         <svg class="size-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="10" cy="10" r="7.25"/><path d="M10 6v4l2.5 1.5" stroke-linecap="round"/></svg>
@@ -35,6 +48,6 @@
       <svg class="size-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4H4.75A.75.75 0 0 0 4 4.75v10.5c0 .41.34.75.75.75h10.5c.41 0 .75-.34.75-.75V12M11 4h5v5M16 4l-7 7"/></svg>
     <% end %>
 
-    <%= render "path_steps/notes/note", path_step: path_step %>
+    <%= render "path_steps/notes/note", path_step: path_step unless read_only %>
   </div>
 </li>

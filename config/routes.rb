@@ -4,7 +4,10 @@ Rails.application.routes.draw do
   resources :learning_goals, only: %i[ new create ]
   resources :learning_paths, only: %i[ show destroy ] do
     post :regenerate, on: :member
+    resource :share, only: %i[ create destroy ], module: :learning_paths
   end
+  # Public, read-only view of a shared path.
+  get "p/:token", to: "shared_paths#show", as: :shared_path
   resources :path_steps, only: [] do
     patch :toggle, on: :member
     resource :note, only: %i[ show edit update ], module: :path_steps
