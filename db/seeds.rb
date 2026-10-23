@@ -6,7 +6,9 @@ demo = User.find_or_initialize_by(email_address: "demo@pathaviator.dev")
 demo.update!(name: "Demo Learner", password: "pathaviator-demo")
 
 # A lambda rather than a method so loading seeds doesn't add a method to Object.
-seed_path = lambda do |user, goal_attrs:, path_attrs:, steps:, completed_steps:|
+# completed_days_ago: one entry per finished step, in order (0 = today), so the
+# dashboard's week and streak look alive whenever the seeds are run.
+seed_path = lambda do |user, goal_attrs:, path_attrs:, steps:, completed_days_ago:, shared: false|
   goal = user.learning_goals.find_or_initialize_by(topic: goal_attrs.fetch(:topic))
   goal.update!(goal_attrs)
 
@@ -15,8 +17,15 @@ seed_path = lambda do |user, goal_attrs:, path_attrs:, steps:, completed_steps:|
 
   steps.each.with_index(1) do |attrs, position|
     step = path.path_steps.find_or_initialize_by(position: position)
-    done = position <= completed_steps
-    step.update!(attrs.merge(completed_at: done ? (step.completed_at || (steps.size - position + 1).days.ago) : nil))
+    days_ago = completed_days_ago[position - 1]
+    step.update!({ note: nil }.merge(attrs, completed_at: days_ago && days_ago.days.ago))
+  end
+
+  # Keep the same token on re-runs so a copied demo link keeps working.
+  if shared
+    path.share! unless path.shared?
+  elsif path.shared?
+    path.unshare!
   end
 
   path
@@ -34,14 +43,17 @@ seed_path.call demo,
     summary: "Go from the Rails basics to a deployed Hotwire app in about two months. " \
              "Each step pairs reading with hands-on practice so you finish with a project you can show."
   },
-  completed_steps: 3,
+  completed_days_ago: [ 2, 1, 0 ],
+  shared: true,
   steps: [
     { title: "Ruby in 20 minutes", description: "Get comfortable with Ruby syntax, blocks and classes before touching Rails.",
       resource_type: "docs", resource_url: "https://www.ruby-lang.org/en/documentation/quickstart/", estimated_minutes: 30 },
     { title: "Getting Started with Rails", description: "Build the official blog app to see MVC, routing and generators in action.",
-      resource_type: "docs", resource_url: "https://guides.rubyonrails.org/getting_started.html", estimated_minutes: 120 },
+      resource_type: "docs", resource_url: "https://guides.rubyonrails.org/getting_started.html", estimated_minutes: 120,
+      note: "Built the blog twice. The second time without scaffolds, which made routes and controllers click." },
     { title: "Active Record basics", description: "Learn models, migrations and validations, the heart of most Rails apps.",
-      resource_type: "docs", resource_url: "https://guides.rubyonrails.org/active_record_basics.html", estimated_minutes: 60 },
+      resource_type: "docs", resource_url: "https://guides.rubyonrails.org/active_record_basics.html", estimated_minutes: 60,
+      note: "Revisit callbacks vs. service objects.\nTry `bin/rails console --sandbox` for experiments." },
     { title: "Associations in depth", description: "Model real relationships with has_many, belongs_to and has_many :through.",
       resource_type: "article", resource_url: "https://guides.rubyonrails.org/association_basics.html", estimated_minutes: 75 },
     { title: "Hotwire: Turbo Frames and Streams", description: "Add fast, SPA-like updates without writing a JavaScript framework.",
@@ -65,7 +77,7 @@ seed_path.call demo,
     title: "Git and GitHub essentials",
     summary: "Learn the everyday Git workflow, branching and pull requests so you can collaborate on any team."
   },
-  completed_steps: 6,
+  completed_days_ago: [ 26, 24, 23, 19, 17, 12 ],
   steps: [
     { title: "What is version control?", description: "Understand why Git exists and how commits form a history.",
       resource_type: "docs", resource_url: "https://git-scm.com/book/en/v2/Getting-Started-About-Version-Control", estimated_minutes: 20 },
