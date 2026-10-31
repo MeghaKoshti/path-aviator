@@ -22,14 +22,10 @@
     <%= render "shared/flash" %>
 
     <main id="main" tabindex="-1" class="flex-1 focus:outline-none">
-      <%= yield %>
+      <%# Nested layouts (e.g. layouts/legal) hand over their wrapped page as :page_body. %>
+      <%= content_for?(:page_body) ? yield(:page_body) : yield %>
     </main>
 
-    <footer class="border-t border-line">
-      <div class="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-ink-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
-        <p>Path Aviator, built by Megha Koshti with Ruby on Rails.</p>
-        <%= link_to "Source on GitHub", "https://github.com/MeghaKoshti/path-aviator", class: "font-medium text-brand-700 underline-offset-4 hover:underline" %>
-      </div>
-    </footer>
+    <%= render "shared/site_footer" %>
   </body>
 </html>

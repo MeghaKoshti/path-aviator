@@ -1,0 +1,13 @@
+<%# Site-wide footer for the marketing and app layouts: policies, contact and source. %>
+<footer class="border-t border-line bg-surface">
+  <div class="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 text-sm sm:px-6 md:flex-row md:items-center md:justify-between">
+    <p class="text-ink-muted">Path Aviator, built by Megha Koshti with Ruby on Rails.</p>
+    <nav aria-label="Footer">
+      <ul class="flex flex-wrap gap-x-5 gap-y-2">
+        <% site_footer_links.each do |label, href| %>
+          <li><%= link_to label, href, class: "font-medium text-ink-muted underline-offset-4 hover:text-ink hover:underline" %></li>
+        <% end %>
+      </ul>
+    </nav>
+  </div>
+</footer>

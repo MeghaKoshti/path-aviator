@@ -1,0 +1,31 @@
+<% content_for :title, "Contact" %>
+<% content_for :meta_description, "Contact Path Aviator for help with your account, billing, refunds or privacy requests. We reply within 2 working days." %>
+
+<div class="legal-summary">
+  <p>Path Aviator is a small, independent product run by one developer. Email is the fastest way to reach a real person:</p>
+  <p class="mt-3 text-xl font-semibold text-ink"><%= support_mail_link(subject: "Path Aviator help") %></p>
+  <p class="mt-3 text-sm text-ink-muted">We reply within 2 working days, Monday to Friday, Indian Standard Time.</p>
+</div>
+
+<%= legal_section "Account and billing help" do %>
+  <p>Write from the email address on your account, so we can find it. For billing, include the order or invoice ID from your receipt if you have it.</p>
+  <ul>
+    <li>Cancel or change your plan: see the <%= link_to "Refund & Cancellation Policy", refunds_path %>.</li>
+    <li>Forgotten password: use <%= link_to "Reset your password", new_password_path %> on the sign-in page.</li>
+  </ul>
+<% end %>
+
+<%= legal_section "Privacy requests and grievances" do %>
+  <p>To get a copy of your data, correct it, delete it or raise a grievance, email our grievance officer:</p>
+  <p><strong><%= Legal.owner_name %></strong><br>
+    <%= support_mail_link(subject: "Grievance") %></p>
+  <p>We acknowledge a grievance within 3 working days and aim to resolve it within 30 days. More detail is in the <%= link_to "Privacy Policy", privacy_path %>.</p>
+<% end %>
+
+<%= legal_section "Bugs and ideas" do %>
+  <p>Found a bug or have an idea? <a href="https://github.com/MeghaKoshti/path-aviator/issues" rel="noopener">Open an issue on GitHub</a>, or email us. Please don’t post personal details in public issues.</p>
+<% end %>
+
+<%= legal_section "Who runs Path Aviator" do %>
+  <p><%= Legal.owner_name %>, an individual based in <%= Legal::JURISDICTION %>. Payments for Pro are handled by Dodo Payments as the merchant of record.</p>
+<% end %>

@@ -1,4 +1,8 @@
 en:
+  date:
+    formats:
+      # 24 October 2026: day-month order reads naturally in India and the UK.
+      legal: "%-d %B %Y"
   activerecord:
     attributes:
       user:

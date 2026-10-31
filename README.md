@@ -25,6 +25,7 @@
 | Public read-only share links for a path (turn off any time) | ✅ Done |
 | Accessibility (WCAG 2.1 AA checks, keyboard) and responsive pass | ✅ Done |
 | CI: tests, system tests, RuboCop, Brakeman, importmap audit | ✅ Done |
+| Privacy, terms, refund and contact pages, sign-up consent | ✅ Done (needs owner review) |
 | Google / GitHub sign-in | 📝 Planned |
 
 ## Screenshots
@@ -153,6 +154,17 @@ CHROME_BIN=/path/to/chrome CHROMEDRIVER_PATH=/path/to/chromedriver bin/rails tes
 # add CHROME_NO_SANDBOX=1 when running as root, e.g. inside a container
 ```
 
+## Policy pages: review before launch
+
+> **⚠️ Megha must read and adjust these before taking payments. They are a plain-English starting point, not legal advice.**
+
+`/privacy`, `/terms`, `/refunds` and `/contact` are written for an individual operator in India (DPDP Act 2023 and DPDP Rules 2025 notice basics, GDPR basics) with these subprocessors: Google Gemini API, Hetzner (hosting), Resend (email) and Dodo Payments (merchant of record). Before launch:
+
+- Set `LEGAL_OWNER_NAME` and `SUPPORT_EMAIL`. Until both are set, every policy page shows a "Placeholder details" warning.
+- Check the commitments match how you run things: 7-day first-payment refund, 3-day grace after a failed payment, 30-day backup deletion, replies within 2 working days, grievances acknowledged in 3 working days.
+- Confirm the Gemini key is on the paid tier (the privacy page says prompts aren't used for training), and that the hosting region and email provider match the table.
+- Bump `Legal::LAST_UPDATED` (`app/models/legal.rb`) whenever the wording changes.
+
 ## Deploy
 
 Path Aviator runs as one Docker container on one small VPS, deployed with [Kamal 2](https://kamal-deploy.org). The container serves the app with Puma behind Thruster and runs the Solid Queue jobs inside Puma (`SOLID_QUEUE_IN_PUMA`). The SQLite databases live on a persistent Docker volume. `kamal-proxy` in front handles HTTPS with a free Let's Encrypt certificate and only sends traffic to a new version once `/up` answers.
@@ -187,6 +199,8 @@ Add an `A` record, for example `pathaviator.example.com → 203.0.113.10`, and w
 | `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME` | No | app | Outgoing email for password resets. Port defaults to 587 |
 | `SMTP_PASSWORD` | No | secret | SMTP password or API key |
 | `MAILER_FROM` | No | app | Sender address. Defaults to `Path Aviator <no-reply@APP_HOST>` |
+| `LEGAL_OWNER_NAME` | Yes, before launch | app | Your legal name, shown as the operator and grievance officer on the policy pages |
+| `SUPPORT_EMAIL` | Yes, before launch | app | The monitored support and grievance address shown on the policy and contact pages |
 
 Keep them in a file that git ignores (the `/.env*` rule covers `.env.deploy`) and load it before each Kamal command:
 

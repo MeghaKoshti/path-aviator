@@ -72,6 +72,10 @@ env:
     SMTP_USERNAME: "<%= ENV["SMTP_USERNAME"] %>"
     MAILER_FROM: "<%= ENV.fetch("MAILER_FROM", "Path Aviator <no-reply@#{ENV.fetch("APP_HOST")}>") %>"
 
+    # Operator name and support/grievance email on the policy pages (placeholders when empty).
+    LEGAL_OWNER_NAME: "<%= ENV["LEGAL_OWNER_NAME"] %>"
+    SUPPORT_EMAIL: "<%= ENV["SUPPORT_EMAIL"] %>"
+
     # Set number of processes dedicated to Solid Queue (default: 1)
     # JOB_CONCURRENCY: 3
 

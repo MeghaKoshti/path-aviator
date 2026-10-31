@@ -26,6 +26,16 @@
           <div class="mt-6 text-center text-sm text-ink-muted"><%= yield :below_card %></div>
         <% end %>
       </main>
+
+      <footer class="mt-auto pt-10">
+        <nav aria-label="Footer">
+          <ul class="flex flex-wrap justify-center gap-x-5 gap-y-2 text-sm">
+            <% site_footer_links.first(4).each do |label, href| %>
+              <li><%= link_to label, href, class: "text-ink-muted underline-offset-4 hover:text-ink hover:underline" %></li>
+            <% end %>
+          </ul>
+        </nav>
+      </footer>
     </div>
   </body>
 </html>

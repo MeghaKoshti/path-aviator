@@ -17,6 +17,14 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", new_session_path, text: "Sign in"
   end
 
+  test "sign-up shows the consent line with links to the terms and privacy policy" do
+    get new_registration_path
+
+    assert_select "form p", /By creating an account you agree to the\s+Terms\s+and\s+Privacy Policy/
+    assert_select "form a[href=?]", terms_path, text: "Terms"
+    assert_select "form a[href=?]", privacy_path, text: "Privacy Policy"
+  end
+
   test "sign-in page links to sign-up" do
     get new_session_path
 

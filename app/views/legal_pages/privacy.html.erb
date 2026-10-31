@@ -1,0 +1,113 @@
+<% content_for :title, "Privacy Policy" %>
+<% content_for :meta_description, "What Path Aviator collects, why, who processes it (Google Gemini, Hetzner, Resend, Dodo Payments), how long it’s kept and how to export or delete it." %>
+
+<div class="legal-summary">
+  <p><strong>The short version.</strong> We collect what we need to plan and track your learning: your email, an optional name, what you want to learn, and your progress and notes. We don’t sell your data, we don’t show ads, and we don’t use your data to train AI models. You can download your data or delete your account at any time from Settings.</p>
+</div>
+
+<%= legal_section "Who we are" do %>
+  <p>Path Aviator is run by <strong><%= Legal.owner_name %></strong>, an individual based in India. For this policy, “we” and “us” mean the operator of Path Aviator.</p>
+  <p>Under India’s Digital Personal Data Protection Act, 2023 (DPDP Act) we are the <strong>Data Fiduciary</strong> for your personal data. Under the EU and UK GDPR we are the <strong>controller</strong>. You can reach us at <%= support_mail_link(subject: "Privacy question") %>.</p>
+<% end %>
+
+<%= legal_section "What we collect" do %>
+  <ul>
+    <li><strong>Account details:</strong> your email address, an optional name, and your password, stored only as a one-way hash (we can’t read it).</li>
+    <li><strong>Learning data:</strong> the topics you want to learn, your level, weekly hours, any goal or job post you paste, the paths we plan for you, the steps you tick off and when, your private notes, and any certificate or evidence links you choose to publish.</li>
+    <li><strong>Sign-in sessions:</strong> the IP address and browser name (user agent) of each signed-in session, so you stay signed in and we can spot misuse.</li>
+    <li><strong>Billing details:</strong> your plan, subscription status, renewal date and the payment provider’s customer and subscription IDs. We never see or store your card, UPI or bank details.</li>
+    <li><strong>Settings:</strong> preferences such as your time zone and email choices.</li>
+    <li><strong>Logs and product events:</strong> server logs (IP address, pages requested, errors) and simple events such as “path created” or “step completed”, so we can fix bugs and see which features help. We don’t use third-party analytics or advertising trackers.</li>
+  </ul>
+<% end %>
+
+<%= legal_section "Why we use it" do %>
+  <p>We use each kind of data only for the purposes below. You give consent at sign-up, after seeing this notice, and you can withdraw it at any time by deleting your account. Some uses are also allowed without consent as “legitimate uses” under the DPDP Act (for example, keeping records the law requires).</p>
+  <div class="overflow-x-auto">
+    <table>
+      <thead>
+        <tr><th scope="col">Purpose</th><th scope="col">Data used</th><th scope="col">GDPR legal basis</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Run your account, paths, progress and notes</td><td>Account, learning data</td><td>Contract</td></tr>
+        <tr><td>Plan paths with AI</td><td>Topic, level, hours, goal or job post</td><td>Contract</td></tr>
+        <tr><td>Take payments and manage your plan</td><td>Billing details</td><td>Contract, legal obligation</td></tr>
+        <tr><td>Send service emails (password reset, email confirmation, receipts, the weekly check-in you can turn off)</td><td>Email address, learning data</td><td>Contract, legitimate interests</td></tr>
+        <tr><td>Keep the service secure and stop abuse (sign-in limits, monthly quotas)</td><td>Sessions, logs</td><td>Legitimate interests</td></tr>
+        <tr><td>Fix bugs and improve features</td><td>Logs, product events</td><td>Legitimate interests</td></tr>
+      </tbody>
+    </table>
+  </div>
+<% end %>
+
+<%= legal_section "How the AI planning works" do %>
+  <p>When you plan a path, we send your topic, level, weekly hours and any goal or job post text to Google’s <strong>Gemini API</strong>. We don’t send your email address or name. Please don’t paste personal details (your phone number, address or salary) into the goal box.</p>
+  <p>We use the paid Gemini API. Under Google’s terms for paid services, Google doesn’t use these prompts or answers to improve its products, and keeps them only for a limited time to detect abuse.</p>
+<% end %>
+
+<%= legal_section "Who processes your data" do %>
+  <p>We don’t sell or rent your personal data. A few companies process it on our behalf, only to run Path Aviator:</p>
+  <div class="overflow-x-auto">
+    <table>
+      <thead>
+        <tr><th scope="col">Company</th><th scope="col">What they do</th><th scope="col">Where</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Google LLC (Gemini API)</td><td>Plans your learning path from your goal</td><td>United States and other Google regions</td></tr>
+        <tr><td>Hetzner Online GmbH</td><td>Hosts the app, database and backups</td><td>European Union (Germany or Finland)</td></tr>
+        <tr><td>Resend</td><td>Sends service emails</td><td>United States</td></tr>
+        <tr><td>Dodo Payments</td><td>Merchant of record: runs checkout, takes payment, issues invoices and handles tax</td><td>India, United States and its payment partners</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Dodo Payments sells the Pro subscription to you as the merchant of record, so the card, UPI or bank details you enter at checkout go to Dodo and its payment partners under the privacy policy published on <a href="https://dodopayments.com" rel="noopener">Dodo’s website</a>, not to us.</p>
+  <p>We may also disclose data when the law requires it, for example in response to a valid order from a court or government authority.</p>
+<% end %>
+
+<%= legal_section "Cookies" do %>
+  <p>We set one essential cookie that keeps you signed in, plus the standard protection Rails uses against cross-site request forgery. There are no advertising or analytics cookies, so there’s no cookie banner to click through.</p>
+<% end %>
+
+<%= legal_section "How long we keep it" do %>
+  <ul>
+    <li><strong>Account and learning data:</strong> until you delete your account. Deleting removes it from the live database straight away and from backups within 30 days.</li>
+    <li><strong>Sign-in sessions:</strong> until you sign out or delete your account.</li>
+    <li><strong>Server logs:</strong> up to 30 days.</li>
+    <li><strong>Billing records:</strong> as long as Indian tax and accounting law requires, usually up to 8 years.</li>
+  </ul>
+<% end %>
+
+<%= legal_section "Your rights" do %>
+  <p>Wherever you live, you can:</p>
+  <ul>
+    <li><strong>Get a copy</strong> of your data: use “Download your data” in Settings, or email us.</li>
+    <li><strong>Correct it:</strong> change your name and email in Settings, or ask us.</li>
+    <li><strong>Delete it:</strong> use “Delete account” in Settings. This also withdraws your consent. Withdrawing consent doesn’t affect what we did before.</li>
+    <li><strong>Object to or restrict</strong> a use based on legitimate interests (GDPR).</li>
+    <li><strong>Nominate someone</strong> to exercise your rights if you die or can’t act yourself (DPDP Act): email us their name and contact details.</li>
+    <li><strong>Complain:</strong> write to our grievance officer first (below). If you’re not satisfied, you can approach the Data Protection Board of India, or your local data protection authority if you’re in the EU or UK.</li>
+  </ul>
+  <p>We reply to rights requests within 30 days.</p>
+<% end %>
+
+<%= legal_section "Grievance officer" do %>
+  <p><strong><%= Legal.owner_name %></strong><br>
+    Email: <%= support_mail_link(subject: "Grievance") %></p>
+  <p>We acknowledge a grievance within 3 working days and aim to resolve it within 30 days.</p>
+<% end %>
+
+<%= legal_section "Security and breaches" do %>
+  <p>All traffic uses HTTPS, passwords are hashed with bcrypt, sign-in cookies are signed and can’t be read by scripts, and only the operator can access the servers. No system is perfectly secure. If a breach affects your personal data, we’ll tell you and the Data Protection Board of India (and other regulators where the law requires) without undue delay, with what happened and what you can do.</p>
+<% end %>
+
+<%= legal_section "International transfers" do %>
+  <p>Your data is stored in the EU and processed by the companies listed above, some of which are in the United States. Where GDPR applies, we rely on those companies’ standard contractual clauses or EU–US Data Privacy Framework certification. Transfers from India follow the DPDP Act, which allows transfers except to countries the Government of India restricts.</p>
+<% end %>
+
+<%= legal_section "Age limit" do %>
+  <p>Path Aviator is for people aged 18 or over. The DPDP Act needs verifiable parental consent for anyone younger, which we don’t collect, so please don’t create an account if you’re under 18.</p>
+<% end %>
+
+<%= legal_section "Changes to this policy" do %>
+  <p>When we change this policy we update the date at the top. If a change affects how we use data you’ve already given us, we’ll email you before it takes effect.</p>
+<% end %>

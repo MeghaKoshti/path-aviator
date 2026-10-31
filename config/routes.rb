@@ -20,6 +20,12 @@ Rails.application.routes.draw do
     resource :account, only: :destroy
   end
   resources :passwords, param: :token
+
+  # Policies and contact: public, linked from every footer.
+  get "privacy", to: "legal_pages#privacy"
+  get "terms", to: "legal_pages#terms"
+  get "refunds", to: "legal_pages#refunds"
+  get "contact", to: "legal_pages#contact"
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

@@ -18,6 +18,17 @@ module ApplicationHelper
     fields_in_order.find { |field| record.errors.include?(field) }
   end
 
+  # Links every footer carries, so policies are one click from any page.
+  def site_footer_links
+    [
+      [ "Privacy", privacy_path ],
+      [ "Terms", terms_path ],
+      [ "Refunds", refunds_path ],
+      [ "Contact", contact_path ],
+      [ "GitHub", "https://github.com/MeghaKoshti/path-aviator" ]
+    ]
+  end
+
   def user_display_name(user)
     user.try(:name).presence || user.email_address
   end
