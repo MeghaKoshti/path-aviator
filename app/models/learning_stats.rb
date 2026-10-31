@@ -65,6 +65,15 @@ class LearningStats
     completions.empty?
   end
 
+  # Ready, unfinished paths with a target date, soonest first, each with
+  # whether the learner is on track to finish in time.
+  def deadlines
+    @deadlines ||= @user.learning_paths.ready.joins(:learning_goal).where.not(learning_goals: { target_date: nil })
+      .includes(:learning_goal, :path_steps).order("learning_goals.target_date")
+      .reject(&:completed?)
+      .map { |path| [ path, path.pace(today:) ] }
+  end
+
   private
     # [date in the user's zone, minutes] for every finished step, in one query.
     # Dates are worked out in Ruby so time zones behave the same on any

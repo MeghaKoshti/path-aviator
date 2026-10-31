@@ -57,7 +57,7 @@ module UiHelper
   end
 
   def ui_badge(text, tone = :neutral)
-    tag.span(text, class: class_names("inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold", BADGE_TONES.fetch(tone.to_sym)))
+    tag.span(text, class: class_names("inline-flex shrink-0 items-center whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-semibold", BADGE_TONES.fetch(tone.to_sym)))
   end
 
   def ui_input_classes(invalid: false)

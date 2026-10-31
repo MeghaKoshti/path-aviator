@@ -5,12 +5,20 @@ module PathGenerator
     STEP_FIELDS = %w[title description resource_type resource_url estimated_minutes].freeze
     # A substitute for one step whose link is broken.
     REPLACEMENT_FIELDS = %w[description resource_type resource_url].freeze
+    SKILL_COUNT = 1..10
+    # Estimates are rough, so a plan may run this much over the time available.
+    BUDGET_SLACK = 1.25
 
     attr_reader :errors
 
-    def initialize(data, replacement: false)
+    # require_skills: the goal came from a job post, so the skills it asks for
+    # must be listed. budget_minutes: the time until the target date, which
+    # the steps must fit into.
+    def initialize(data, replacement: false, require_skills: false, budget_minutes: nil)
       @data = data
       @replacement = replacement
+      @require_skills = require_skills
+      @budget_minutes = budget_minutes
       @errors = []
       validate
     end
@@ -34,6 +42,22 @@ module PathGenerator
         end
 
         steps.each.with_index(1) { |step, number| validate_step(step, "step #{number}") }
+        validate_skills if @require_skills
+        validate_budget(steps) if @budget_minutes && errors.empty?
+      end
+
+      def validate_skills
+        skills = @data["skills"]
+        return if skills.is_a?(Array) && SKILL_COUNT.cover?(skills.size) && skills.all? { |skill| present_string?(skill) }
+
+        errors << "skills must be a list of #{SKILL_COUNT.min}-#{SKILL_COUNT.max} names"
+      end
+
+      def validate_budget(steps)
+        total = steps.sum { |step| step["estimated_minutes"] }
+        return if total <= @budget_minutes * BUDGET_SLACK
+
+        errors << "steps take #{total} minutes but only #{@budget_minutes} are available before the target date"
       end
 
       def validate_step(step, name, fields: STEP_FIELDS)

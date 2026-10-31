@@ -60,4 +60,29 @@ class OnboardingTest < ApplicationSystemTestCase
     assert_selector "legend", text: "How much time can you give it?"
     assert_no_field "Topic"
   end
+
+  test "planning a first path from a job post with a finish date" do
+    sign_in_through_ui @user, password: "long-enough-pw"
+    click_on "I have a job post"
+
+    assert_selector "legend", text: "Which job are you preparing for?"
+    fill_in "Job title", with: "Junior Rails developer"
+    fill_in "The job post", with: "Acme hires a Rails developer: Ruby on Rails, PostgreSQL, Docker. Apply at jobs@acme.in or +91 98765 43210."
+    click_on "Continue"
+    choose "Beginner"
+    click_on "Continue"
+    fill_in "Hours per week", with: "6"
+    execute_script("document.getElementById('learning_goal_target_date').value = '#{6.weeks.from_now.to_date.iso8601}'")
+    click_on "Plan my path"
+
+    assert_current_path %r{\A/learning_paths/\d+\z}
+    path = @user.learning_paths.sole
+    GenerateLearningPathJob.perform_now(path)
+    visit learning_path_path(path)
+    assert_selector "h2", text: "Skills this covers"
+    assert_selector "li", text: "PostgreSQL"
+    assert_text "On track"
+    assert_text "Finish by #{I18n.l(6.weeks.from_now.to_date, format: "%-d %b %Y")}"
+    assert_equal "Acme hires a Rails developer: Ruby on Rails, PostgreSQL, Docker. Apply at [email removed] or [phone removed].", path.learning_goal.job_post
+  end
 end

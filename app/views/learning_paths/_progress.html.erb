@@ -14,6 +14,13 @@
     </div>
   </dl>
 
+  <% if (pace = learning_path.pace) && pace != :done %>
+    <div class="mt-4 flex items-start gap-2 border-t border-line pt-4 text-sm">
+      <%= pace_badge(pace) %>
+      <p class="text-pretty text-ink-muted"><%= target_date_label(learning_path.target_date) %>. <%= pace_detail(learning_path) %></p>
+    </div>
+  <% end %>
+
   <div class="mt-4 border-t border-line pt-4 text-sm">
     <% if learning_path.completed? %>
       <p class="font-semibold text-success-700">You’ve finished every step.</p>

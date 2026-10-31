@@ -51,6 +51,7 @@ class GenerateLearningPathJob < ApplicationJob
         current.update!(
           title: result.title,
           summary: result.summary,
+          skills: result.skills,
           raw_response: result.raw,
           generated_at: Time.current,
           error_message: nil,

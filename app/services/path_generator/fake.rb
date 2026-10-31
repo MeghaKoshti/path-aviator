@@ -1,13 +1,21 @@
 module PathGenerator
   # Offline stand-in for Gemini: a realistic 8-step path that adapts to the
   # goal's topic. Used in tests, and in development when GEMINI_API_KEY is unset.
+  # From a job post it picks out well-known skill names, and with a target date
+  # it shortens the steps so they fit the time left, as the real prompt asks.
   class Fake
+    KNOWN_SKILLS = [
+      "Ruby", "Ruby on Rails", "Hotwire", "RSpec", "Sidekiq", "SQL", "PostgreSQL", "MySQL", "Redis",
+      "JavaScript", "TypeScript", "React", "Node.js", "Python", "Django", "Go", "Java", "Docker",
+      "Kubernetes", "AWS", "Git", "REST APIs", "GraphQL", "CI/CD", "Linux", "System design"
+    ].freeze
+
     def generate(goal)
       topic = goal.topic
       level = goal.current_level.to_s.humanize.downcase
       query = CGI.escape(topic)
 
-      {
+      path = {
         title: "#{topic}: #{level.capitalize} Learning Path",
         summary: "A practical route through #{topic} for #{level} learners with about #{goal.hours_per_week} hours a week. " \
                  "You'll start with the core ideas, practise them on small exercises and finish by building a project you can show.",
@@ -29,7 +37,10 @@ module PathGenerator
           step("Build and share a small project", "Combine everything in a small project and publish it on GitHub.",
                "practice", "https://github.com/new", 240)
         ]
-      }.to_json
+      }
+      path[:skills] = skills_in(goal.job_post, fallback: topic) if goal.job_post?
+      fit_to_budget(path[:steps], goal.minutes_until_target) if goal.target_date
+      path.to_json
     end
 
     # A substitute resource for a step whose link is broken: a search for the
@@ -43,6 +54,20 @@ module PathGenerator
     end
 
     private
+      def skills_in(text, fallback:)
+        found = KNOWN_SKILLS.select { |skill| text.match?(/(?<![\w.])#{Regexp.escape(skill)}(?![\w-])/i) }
+        # "Ruby on Rails" already says "Ruby".
+        found -= [ "Ruby" ] if found.include?("Ruby on Rails")
+        found.presence&.first(8) || [ fallback ]
+      end
+
+      def fit_to_budget(steps, budget)
+        total = steps.sum { |step| step[:estimated_minutes] }
+        return if total <= budget
+
+        steps.each { |step| step[:estimated_minutes] = [ step[:estimated_minutes] * budget / total, 10 ].max }
+      end
+
       def step(title, description, resource_type, resource_url, estimated_minutes)
         { title:, description:, resource_type:, resource_url:, estimated_minutes: }
       end

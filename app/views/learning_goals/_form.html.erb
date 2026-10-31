@@ -1,12 +1,14 @@
 <%#
   One form, three fieldsets. The onboarding Stimulus controller shows one
   fieldset at a time; without JavaScript all three show and the form still works.
+  When the goal comes from a job post, the first fieldset asks for the post.
 %>
 <%
+  from_job_post = learning_goal.from_job_post
   steps = [
-    { title: "Topic", fields: %i[topic] },
+    from_job_post ? { title: "Job post", fields: %i[topic job_post] } : { title: "Topic", fields: %i[topic] },
     { title: "Level", fields: %i[current_level] },
-    { title: "Time", fields: %i[hours_per_week goal_description] }
+    { title: "Time", fields: %i[hours_per_week target_date goal_description] }
   ]
   start_step = steps.index { |step| step[:fields].any? { |field| learning_goal.errors.include?(field) } }
   levels = {
@@ -43,24 +45,37 @@
     <% end %>
 
     <div class="space-y-10">
-      <fieldset data-onboarding-target="step" data-title="Topic" class="space-y-5">
-        <legend class="type-display mb-5 text-xl text-ink">What do you want to learn?</legend>
-        <%= render "shared/field", form: form, attribute: :topic, label: "Topic",
-              hint: "A skill, tool or subject, like “SQL for analytics” or “Spanish for travel”.",
-              input: { required: true, minlength: 3, maxlength: 100, autofocus: start_step.nil? || start_step.zero?, autocomplete: "off" } %>
+      <% if from_job_post %>
+        <fieldset data-onboarding-target="step" data-title="Job post" class="space-y-5">
+          <legend class="type-display mb-5 text-xl text-ink">Which job are you preparing for?</legend>
+          <%= form.hidden_field :from_job_post %>
+          <%= render "shared/field", form: form, attribute: :topic, label: "Job title",
+                hint: "For example “Junior Rails developer”. It names your path.",
+                input: { required: true, minlength: 3, maxlength: 100, autofocus: start_step.nil? || start_step.zero?, autocomplete: "off" } %>
+          <%= render "shared/field", form: form, attribute: :job_post, label: "The job post", as: :text_area,
+                hint: "Paste the whole post, up to #{number_with_delimiter(LearningGoal::JOB_POST_MAX_LENGTH)} characters. Email addresses and phone numbers are removed before planning, and only you ever see the post.",
+                input: { required: true, rows: 10, maxlength: LearningGoal::JOB_POST_MAX_LENGTH, class: "text-[0.9375rem] leading-relaxed" } %>
+        </fieldset>
+      <% else %>
+        <fieldset data-onboarding-target="step" data-title="Topic" class="space-y-5">
+          <legend class="type-display mb-5 text-xl text-ink">What do you want to learn?</legend>
+          <%= render "shared/field", form: form, attribute: :topic, label: "Topic",
+                hint: "A skill, tool or subject, like “SQL for analytics” or “Spanish for travel”.",
+                input: { required: true, minlength: 3, maxlength: 100, autofocus: start_step.nil? || start_step.zero?, autocomplete: "off" } %>
 
-        <div hidden data-onboarding-target="suggestions">
-          <p class="mb-2 text-sm text-ink-subtle" id="topic-suggestions-label">Or start with a popular one:</p>
-          <ul class="flex flex-wrap gap-2" aria-labelledby="topic-suggestions-label">
-            <% [ "Ruby on Rails", "SQL for analytics", "System design", "Docker", "TypeScript" ].each do |topic| %>
-              <li>
-                <button type="button" class="rounded-full border border-line-strong/50 px-3 py-1.5 pointer-coarse:py-2.5 text-sm font-medium text-ink-muted hover:border-brand-600 hover:text-brand-700"
-                        data-action="onboarding#suggest" data-topic="<%= topic %>"><%= topic %></button>
-              </li>
-            <% end %>
-          </ul>
-        </div>
-      </fieldset>
+          <div hidden data-onboarding-target="suggestions">
+            <p class="mb-2 text-sm text-ink-subtle" id="topic-suggestions-label">Or start with a popular one:</p>
+            <ul class="flex flex-wrap gap-2" aria-labelledby="topic-suggestions-label">
+              <% [ "Ruby on Rails", "SQL for analytics", "System design", "Docker", "TypeScript" ].each do |topic| %>
+                <li>
+                  <button type="button" class="rounded-full border border-line-strong/50 px-3 py-1.5 pointer-coarse:py-2.5 text-sm font-medium text-ink-muted hover:border-brand-600 hover:text-brand-700"
+                          data-action="onboarding#suggest" data-topic="<%= topic %>"><%= topic %></button>
+                </li>
+              <% end %>
+            </ul>
+          </div>
+        </fieldset>
+      <% end %>
 
       <fieldset data-onboarding-target="step" data-title="Level" aria-describedby="<%= "current_level_error" if level_error %>">
         <legend class="type-display mb-5 text-xl text-ink">Where are you starting from?</legend>
@@ -86,6 +101,9 @@
         <%= render "shared/field", form: form, attribute: :hours_per_week, label: "Hours per week", as: :number_field,
               hint: "Between 1 and 40. Three to six hours a week is a steady pace.",
               input: { required: true, min: 1, max: 40, step: 1, inputmode: "numeric", class: "max-w-32" } %>
+        <%= render "shared/field", form: form, attribute: :target_date, label: "Finish by (optional)", as: :date_field,
+              hint: from_job_post ? "Your interview or joining date. Steps are sized so you finish by then at your weekly hours." : "Steps are sized so you finish by then at your weekly hours.",
+              input: { min: Date.current + LearningGoal::MIN_LEAD_TIME, max: Date.current + LearningGoal::MAX_LEAD_TIME, class: "max-w-52" } %>
         <%= render "shared/field", form: form, attribute: :goal_description, label: "Your goal (optional)", as: :text_area,
               hint: "What would make this worth it? For example: “Build and deploy a portfolio app”. Up to 500 characters.",
               input: { rows: 3, maxlength: 500 } %>

@@ -25,6 +25,7 @@
 | Public read-only share links for a path (turn off any time) | ✅ Done |
 | Accessibility (WCAG 2.1 AA checks, keyboard) and responsive pass | ✅ Done |
 | Checked resource links: SSRF-safe checker, badges, a substitute for broken links, weekly recheck (Pro) | ✅ Done |
+| Path from a job post or a finish date: skills it covers, steps sized to the date, on track / behind | ✅ Done |
 | CI: tests, system tests, RuboCop, Brakeman, importmap audit | ✅ Done |
 | Privacy, terms, refund and contact pages, sign-up consent | ✅ Done (needs owner review) |
 | Pricing page (INR/USD, monthly/yearly toggle, FAQ) and job-switch landing copy | ✅ Done |
@@ -142,6 +143,10 @@ The demo account is shared, so its name, email and password can't be changed, it
 ```bash
 GEMINI_API_KEY=your-key bin/dev
 ```
+
+### Paths from a job post
+
+"I have a job post" on the new-path page takes a job title, the pasted post (up to 6,000 characters) and an optional finish date. Email addresses and phone numbers are removed (`PiiScrubber`) before the post is saved, so they never reach Gemini, and the post itself is never shown on a shared page. The prompt fences the post off as data, asks for the 3-8 skills it requires, compares them with the learner's level and fits the steps into the weeks left at their weekly hours; `PathGenerator::Validator` checks the skills list and the time budget (25% slack). The path shows "Skills this covers", the finish date and whether the learner is on track, and so does the dashboard's "This week" panel. Everyone gets one job-post path free; more are Pro.
 
 ### Link checks
 

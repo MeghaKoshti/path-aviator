@@ -21,7 +21,7 @@ module PathGenerator
     end
   end
 
-  Result = Data.define(:title, :summary, :steps, :raw)
+  Result = Data.define(:title, :summary, :steps, :skills, :raw)
   Replacement = Data.define(:description, :resource_type, :resource_url, :raw)
 
   class << self
@@ -31,7 +31,7 @@ module PathGenerator
       raw = client.generate(learning_goal)
       data = parse(raw)
 
-      validator = Validator.new(data)
+      validator = Validator.new(data, require_skills: learning_goal.job_post?, budget_minutes: learning_goal.minutes_until_target)
       raise InvalidOutput.new(validator.errors.to_sentence, raw: raw) unless validator.valid?
 
       build_result(data, raw)
@@ -87,7 +87,9 @@ module PathGenerator
           }
         end
 
-        Result.new(title: data["title"].strip, summary: data["summary"].strip, steps: steps, raw: raw)
+        skills = Array(data["skills"]).grep(String).map(&:squish).compact_blank.uniq.first(Validator::SKILL_COUNT.max)
+
+        Result.new(title: data["title"].strip, summary: data["summary"].strip, steps: steps, skills: skills, raw: raw)
       end
   end
 end

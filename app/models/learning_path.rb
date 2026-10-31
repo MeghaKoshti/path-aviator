@@ -32,6 +32,19 @@ class LearningPath < ApplicationRecord
     ready? && path_steps_count.positive? && completed_steps_count >= path_steps_count
   end
 
+  delegate :target_date, to: :learning_goal
+
+  # For a path with a target date: :on_track while the time left fits in the
+  # weeks left at the goal's hours a week, :behind otherwise (or once the date
+  # has passed), :done when every step is ticked. nil without a target date.
+  def pace(today: Date.current)
+    return unless ready? && target_date
+    return :done if completed?
+    return :behind if today > target_date
+
+    remaining_minutes <= learning_goal.minutes_until_target(today:) ? :on_track : :behind
+  end
+
   # Sharing gives the path a read-only public page at /p/:token. A token means
   # shared, nil means private. (has_secure_token would fill one in for every
   # new path, sharing them all by default, so the same generator is used here.)
@@ -48,14 +61,15 @@ class LearningPath < ApplicationRecord
     update!(share_token: nil)
   end
 
-  # Copies the plan for another person: same goal settings, title and steps,
-  # none of the progress, notes or evidence. No AI call is made.
+  # Copies the plan for another person: same goal settings, title, skills and
+  # steps (with their link checks), none of the progress, notes or evidence,
+  # and never the job post. No AI call is made.
   def copy_for(user)
     transaction do
       goal = user.learning_goals.create!(learning_goal.slice(:topic, :current_level, :hours_per_week))
-      goal.create_learning_path!(user:, title:, summary:, status: :ready, generated_at: Time.current).tap do |copy|
+      goal.create_learning_path!(user:, title:, summary:, skills:, status: :ready, generated_at: Time.current).tap do |copy|
         path_steps.each do |step|
-          copy.path_steps.create!(step.slice(:position, :title, :description, :resource_type, :resource_url, :estimated_minutes))
+          copy.path_steps.create!(step.slice(:position, :title, :description, :resource_type, :resource_url, :estimated_minutes, :link_status, :link_checked_at))
         end
       end
     end
@@ -99,7 +113,7 @@ class LearningPath < ApplicationRecord
   def regenerate!
     transaction do
       path_steps.delete_all
-      update!(status: :generating, completed_steps_count: 0, error_message: nil, raw_response: nil, generated_at: nil)
+      update!(status: :generating, completed_steps_count: 0, skills: [], error_message: nil, raw_response: nil, generated_at: nil)
     end
     reload
     GenerateLearningPathJob.perform_later(self)

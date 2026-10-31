@@ -125,4 +125,27 @@ class PathGeneratorTest < ActiveSupport::TestCase
     assert_match %r{\Ahttps://}, replacement.resource_url
     assert_not_equal step.resource_url, replacement.resource_url
   end
+
+  test "the fake generator picks skills out of a job post and fits a target date" do
+    travel_to Date.new(2026, 10, 31) do
+      goal = LearningGoal.new(topic: "Backend developer", current_level: :intermediate, hours_per_week: 2, target_date: Date.new(2026, 11, 21),
+                              job_post: "We ship Ruby on Rails with PostgreSQL, Redis and Sidekiq on AWS. Go-getters welcome!")
+      result = PathGenerator.call(goal)
+
+      assert_equal [ "Ruby on Rails", "Sidekiq", "PostgreSQL", "Redis", "AWS" ], result.skills
+      assert_operator result.steps.sum { |step| step[:estimated_minutes] }, :<=, 3 * 2 * 60 * PathGenerator::Validator::BUDGET_SLACK
+    end
+  end
+
+  test "a topic path has no skills" do
+    assert_equal [], PathGenerator.call(@goal).skills
+  end
+
+  test "a job-post answer without skills is invalid" do
+    goal = LearningGoal.new(topic: "Backend developer", current_level: :beginner, hours_per_week: 4, job_post: "Rails role")
+    PathGenerator.client = ScriptedClient.new(valid_json)
+
+    error = assert_raises(PathGenerator::InvalidOutput) { PathGenerator.call(goal) }
+    assert_match "skills", error.message
+  end
 end

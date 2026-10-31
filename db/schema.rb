@@ -19,6 +19,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_102822) do
     t.text "goal_description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "job_post"
+    t.date "target_date"
     t.index ["user_id"], name: "index_learning_goals_on_user_id"
   end
 
@@ -38,6 +40,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_102822) do
     t.string "share_token"
     t.string "certificate_token"
     t.datetime "certificate_issued_at"
+    t.json "skills", default: [], null: false
     t.index ["certificate_token"], name: "index_learning_paths_on_certificate_token", unique: true
     t.index ["learning_goal_id"], name: "index_learning_paths_on_learning_goal_id", unique: true
     t.index ["share_token"], name: "index_learning_paths_on_share_token", unique: true

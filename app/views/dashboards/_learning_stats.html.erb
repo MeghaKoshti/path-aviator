@@ -84,4 +84,16 @@
       </div>
     </div>
   <% end %>
+
+  <% if stats.deadlines.any? %>
+    <ul class="mt-5 space-y-2 border-t border-line pt-4" aria-label="Paths with a finish date" role="list">
+      <% stats.deadlines.each do |path, pace| %>
+        <li class="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+          <%= pace_badge(pace) %>
+          <%= link_to path.title, learning_path_path(path), class: "font-semibold text-ink underline-offset-4 hover:text-brand-700 hover:underline" %>
+          <span class="text-ink-muted"><%= target_date_label(path.target_date) %>. <%= pace_detail(path, today: stats.today) %></span>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
 </section>

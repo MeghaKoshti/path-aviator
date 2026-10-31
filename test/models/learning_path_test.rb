@@ -151,4 +151,48 @@ class LearningPathTest < ActiveSupport::TestCase
     @path.user.name = nil
     assert_nil @path.owner_first_name
   end
+
+  test "pace compares the time left with the weeks left before the target date" do
+    path = learning_paths(:rails) # 3 h 45 min left, 6 h a week
+    today = Date.new(2026, 10, 31)
+    path.learning_goal.target_date = today + 3.weeks
+
+    assert_nil learning_paths(:sql).pace(today:), "not ready"
+    assert_equal :on_track, path.pace(today:)
+
+    path.learning_goal.hours_per_week = 1
+    path.learning_goal.target_date = today + 2.weeks # 120 minutes available
+    assert_equal :behind, path.pace(today:)
+
+    path.learning_goal.hours_per_week = 6
+    assert_equal :behind, path.pace(today: today + 15.days), "the date has passed"
+
+    path.completed_steps_count = path.path_steps_count
+    assert_equal :done, path.pace(today:)
+  end
+
+  test "a path without a target date has no pace" do
+    assert_nil learning_paths(:rails).pace
+  end
+
+  test "regenerating clears the skills" do
+    path = learning_paths(:rails)
+    path.update!(skills: [ "Rails" ])
+    path.regenerate!
+
+    assert_equal [], path.reload.skills
+  end
+
+  test "a copy keeps the skills and link checks but never the job post" do
+    path = learning_paths(:rails)
+    path.update!(skills: [ "Hotwire" ])
+    path.learning_goal.update!(job_post: "Private post")
+    path.path_steps.first.update!(link_status: :ok, link_checked_at: 1.day.ago)
+
+    copy = path.copy_for(users(:two))
+
+    assert_equal [ "Hotwire" ], copy.skills
+    assert copy.path_steps.first.link_ok?
+    assert_nil copy.learning_goal.job_post
+  end
 end

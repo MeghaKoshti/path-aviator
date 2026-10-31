@@ -183,4 +183,12 @@ class GenerateLearningPathJobTest < ActiveJob::TestCase
     assert_nil @path.error_message
     assert_equal "Fresh path", @path.title
   end
+
+  test "saves the skills of a path planned from a job post" do
+    @path.learning_goal.update!(job_post: "Analytics engineer: SQL, PostgreSQL and Python.")
+
+    GenerateLearningPathJob.perform_now(@path)
+
+    assert_equal [ "SQL", "PostgreSQL", "Python" ], @path.reload.skills
+  end
 end

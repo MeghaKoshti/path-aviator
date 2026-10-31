@@ -31,4 +31,9 @@ class User < ApplicationRecord
   def weekly_link_recheck?
     respond_to?(:pro?) && pro?
   end
+
+  # Everyone gets one path planned from a job post; after that it's Pro.
+  def can_plan_from_job_post?
+    (respond_to?(:pro?) && pro?) || !learning_goals.where.not(job_post: nil).exists?
+  end
 end
