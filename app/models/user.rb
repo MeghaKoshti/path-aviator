@@ -26,4 +26,9 @@ class User < ApplicationRecord
   def demo?
     email_address.to_s.casecmp?(DemoAccount.email)
   end
+
+  # Pro feature. `pro?` arrives with billing; until then nobody has it.
+  def weekly_link_recheck?
+    respond_to?(:pro?) && pro?
+  end
 end

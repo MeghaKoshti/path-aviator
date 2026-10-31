@@ -111,7 +111,8 @@ module DemoAccount
         steps.each.with_index(1) do |attrs, position|
           step = learning_path.path_steps.find_or_initialize_by(position: position)
           days_ago = completed_days_ago[position - 1]
-          step.update!({ note: nil, evidence_url: nil }.merge(attrs, completed_at: days_ago && days_ago.days.ago))
+          # Links are shown as checked recently, as a real account's would be.
+          step.update!({ note: nil, evidence_url: nil }.merge(attrs, completed_at: days_ago && days_ago.days.ago, link_status: "ok", link_checked_at: 2.days.ago))
         end
         learning_path.path_steps.where(position: (steps.size + 1)..).destroy_all
 

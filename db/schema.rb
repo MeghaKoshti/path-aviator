@@ -57,6 +57,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_102822) do
     t.datetime "updated_at", null: false
     t.text "note"
     t.string "evidence_url"
+    t.string "link_status", default: "unchecked", null: false
+    t.datetime "link_checked_at"
     t.index ["learning_path_id", "position"], name: "index_path_steps_on_learning_path_id_and_position", unique: true
   end
 

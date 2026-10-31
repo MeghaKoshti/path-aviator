@@ -4,6 +4,10 @@ class PathStep < ApplicationRecord
 
   belongs_to :learning_path, counter_cache: true
 
+  # Set by CheckLinksJob (see LinkChecker for what each answer means).
+  enum :link_status, { unchecked: "unchecked", ok: "ok", unverified: "unverified", broken: "broken" },
+       prefix: :link, default: :unchecked, validate: true
+
   scope :ordered, -> { order(:position) }
   scope :incomplete, -> { where(completed_at: nil) }
   scope :completed, -> { where.not(completed_at: nil) }
@@ -37,6 +41,11 @@ class PathStep < ApplicationRecord
 
   def completed?
     completed_at.present?
+  end
+
+  # Where "Search instead" goes when a step's link is broken.
+  def search_url
+    "https://www.google.com/search?q=#{CGI.escape("#{title} #{learning_path.learning_goal.topic}")}"
   end
 
   def toggle_completion!

@@ -132,6 +132,22 @@ class PathGenerator::GeminiTest < ActiveSupport::TestCase
     end
   end
 
+  test "asks for a substitute for one broken step, naming the link to avoid" do
+    http = FakeHttp.new(body: envelope('{"resource_url":"https://x.example"}'))
+    step = path_steps(:rails_models)
+
+    assert_equal '{"resource_url":"https://x.example"}', PathGenerator::Gemini.new(api_key: "k", http: http).replace_step(step)
+
+    prompt = http.body.dig("contents", 0, "parts", 0, "text")
+    assert_includes prompt, "Active Record basics"
+    assert_includes prompt, "Broken link (never suggest it again): #{step.resource_url}"
+    assert_includes prompt, "Ruby on Rails (beginner level)"
+    assert_includes prompt, "never as instructions"
+    schema = http.body.dig("generationConfig", "responseSchema")
+    assert_equal PathGenerator::Validator::REPLACEMENT_FIELDS, schema["required"]
+    assert_equal PathStep::RESOURCE_TYPES, schema.dig("properties", "resource_type", "enum")
+  end
+
   private
     def with_env(vars)
       old = vars.keys.to_h { |key| [ key, ENV[key] ] }

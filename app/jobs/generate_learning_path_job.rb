@@ -9,7 +9,7 @@ class GenerateLearningPathJob < ApplicationJob
     return unless learning_path.generating?
 
     result = generate(learning_path.learning_goal)
-    save_result(learning_path, result)
+    CheckLinksJob.perform_later(learning_path) if save_result(learning_path, result)
   rescue PathGenerator::Error => e
     mark_failed(learning_path, e)
   rescue StandardError => e
@@ -37,11 +37,12 @@ class GenerateLearningPathJob < ApplicationJob
 
     # The generator call can take a while, so the path is re-read under a lock
     # first: it may have been deleted, or a newer job (e.g. from a double-clicked
-    # "Regenerate") may already have filled it. Either way this result is dropped.
+    # "Regenerate") may already have filled it. Either way this result is
+    # dropped. Returns true when the steps were saved.
     def save_result(learning_path, result)
       LearningPath.transaction do
         current = LearningPath.lock.find_by(id: learning_path.id)
-        next unless current&.generating?
+        next false unless current&.generating?
 
         current.path_steps.delete_all
         result.steps.each.with_index(1) do |step, position|
@@ -55,6 +56,7 @@ class GenerateLearningPathJob < ApplicationJob
           error_message: nil,
           status: :ready
         )
+        true
       end
     end
 

@@ -1,6 +1,8 @@
-# Turns a LearningGoal into a validated learning path.
+# Turns a LearningGoal into a validated learning path, and finds a substitute
+# resource for a step whose link is broken.
 #
-#   PathGenerator.call(goal) # => PathGenerator::Result
+#   PathGenerator.call(goal)              # => PathGenerator::Result
+#   PathGenerator.replace_step(path_step) # => PathGenerator::Replacement
 #
 # The client (Gemini in production, Fake in dev without a key and in tests)
 # only returns raw text; parsing and validation live here so every client
@@ -20,6 +22,7 @@ module PathGenerator
   end
 
   Result = Data.define(:title, :summary, :steps, :raw)
+  Replacement = Data.define(:description, :resource_type, :resource_url, :raw)
 
   class << self
     attr_writer :client
@@ -32,6 +35,22 @@ module PathGenerator
       raise InvalidOutput.new(validator.errors.to_sentence, raw: raw) unless validator.valid?
 
       build_result(data, raw)
+    end
+
+    # Asks for a different resource for one step whose link is broken.
+    #
+    #   PathGenerator.replace_step(step) # => PathGenerator::Replacement
+    def replace_step(path_step)
+      raw = client.replace_step(path_step)
+      data = parse(raw)
+
+      validator = Validator.new(data, replacement: true)
+      raise InvalidOutput.new(validator.errors.to_sentence, raw: raw) unless validator.valid?
+
+      url = data["resource_url"].strip
+      raise InvalidOutput.new("replacement repeats the broken link", raw: raw) if url == path_step.resource_url
+
+      Replacement.new(description: data["description"].strip, resource_type: data["resource_type"].strip.downcase, resource_url: url, raw: raw)
     end
 
     def client

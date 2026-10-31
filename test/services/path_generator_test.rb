@@ -91,4 +91,38 @@ class PathGeneratorTest < ActiveSupport::TestCase
       assert PathStep.new(step.merge(position:, learning_path: learning_paths(:sql))).valid?, step[:title]
     end
   end
+
+  test "replace_step returns a validated substitute for one step" do
+    step = path_steps(:rails_models)
+    PathGenerator.client = Struct.new(:raw) { def replace_step(_) = raw }.new(
+      { description: " Read the edge guide. ", resource_type: "Docs", resource_url: " https://edgeguides.rubyonrails.org/ " }.to_json
+    )
+
+    replacement = PathGenerator.replace_step(step)
+
+    assert_equal "Read the edge guide.", replacement.description
+    assert_equal "docs", replacement.resource_type
+    assert_equal "https://edgeguides.rubyonrails.org/", replacement.resource_url
+  end
+
+  test "replace_step rejects invalid substitutes and the same broken link" do
+    step = path_steps(:rails_models)
+    [
+      { description: "x", resource_type: "podcast", resource_url: "https://a.example" },
+      { description: "x", resource_type: "docs", resource_url: "ftp://a.example" },
+      { resource_type: "docs", resource_url: "https://a.example" },
+      { description: "x", resource_type: "docs", resource_url: step.resource_url }
+    ].each do |answer|
+      PathGenerator.client = Struct.new(:raw) { def replace_step(_) = raw }.new(answer.to_json)
+      assert_raises(PathGenerator::InvalidOutput, answer.inspect) { PathGenerator.replace_step(step) }
+    end
+  end
+
+  test "the fake generator offers a valid substitute" do
+    step = path_steps(:rails_models)
+    replacement = PathGenerator.replace_step(step)
+
+    assert_match %r{\Ahttps://}, replacement.resource_url
+    assert_not_equal step.resource_url, replacement.resource_url
+  end
 end

@@ -24,6 +24,7 @@
 | Private notes on each step, edited in place | ✅ Done |
 | Public read-only share links for a path (turn off any time) | ✅ Done |
 | Accessibility (WCAG 2.1 AA checks, keyboard) and responsive pass | ✅ Done |
+| Checked resource links: SSRF-safe checker, badges, a substitute for broken links, weekly recheck (Pro) | ✅ Done |
 | CI: tests, system tests, RuboCop, Brakeman, importmap audit | ✅ Done |
 | Privacy, terms, refund and contact pages, sign-up consent | ✅ Done (needs owner review) |
 | Pricing page (INR/USD, monthly/yearly toggle, FAQ) and job-switch landing copy | ✅ Done |
@@ -141,6 +142,19 @@ The demo account is shared, so its name, email and password can't be changed, it
 ```bash
 GEMINI_API_KEY=your-key bin/dev
 ```
+
+### Link checks
+
+After a path is generated, `CheckLinksJob` opens every step's link with `LinkChecker` and the page shows "Link checked {date}", "Couldn't verify link" or "Link may be broken. Search instead". A broken link gets one substitute from the generator (`PathGenerator.replace_step`); if that is broken too, the step keeps its link and offers a search. Pro users' active paths are checked again every Monday (`RecheckLinksJob`).
+
+| Answer | Counts as | Why |
+|---|---|---|
+| 2xx (after at most 3 redirects) | ok | The page opens |
+| 401, 403, 429, 999, 5xx, timeout, reset connection | unverified | Big sites (LinkedIn, Medium, Udemy, Cloudflare-fronted docs) turn bots away or hiccup; the page usually works in a browser, so it is never replaced |
+| 404, 410, other 4xx, unknown host, refused connection, TLS error, redirect loop, more than 3 redirects | broken | The link really doesn't work |
+| Not http(s), a port other than 80/443, or any hop that resolves to a private, loopback, link-local or metadata address | broken | Blocked before connecting, so a generated link can never reach the server's own network (SSRF) |
+
+Every hop is resolved and checked, then the request goes to that vetted IP (no proxy), with HEAD first and GET as a fallback, a 5-second timeout, at most 16 KB of body read and a `PathAviatorLinkChecker/1.0` user agent. Tests never use the network (`LinkChecker::Fake`).
 
 ### Run tests and checks
 

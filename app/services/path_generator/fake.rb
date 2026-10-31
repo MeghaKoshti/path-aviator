@@ -32,6 +32,16 @@ module PathGenerator
       }.to_json
     end
 
+    # A substitute resource for a step whose link is broken: a search for the
+    # step itself, which always exists.
+    def replace_step(path_step)
+      {
+        description: "#{path_step.description.to_s.strip.presence || path_step.title} Start from a fresh, well-rated guide.".squish,
+        resource_type: "article",
+        resource_url: "https://dev.to/search?q=#{CGI.escape(path_step.title)}"
+      }.to_json
+    end
+
     private
       def step(title, description, resource_type, resource_url, estimated_minutes)
         { title:, description:, resource_type:, resource_url:, estimated_minutes: }
