@@ -34,4 +34,15 @@ module ApplicationHelper
   def user_display_name(user)
     user.try(:name).presence || user.email_address
   end
+
+  # Options for a time zone select, one per IANA zone, e.g.
+  # ["(GMT+05:30) Chennai, Kolkata, Mumbai, New Delhi", "Asia/Kolkata"].
+  # A zone the browser found that Rails has no name for is listed as itself.
+  def time_zone_options(selected)
+    options = ActiveSupport::TimeZone.all.group_by { |zone| zone.tzinfo.name }.map do |iana, zones|
+      [ "(GMT#{zones.first.formatted_offset}) #{zones.map(&:name).join(", ")}", iana ]
+    end
+    options << [ selected, selected ] unless options.any? { |_, iana| iana == selected }
+    options_for_select(options, selected)
+  end
 end

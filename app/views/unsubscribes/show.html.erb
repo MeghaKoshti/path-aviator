@@ -1,0 +1,21 @@
+<% content_for :title, @user.weekly_digest? ? "Weekly email on" : "Unsubscribed" %>
+<% content_for :head do %><meta name="robots" content="noindex"><% end %>
+
+<% if @user.weekly_digest? %>
+  <h1 class="type-display text-2xl text-ink sm:text-[1.75rem]">Weekly email is on</h1>
+  <p class="mt-2 text-pretty text-ink-muted">
+    <%= @user.email_address %> gets a short check-in every Sunday evening while you’re learning.
+  </p>
+<% else %>
+  <h1 class="type-display text-2xl text-ink sm:text-[1.75rem]">You’re unsubscribed</h1>
+  <p class="mt-2 text-pretty text-ink-muted">
+    <%= @user.email_address %> won’t get the weekly check-in email any more. Password reset emails still arrive when you ask for one.
+  </p>
+  <div class="mt-8">
+    <%= ui_button "Keep getting the weekly email", unsubscribe_path(params[:token]), method: :delete, variant: :secondary, block: true %>
+  </div>
+<% end %>
+
+<% content_for :below_card do %>
+  <%= link_to "Go to Path Aviator", root_path, class: "font-semibold text-brand-700 underline-offset-4 hover:underline" %>
+<% end %>

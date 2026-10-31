@@ -21,9 +21,12 @@ Rails.application.routes.draw do
   namespace :settings do
     resource :profile, only: :update
     resource :password, only: :update
+    resource :preferences, only: :update
     resource :account, only: :destroy
   end
   resources :passwords, param: :token
+  # One-click unsubscribe from the weekly email (signed token, no sign-in).
+  resource :unsubscribe, only: %i[ show create destroy ], path: "unsubscribe/:token"
 
   # Policies and contact: public, linked from every footer.
   get "privacy", to: "legal_pages#privacy"

@@ -49,9 +49,12 @@ class CheckLinksJob < ApplicationJob
 
     # Swaps just the step's link and badge, so a note being edited isn't lost.
     def broadcast(step)
-      step.broadcast_replace_to [ step.learning_path.user, :learning_paths ],
-        target: ActionView::RecordIdentifier.dom_id(step, :resource),
-        partial: "path_steps/resource",
-        locals: { path_step: step }
+      user = step.learning_path.user
+      Time.use_zone(user.zone) do
+        step.broadcast_replace_to [ user, :learning_paths ],
+          target: ActionView::RecordIdentifier.dom_id(step, :resource),
+          partial: "path_steps/resource",
+          locals: { path_step: step }
+      end
     end
 end

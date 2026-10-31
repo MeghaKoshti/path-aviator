@@ -1,0 +1,8 @@
+<% content_for :title, "Link not recognised" %>
+<% content_for :head do %><meta name="robots" content="noindex"><% end %>
+
+<h1 class="type-display text-2xl text-ink sm:text-[1.75rem]">This link doesn’t work</h1>
+<p class="mt-2 text-pretty text-ink-muted">
+  It may have been copied only in part. Sign in and turn off the weekly email under Settings, Time zone and email.
+</p>
+<div class="mt-8"><%= ui_button "Sign in", new_session_path, block: true %></div>

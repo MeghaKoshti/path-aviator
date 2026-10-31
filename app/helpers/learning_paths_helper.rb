@@ -38,6 +38,10 @@ module LearningPathsHelper
 
   PACE_BADGES = { on_track: [ "On track", :success ], behind: [ "Behind", :warning ], done: [ "Finished", :success ] }.freeze
 
+  def pace_word(pace)
+    PACE_BADGES.dig(pace, 0)&.downcase
+  end
+
   def pace_badge(pace)
     label, tone = PACE_BADGES[pace]
     ui_badge(label, tone) if label

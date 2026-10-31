@@ -26,3 +26,9 @@ production:
     class: RecheckLinksJob
     queue: default
     schedule: every monday at 4am
+
+  # Sunday 6pm in each user's own time zone (the job picks who is due).
+  weekly_digest:
+    class: WeeklyDigestJob
+    queue: default
+    schedule: every hour at minute 2

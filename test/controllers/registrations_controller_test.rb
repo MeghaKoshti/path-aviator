@@ -97,4 +97,16 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
 
     assert_redirected_to dashboard_path
   end
+
+  test "sign-up keeps the time zone the browser reported" do
+    post registration_path, params: { user: { email_address: "zone@example.com", password: "long-enough-pw", password_confirmation: "long-enough-pw", time_zone: "Asia/Calcutta" } }
+
+    assert_equal "Asia/Kolkata", User.find_by(email_address: "zone@example.com").time_zone
+  end
+
+  test "sign-up without a time zone uses UTC" do
+    post registration_path, params: { user: { email_address: "nozone@example.com", password: "long-enough-pw", password_confirmation: "long-enough-pw" } }
+
+    assert_equal "UTC", User.find_by(email_address: "nozone@example.com").time_zone
+  end
 end

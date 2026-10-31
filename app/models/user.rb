@@ -1,4 +1,11 @@
 class User < ApplicationRecord
+  # Old names some browsers still report, for servers whose tz database
+  # doesn't carry the "backward" links.
+  TIME_ZONE_ALIASES = {
+    "Asia/Calcutta" => "Asia/Kolkata", "Asia/Katmandu" => "Asia/Kathmandu", "Asia/Saigon" => "Asia/Ho_Chi_Minh",
+    "Asia/Rangoon" => "Asia/Yangon", "Europe/Kiev" => "Europe/Kyiv", "America/Buenos_Aires" => "America/Argentina/Buenos_Aires"
+  }.freeze
+
   has_secure_password
   has_many :sessions, dependent: :destroy
   # Paths are declared first so they are destroyed before the goals they point to.
@@ -7,6 +14,16 @@ class User < ApplicationRecord
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
   normalizes :name, with: ->(name) { name.strip.presence }
+  # Stored as an IANA name ("Asia/Kolkata"). Anything unknown becomes UTC
+  # rather than an error: it usually comes from the browser, not the person.
+  normalizes :time_zone, with: ->(zone) {
+    zone = zone.to_s.strip
+    name = ActiveSupport::TimeZone[TIME_ZONE_ALIASES.fetch(zone, zone)]&.tzinfo&.name
+    name.nil? || name == "Etc/UTC" ? "UTC" : name
+  }
+
+  # The weekly email's unsubscribe link. It needs no sign-in and never expires.
+  generates_token_for :unsubscribe
 
   validates :email_address, presence: true,
                             format: { with: URI::MailTo::EMAIL_REGEXP },
@@ -15,6 +32,11 @@ class User < ApplicationRecord
   # has_secure_password already requires one on create.
   validates :password, length: { minimum: 8 }, allow_nil: true
   validates :name, length: { maximum: 100 }, allow_nil: true
+
+  # "Today", "this week" and streaks follow this zone.
+  def zone
+    ActiveSupport::TimeZone[time_zone] || ActiveSupport::TimeZone["UTC"]
+  end
 
   # A user without a goal still needs to go through onboarding.
   def onboarded?

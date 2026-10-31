@@ -26,6 +26,7 @@
 | Accessibility (WCAG 2.1 AA checks, keyboard) and responsive pass | ✅ Done |
 | Checked resource links: SSRF-safe checker, badges, a substitute for broken links, weekly recheck (Pro) | ✅ Done |
 | Path from a job post or a finish date: skills it covers, steps sized to the date, on track / behind | ✅ Done |
+| Per-user time zone (detected at sign-up, editable) and a Sunday check-in email with one-click unsubscribe | ✅ Done |
 | CI: tests, system tests, RuboCop, Brakeman, importmap audit | ✅ Done |
 | Privacy, terms, refund and contact pages, sign-up consent | ✅ Done (needs owner review) |
 | Pricing page (INR/USD, monthly/yearly toggle, FAQ) and job-switch landing copy | ✅ Done |
@@ -143,6 +144,10 @@ The demo account is shared, so its name, email and password can't be changed, it
 ```bash
 GEMINI_API_KEY=your-key bin/dev
 ```
+
+### Time zones and the weekly email
+
+Sign-up stores the browser's time zone (a Stimulus controller fills a hidden field) and Settings can change it. Every request runs in the user's zone (`Time.use_zone`), so the week, "today" and streaks follow their local midnight. `WeeklyDigestJob` runs hourly and sends `WeeklyDigestMailer` to each opted-in user at 6pm on their own Sunday, if they learned something in the last 30 days, never to the demo account. Each email has a signed one-click unsubscribe link plus `List-Unsubscribe` headers. Preview it at `/rails/mailers/weekly_digest_mailer/check_in`.
 
 ### Paths from a job post
 

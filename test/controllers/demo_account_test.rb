@@ -15,7 +15,7 @@ class DemoAccountControllersTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "#demo-locked-note", LOCKED
-    assert_select "fieldset[disabled][aria-describedby=demo-locked-note]", 3
+    assert_select "fieldset[disabled][aria-describedby=demo-locked-note]", 4
     assert_select "form[action=?] fieldset[disabled] input[type=submit][value='Save profile']", settings_profile_path
     assert_select "form[action=?] fieldset[disabled]", settings_password_path
     assert_select "form[action=?] fieldset[disabled]", settings_account_path

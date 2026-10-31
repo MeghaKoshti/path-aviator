@@ -141,4 +141,43 @@ class SettingsControllerTest < ActionDispatch::IntegrationTest
       delete settings_account_path, params: { confirmation: " ONE@example.com " }
     end
   end
+
+  test "time zone and weekly email can be changed" do
+    get settings_path
+    assert_select "form[action=?]", settings_preferences_path do
+      assert_select "select#preferences_user_time_zone option[value='Asia/Kolkata']", /Kolkata/
+      assert_select "input[type=checkbox]#preferences_user_weekly_digest[checked]"
+    end
+
+    patch settings_preferences_path, params: { user: { time_zone: "Asia/Kolkata", weekly_digest: "0" } }
+
+    assert_redirected_to settings_path(anchor: "preferences")
+    @user.reload
+    assert_equal "Asia/Kolkata", @user.time_zone
+    assert_not @user.weekly_digest?
+  end
+
+  test "pages show dates in the user's own zone" do
+    @user.update!(time_zone: "Asia/Kolkata")
+
+    # Sunday 20:00 UTC is Monday 01:30 in Kolkata: a new week has started there.
+    travel_to Time.utc(2026, 11, 1, 20, 0) do
+      get dashboard_path
+      assert_select "#learning_stats", /2 Nov to 8 Nov/
+
+      @user.update!(time_zone: "UTC")
+      get dashboard_path
+      assert_select "#learning_stats", /26 Oct to 1 Nov/
+    end
+  end
+
+  test "the demo account can't change its preferences" do
+    demo = DemoAccount.reset!
+    sign_in_as demo, password: DemoAccount::PASSWORD
+
+    patch settings_preferences_path, params: { user: { time_zone: "Asia/Tokyo" } }
+
+    assert_redirected_to settings_path
+    assert_equal "UTC", demo.reload.time_zone
+  end
 end

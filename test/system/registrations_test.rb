@@ -19,4 +19,20 @@ class RegistrationsTest < ApplicationSystemTestCase
     assert_text "Welcome aboard"
     assert_current_path new_learning_goal_path
   end
+
+  test "sign-up stores the time zone the browser reports" do
+    visit new_registration_path
+    browser_zone = evaluate_script("Intl.DateTimeFormat().resolvedOptions().timeZone")
+    assert_equal browser_zone, find("#user_time_zone", visible: :hidden).value
+
+    # Stand in for a learner in India, whatever zone this machine is in.
+    execute_script("document.getElementById('user_time_zone').value = 'Asia/Kolkata'")
+    fill_in "Email", with: "zone@example.com"
+    fill_in "Password", with: "long-enough-pw"
+    fill_in "Confirm password", with: "long-enough-pw"
+    click_on "Create account"
+
+    assert_current_path new_learning_goal_path
+    assert_equal "Asia/Kolkata", User.find_by(email_address: "zone@example.com").time_zone
+  end
 end

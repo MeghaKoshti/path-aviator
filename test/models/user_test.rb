@@ -81,4 +81,22 @@ class UserTest < ActiveSupport::TestCase
     ensure
       old.each { |key, value| ENV[key] = value }
     end
+
+  test "time zones are stored as IANA names, from browser or Rails names, defaulting to UTC" do
+    assert_equal "UTC", User.new.time_zone
+    assert_equal "Asia/Kolkata", User.new(time_zone: "Asia/Kolkata").time_zone
+    assert_equal "Asia/Kolkata", User.new(time_zone: "Asia/Calcutta").time_zone, "old browser name"
+    assert_equal "Asia/Kolkata", User.new(time_zone: "Mumbai").time_zone, "Rails name"
+    assert_equal "America/Detroit", User.new(time_zone: "America/Detroit").time_zone
+    assert_equal "UTC", User.new(time_zone: "Mars/Olympus_Mons").time_zone
+    assert_equal "UTC", User.new(time_zone: "").time_zone
+    assert_equal "+05:30", User.new(time_zone: "Asia/Kolkata").zone.formatted_offset
+  end
+
+  test "an unsubscribe token finds its user and no one else" do
+    token = users(:one).generate_token_for(:unsubscribe)
+
+    assert_equal users(:one), User.find_by_token_for(:unsubscribe, token)
+    assert_nil User.find_by_token_for(:unsubscribe, token.reverse)
+  end
 end
