@@ -1,4 +1,5 @@
 class PagesController < ApplicationController
+  include PricingPreferences
   allow_unauthenticated_access
   layout "marketing"
 

@@ -26,6 +26,7 @@
 | Accessibility (WCAG 2.1 AA checks, keyboard) and responsive pass | ✅ Done |
 | CI: tests, system tests, RuboCop, Brakeman, importmap audit | ✅ Done |
 | Privacy, terms, refund and contact pages, sign-up consent | ✅ Done (needs owner review) |
+| Pricing page (INR/USD, monthly/yearly toggle, FAQ) and job-switch landing copy | ✅ Done |
 | Google / GitHub sign-in | 📝 Planned |
 
 ## Screenshots

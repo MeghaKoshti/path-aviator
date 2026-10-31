@@ -21,6 +21,7 @@ module ApplicationHelper
   # Links every footer carries, so policies are one click from any page.
   def site_footer_links
     [
+      [ "Pricing", pricing_path ],
       [ "Privacy", privacy_path ],
       [ "Terms", terms_path ],
       [ "Refunds", refunds_path ],

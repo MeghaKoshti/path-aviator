@@ -1,23 +1,25 @@
-<% content_for :title, "Learning paths for anything" %>
+<% content_for :title, "Turn a job post into a study plan you’ll finish" %>
+<% content_for :meta_description, "Paste a job post or name a skill. Path Aviator plans a week-by-week route around the hours you have after work, with checked links and a public progress page for your CV." %>
 
 <%# Hero %>
 <section class="relative overflow-hidden" aria-labelledby="hero-title">
   <div class="pointer-events-none absolute inset-0 -z-10 bg-chart-grid [mask-image:linear-gradient(to_bottom,black,transparent_85%)]" aria-hidden="true"></div>
 
-  <div class="mx-auto grid max-w-6xl items-center gap-12 px-4 pb-20 pt-10 sm:px-6 sm:pt-16 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:pb-28 lg:pt-20">
+  <div class="mx-auto grid max-w-6xl items-center gap-12 px-4 pb-20 pt-10 [&>*]:min-w-0 sm:px-6 sm:pt-16 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:pb-28 lg:pt-20">
     <div class="max-w-xl">
-      <h1 id="hero-title" class="type-display text-[2.5rem] text-ink sm:text-6xl">
-        Chart a course for anything you want to learn.
+      <h1 id="hero-title" class="type-display text-[2.5rem] text-balance text-ink sm:text-6xl">
+        Turn the job post into a plan you’ll finish.
       </h1>
-      <p class="mt-6 text-lg leading-relaxed text-ink-muted">
-        Tell Path Aviator the topic, your level and the hours you have each week.
-        It plans a route of courses, docs, videos and practice, step by step,
-        and keeps track of how far you’ve come.
+      <p class="mt-6 text-lg leading-relaxed text-pretty text-ink-muted">
+        Paste the job description or name the skill. Path Aviator plans a week-by-week route
+        around the hours you have after work, links only to courses and docs it has checked,
+        and gives you a public progress page to put on your CV.
       </p>
       <div class="mt-8 flex flex-col gap-3 sm:flex-row">
         <%= ui_button "Plan my first path", new_registration_path, size: :lg %>
-        <%= ui_button "Sign in", new_session_path, variant: :secondary, size: :lg %>
+        <%= ui_button "See pricing", pricing_path, variant: :secondary, size: :lg %>
       </div>
+      <p class="mt-4 text-sm text-ink-subtle"><%= Plan.free.monthly_generations %> paths a month free. No card needed.</p>
     </div>
 
     <%= render "pages/flight_plan" %>
@@ -32,9 +34,9 @@
     <ol class="mt-12 grid gap-10 md:grid-cols-3 md:gap-8">
 
       <% [
-        [ "Tell us where you’re headed", "Pick a topic, your current level and the hours you can give it each week. Add a goal if you have one in mind." ],
-        [ "Get a route in about a minute", "Path Aviator plans 6 to 12 steps of courses, docs, videos, articles and practice, each with a time estimate." ],
-        [ "Fly it one leg at a time", "Tick off steps as you finish them. Your dashboard shows what’s next and how much time is left." ]
+        [ "Paste the job post, or name the skill", "Add your current level and the hours you can give it each week, say six hours after work." ],
+        [ "Get a week-by-week route", "In about a minute: 6 to 12 steps of courses, docs, videos and practice, each with a time estimate and a checked link." ],
+        [ "Show what you’ve done", "Tick steps off and keep your streak. Share a public progress page with recruiters, and add a certificate to LinkedIn when you finish." ]
       ].each_with_index do |(title, body), index| %>
         <li class="relative pl-16 md:pl-0">
           <% if index < 2 %>
@@ -56,20 +58,20 @@
 <section class="border-t border-line" aria-labelledby="features-title">
   <div class="mx-auto grid max-w-6xl gap-12 px-4 py-20 sm:px-6 lg:grid-cols-[1fr_2fr] lg:py-24">
     <div>
-      <h2 id="features-title" class="type-display text-3xl text-ink sm:text-4xl">What every path includes</h2>
-      <p class="mt-4 max-w-sm leading-relaxed text-ink-muted">A plan you can follow on a busy week, built from resources that already exist.</p>
+      <h2 id="features-title" class="type-display text-3xl text-ink sm:text-4xl">Built for the switch, not just the plan</h2>
+      <p class="mt-4 max-w-sm leading-relaxed text-ink-muted">Any chatbot can write a study plan. The hard part is week two. Path Aviator is built for the weeks after.</p>
     </div>
 
     <dl class="grid gap-x-10 gap-y-10 sm:grid-cols-2">
       <% [
-        [ "Real resources, in order", "Every step links to an actual course, doc, video or exercise, sequenced so each one builds on the last.",
+        [ "Links that work", "Every step is a real course, doc, video or exercise, checked when your path is planned. No dead pages, no made-up URLs.",
           "M4 6h16M4 12h10M4 18h6" ],
-        [ "Sized to your week", "Paths respect the hours you set, so three hours a week gets a different route than fifteen.",
+        [ "Sized to your evenings", "Paths respect the hours you set, so six hours a week after work gets a different route than fifteen.",
           "M12 7v5l3 2M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" ],
-        [ "Progress you can see", "Completed steps, percentage done and time remaining, all on one screen.",
+        [ "Accountability that sticks", "Weekly stats and a streak show when you’re slipping, while there’s still time to catch up.",
           "M4 19V5m5 14v-6m5 6V9m5 10V4" ],
-        [ "Change course anytime", "Not happy with a route? Regenerate it, or start a new path for another topic.",
-          "M4 12a8 8 0 0 1 13.7-5.7L20 8.6M20 4v4.6h-4.6M20 12a8 8 0 0 1-13.7 5.7L4 15.4M4 20v-4.6h4.6" ]
+        [ "Proof for interviews", "A public progress page for your CV and, when you finish, a certificate you can add to LinkedIn.",
+          "M9 12l2 2 4-4M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-3Z" ]
       ].each do |title, body, icon| %>
         <div>
           <dt class="flex items-center gap-3 font-semibold text-ink">
@@ -85,6 +87,24 @@
   </div>
 </section>
 
+<%# Pricing teaser: the monthly Pro price in the visitor's currency. %>
+<section class="border-t border-line bg-surface-raised" aria-labelledby="pricing-title"
+         data-controller="pricing" data-pricing-interval-value="month"
+         data-pricing-currency-value="<%= pricing_currency %>" data-pricing-chosen-value="<%= pricing_currency_chosen? %>">
+  <div class="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-20 sm:px-6 md:flex-row md:items-end md:justify-between lg:py-24">
+    <div class="max-w-2xl">
+      <h2 id="pricing-title" class="type-display text-3xl text-ink sm:text-4xl">Start free. Go Pro for the push.</h2>
+      <p class="mt-4 text-lg leading-relaxed text-pretty text-ink-muted">
+        Free gives you <%= Plan.free.monthly_generations %> new paths a month.
+        Pro is <% Plan::CURRENCIES.each do |currency| %><%= pricing_variant(currency:, class: "font-semibold text-ink") { "#{plan_price(Plan.pro, currency:, interval: :month)} a month" } %><% end %>
+        for unlimited paths, plans from job posts, weekly link checks and a LinkedIn certificate.
+        Less than a single online course.
+      </p>
+    </div>
+    <%= ui_button "See pricing", pricing_path, variant: :secondary, size: :lg, class: "shrink-0" %>
+  </div>
+</section>
+
 <%# Closing call to action %>
 <section class="relative overflow-hidden bg-brand-900" aria-labelledby="cta-title">
   <svg class="pointer-events-none absolute inset-0 h-full w-full text-route" viewBox="0 0 1200 320" preserveAspectRatio="none" fill="none" aria-hidden="true">
@@ -92,8 +112,8 @@
   </svg>
   <div class="relative mx-auto flex max-w-6xl flex-col items-start gap-8 px-4 py-20 sm:px-6 md:flex-row md:items-center md:justify-between">
     <div class="max-w-xl">
-      <h2 id="cta-title" class="type-display text-3xl text-white sm:text-4xl">Where do you want to go next?</h2>
-      <p class="mt-4 text-lg text-brand-100">Create an account and plan your first path in about a minute.</p>
+      <h2 id="cta-title" class="type-display text-3xl text-white sm:text-4xl">Your next role starts with week one.</h2>
+      <p class="mt-4 text-lg text-brand-100">Create a free account and plan your first path in about a minute.</p>
     </div>
     <%= ui_button "Plan my first path", new_registration_path, variant: :inverse, size: :lg, class: "shrink-0" %>
   </div>

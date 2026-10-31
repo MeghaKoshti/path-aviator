@@ -10,6 +10,7 @@
     <header class="mx-auto flex h-18 w-full max-w-6xl items-center gap-3 px-4 sm:px-6">
       <%= render "shared/logo" %>
       <nav aria-label="Account" class="ml-auto flex items-center gap-1 sm:gap-2">
+        <%= ui_button "Pricing", pricing_path, variant: :ghost, size: :sm, class: "max-sm:hidden", aria: { current: ("page" if current_page?(pricing_path)) } %>
         <% if authenticated? %>
           <%= ui_button "Your dashboard", dashboard_path, size: :sm %>
         <% else %>
