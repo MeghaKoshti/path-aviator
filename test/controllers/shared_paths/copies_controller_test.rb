@@ -58,4 +58,11 @@ class SharedPaths::CopiesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to learning_path_path(user.learning_paths.sole)
     assert_equal @path.title, user.learning_paths.sole.title
   end
+
+  test "someone with an account who picks Sign in on the copy sign-up page comes back to the shared path" do
+    get new_registration_path(copy: @path.share_token)
+    sign_in_as users(:two)
+
+    assert_redirected_to shared_path_url(@path.share_token)
+  end
 end

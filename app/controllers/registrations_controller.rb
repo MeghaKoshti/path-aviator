@@ -7,6 +7,11 @@ class RegistrationsController < ApplicationController
 
   def new
     @user = User.new
+    # Someone who already has an account picks "Sign in" here instead; bring
+    # them back to the plan they wanted to copy.
+    if (plan_url = plan_to_copy_url)
+      session[:return_to_after_authenticating] = plan_url
+    end
   end
 
   def create
@@ -38,6 +43,14 @@ class RegistrationsController < ApplicationController
         LearningPath.ready.find_by(share_token: params[:copy])
       elsif params[:learn].present?
         LearnTopic.all.find { |topic| topic.slug == params[:learn] }
+      end
+    end
+
+    def plan_to_copy_url
+      if params[:copy].present?
+        shared_path_url(params[:copy])
+      elsif params[:learn].present?
+        learn_topic_url(params[:learn])
       end
     end
 
