@@ -86,6 +86,6 @@ module PricingHelper
   end
 
   def pro_user?(user)
-    user.respond_to?(:pro?) && user.pro?
+    ProAccess.granted?(user)
   end
 end

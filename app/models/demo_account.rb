@@ -105,12 +105,13 @@ module DemoAccount
         learning_goal.update!(goal)
 
         learning_path = learning_goal.learning_path || learning_goal.build_learning_path(user: user)
-        learning_path.update!(path.merge(status: :ready, error_message: nil, generated_at: learning_path.generated_at || 3.weeks.ago))
+        learning_path.update!(path.merge(status: :ready, error_message: nil, generated_at: learning_path.generated_at || 3.weeks.ago,
+          certificate_token: nil, certificate_issued_at: nil))
 
         steps.each.with_index(1) do |attrs, position|
           step = learning_path.path_steps.find_or_initialize_by(position: position)
           days_ago = completed_days_ago[position - 1]
-          step.update!({ note: nil }.merge(attrs, completed_at: days_ago && days_ago.days.ago))
+          step.update!({ note: nil, evidence_url: nil }.merge(attrs, completed_at: days_ago && days_ago.days.ago))
         end
         learning_path.path_steps.where(position: (steps.size + 1)..).destroy_all
 

@@ -27,6 +27,7 @@
 | CI: tests, system tests, RuboCop, Brakeman, importmap audit | ✅ Done |
 | Privacy, terms, refund and contact pages, sign-up consent | ✅ Done (needs owner review) |
 | Pricing page (INR/USD, monthly/yearly toggle, FAQ) and job-switch landing copy | ✅ Done |
+| Shareable proof: link previews, "Copy this path", Pro completion certificate with LinkedIn "Add to profile" | ✅ Done |
 | Google / GitHub sign-in | 📝 Planned |
 
 ## Screenshots
@@ -91,7 +92,8 @@ flowchart LR
 3. When the job finishes, it broadcasts the re-rendered path partial. The page swaps from the planning animation to the route without a reload, and a polite live region tells screen reader users.
 4. Ticking a step sends a `PATCH` and gets back Turbo Streams that update the route, the progress panel and the time left. Counter caches keep the dashboard to a fixed number of queries.
 5. Each step has a private note, edited in place inside a Turbo Frame (Esc cancels). The dashboard's "This week" panel works out time against the weekly goal and the streak from when steps were ticked.
-6. Sharing gives a path a random token and a public, `noindex` page at `/p/:token` with the steps and progress only. "New link" swaps the token and "Stop sharing" clears it, so old links 404.
+6. Sharing gives a path a random token and a public, `noindex` page at `/p/:token` with the steps and progress only. "New link" swaps the token and "Stop sharing" clears it, so old links 404. Visitors can "Copy this path": they get the same steps with fresh progress, and no AI call is made (guests sign up first and the copy is made straight after).
+7. When every step is ticked, Pro users can publish a certificate at `/c/:token` with optional evidence links per step and a LinkedIn "Add to profile" link. It goes offline if a step is un-ticked, and the owner can revoke it. Every page carries Open Graph and Twitter tags with one static 1200×630 card (`app/assets/images/og-card.svg`, rendered to PNG).
 
 Without a `GEMINI_API_KEY` (and always in tests), a built-in fake generator returns a realistic sample path, so the whole flow works offline.
 
@@ -201,6 +203,7 @@ Add an `A` record, for example `pathaviator.example.com → 203.0.113.10`, and w
 | `SMTP_PASSWORD` | No | secret | SMTP password or API key |
 | `MAILER_FROM` | No | app | Sender address. Defaults to `Path Aviator <no-reply@APP_HOST>` |
 | `LEGAL_OWNER_NAME` | Yes, before launch | app | Your legal name, shown as the operator and grievance officer on the policy pages |
+| `LINKEDIN_ORGANIZATION_ID` | No | app | Your LinkedIn company page ID. When set, "Add to LinkedIn" on certificates links to that page instead of using the plain name "Path Aviator" |
 | `SUPPORT_EMAIL` | Yes, before launch | app | The monitored support and grievance address shown on the policy and contact pages |
 
 Keep them in a file that git ignores (the `/.env*` rule covers `.env.deploy`) and load it before each Kamal command:

@@ -1,0 +1,53 @@
+<% content_for :title, "Certificate for #{@learning_path.title}" %>
+<% steps = @learning_path.path_steps.to_a %>
+
+<div class="mx-auto max-w-2xl">
+  <%= link_to "Back to the path", @learning_path, class: "text-sm font-medium text-brand-700 underline-offset-4 hover:underline" %>
+  <h1 class="type-display mt-4 text-3xl text-balance text-ink"><%= @learning_path.certificate_published? ? "Your certificate" : "Publish your certificate" %></h1>
+  <p class="mt-3 text-pretty text-ink-muted">
+    Anyone with the link will see your name, “<%= @learning_path.title %>”, its steps, the total study time and when you started and finished.
+    Your notes and email stay private. If you un-tick a step or regenerate the path, the link stops working until every step is done again.
+  </p>
+
+  <% if Current.user.name.blank? %>
+    <p class="mt-6 rounded-control bg-warning-50 px-4 py-3 text-sm font-medium text-warning-700" role="alert">
+      Your name is printed on the certificate. <%= link_to "Add it in Settings", settings_path, class: "underline underline-offset-4" %>, then come back.
+    </p>
+  <% end %>
+
+  <%= form_with url: learning_path_certificate_path(@learning_path), method: :post, class: "mt-8" do %>
+    <%= render "shared/card", title: "Evidence links (optional)" do %>
+      <p class="-mt-2 text-sm text-pretty text-ink-muted">Link to your own work for any step: a GitHub repo, notes, a demo or a blog post. They appear on the certificate.</p>
+      <div class="mt-6 space-y-5">
+        <% steps.each do |step| %>
+          <% field_id = "evidence_#{step.id}" %>
+          <% error = step.errors.full_messages_for(:evidence_url).first %>
+          <div class="space-y-1.5">
+            <label for="<%= field_id %>" class="block text-sm font-semibold text-ink">Step <%= step.position %>: <%= step.title %></label>
+            <%= url_field_tag "evidence[#{step.id}]", step.evidence_url, id: field_id, placeholder: "https://github.com/you/project",
+                  class: ui_input_classes(invalid: error.present?), aria: { invalid: error.present? || nil, describedby: ("#{field_id}_error" if error) } %>
+            <% if error %>
+              <p id="<%= field_id %>_error" class="text-sm font-medium text-danger-600"><%= error %></p>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div class="mt-6 flex flex-wrap items-center gap-3">
+      <%= button_tag @learning_path.certificate_published? ? "Save and view certificate" : "Publish certificate", type: :submit,
+            class: ui_button_classes(size: :lg), disabled: Current.user.name.blank? %>
+    </div>
+  <% end %>
+
+  <% if @learning_path.certificate_published? %>
+    <div class="mt-10 border-t border-line pt-6">
+      <h2 class="font-semibold text-ink">Revoke the certificate</h2>
+      <p class="mt-1 text-sm text-ink-muted">The link stops working, including on LinkedIn. You can publish a new one later.</p>
+      <div class="mt-4">
+        <%= ui_button "Revoke certificate", learning_path_certificate_path(@learning_path), method: :delete, variant: :danger_ghost, size: :sm,
+              data: { turbo_confirm: "Revoke this certificate? Its link will stop working, including on LinkedIn." } %>
+      </div>
+    </div>
+  <% end %>
+</div>

@@ -5,9 +5,13 @@ Rails.application.routes.draw do
   resources :learning_paths, only: %i[ show destroy ] do
     post :regenerate, on: :member
     resource :share, only: %i[ create destroy ], module: :learning_paths
+    resource :certificate, only: %i[ new create destroy ], module: :learning_paths
   end
-  # Public, read-only view of a shared path.
+  # Public, read-only view of a shared path, and copying it into your own account.
   get "p/:token", to: "shared_paths#show", as: :shared_path
+  post "p/:token/copy", to: "shared_paths/copies#create", as: :copy_shared_path
+  # Public completion certificate.
+  get "c/:token", to: "certificates#show", as: :certificate
   resources :path_steps, only: [] do
     patch :toggle, on: :member
     resource :note, only: %i[ show edit update ], module: :path_steps

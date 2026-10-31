@@ -11,6 +11,7 @@ class PathStep < ApplicationRecord
 
   # A blank note is stored as nil, so saving an empty box removes the note.
   normalizes :note, with: ->(note) { note.strip.presence }
+  normalizes :evidence_url, with: ->(url) { url.strip.presence }
 
   validates :title, presence: true
   validates :position, numericality: { only_integer: true, greater_than: 0 },
@@ -19,6 +20,7 @@ class PathStep < ApplicationRecord
   validates :estimated_minutes, numericality: { only_integer: true, greater_than: 0 }
   validates :note, length: { maximum: NOTE_MAX_LENGTH }
   validate :resource_url_must_be_http
+  validate :evidence_url_must_be_http, if: :evidence_url?
 
   # completed_steps_count is kept in sync by these callbacks, which run inside
   # the same transaction as the step's own save or destroy.
@@ -55,5 +57,9 @@ class PathStep < ApplicationRecord
 
     def resource_url_must_be_http
       errors.add(:resource_url, "must be an http or https link") unless self.class.http_url?(resource_url)
+    end
+
+    def evidence_url_must_be_http
+      errors.add(:evidence_url, "must be a link starting with http:// or https://") unless self.class.http_url?(evidence_url)
     end
 end

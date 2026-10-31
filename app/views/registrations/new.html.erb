@@ -2,10 +2,13 @@
 <% content_for :meta_description, "Create a free Path Aviator account and plan a step-by-step learning path in about a minute." %>
 
 <h1 class="type-display text-2xl text-ink sm:text-[1.75rem]">Create your account</h1>
-<p class="mt-2 text-pretty text-ink-muted">Next, you’ll tell us what you want to learn and we’ll plan the route.</p>
+<p class="mt-2 text-pretty text-ink-muted">
+  <%= params[:copy].present? ? "Then the path you picked is copied to your account, ready to start." : "Next, you’ll tell us what you want to learn and we’ll plan the route." %>
+</p>
 
 <% invalid = first_invalid_field(@user, %i[name email_address password password_confirmation]) %>
 <%= form_with model: @user, url: registration_path, class: "mt-8 space-y-5" do |form| %>
+  <%= hidden_field_tag :copy, params[:copy], id: nil if params[:copy].present? %>
   <% if @user.errors.any? %>
     <p class="rounded-control bg-danger-50 px-4 py-3 text-sm font-medium text-danger-700" role="alert">
       <%= pluralize(@user.errors.count, "thing needs", plural: "things need") %> fixing before we can create your account.

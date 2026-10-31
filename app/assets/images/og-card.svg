@@ -1,0 +1,52 @@
+<!--
+  Share-preview card (1200×630) for Open Graph and Twitter.
+  Source for og-card.png. The text is set in Archivo (expanded, bold) from
+  app/assets/fonts/archivo-variable.woff2, so render it in a browser that has
+  that font loaded (we use headless Chromium via Playwright) and save it as PNG.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" fill="none" stroke="#ffffff" stroke-opacity="0.06" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#221862" stop-opacity="0"/>
+      <stop offset="1" stop-color="#160f45" stop-opacity="0.9"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="#221862"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <rect y="380" width="1200" height="250" fill="url(#fade)"/>
+
+  <!-- Brand mark and wordmark -->
+  <g transform="translate(80 72)">
+    <rect width="64" height="64" rx="18" fill="#ffffff"/>
+    <path d="M17 47c9 0 10-13 18-15s9-7 11-12" fill="none" stroke="#3f2daa" stroke-width="4" stroke-linecap="round" stroke-dasharray="6 5"/>
+    <circle cx="17" cy="47" r="5.2" fill="#b4277a"/>
+    <path d="M51 13 49.2 26l-4-4.8-6 1.2z" fill="#3f2daa"/>
+    <text x="88" y="44" fill="#ffffff" style="font: 700 34px Archivo; font-stretch: 125%; letter-spacing: -0.5px">Path Aviator</text>
+  </g>
+
+  <!-- Headline -->
+  <g fill="#ffffff" style="font: 700 68px Archivo; font-stretch: 125%; letter-spacing: -1.4px">
+    <text x="80" y="252">Turn the job post into</text>
+    <text x="80" y="330">a plan you’ll finish.</text>
+  </g>
+  <g fill="#cbc3f8" style="font: 400 30px Archivo; letter-spacing: -0.2px">
+    <text x="80" y="398">Week-by-week study plans with checked links</text>
+    <text x="80" y="440">and a public progress page for your CV.</text>
+  </g>
+
+  <!-- Route: flown legs solid, the rest dashed, ending at the destination -->
+  <path d="M80 560 C 220 560, 260 512, 380 516 S 560 566, 680 548 S 900 470, 1000 500 S 1090 520, 1120 470"
+        fill="none" stroke="#b4277a" stroke-opacity="0.6" stroke-width="3" stroke-dasharray="8 11" stroke-linecap="round"/>
+  <path d="M80 560 C 220 560, 260 512, 380 516 S 560 566, 680 548"
+        fill="none" stroke="#e05aa8" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="80" cy="560" r="10" fill="#e05aa8"/>
+  <circle cx="380" cy="516" r="10" fill="#e05aa8"/>
+  <circle cx="680" cy="548" r="20" fill="#e05aa8" fill-opacity="0.25"/>
+  <circle cx="680" cy="548" r="10" fill="#221862" stroke="#e05aa8" stroke-width="5"/>
+  <circle cx="1000" cy="500" r="9" fill="#221862" stroke="#b4277a" stroke-width="3"/>
+  <path d="M1120 452 l14 24 h-28 z" fill="#ffffff"/>
+</svg>

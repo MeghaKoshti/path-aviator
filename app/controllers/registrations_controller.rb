@@ -14,7 +14,11 @@ class RegistrationsController < ApplicationController
 
     if @user.save
       start_new_session_for @user
-      redirect_to new_learning_goal_path, notice: "Welcome aboard! Let’s plan your first path."
+      if (shared = path_to_copy)
+        redirect_to shared.copy_for(@user), notice: "Welcome aboard! The path is copied to your account."
+      else
+        redirect_to new_learning_goal_path, notice: "Welcome aboard! Let’s plan your first path."
+      end
     else
       render :new, status: :unprocessable_entity
     end
@@ -23,6 +27,11 @@ class RegistrationsController < ApplicationController
   private
     def registration_params
       params.expect(user: [ :name, :email_address, :password, :password_confirmation ])
+    end
+
+    # Set when a guest clicked "Copy this path" on a shared page.
+    def path_to_copy
+      LearningPath.ready.find_by(share_token: params[:copy]) if params[:copy].present?
     end
 
     def redirect_signed_in_user

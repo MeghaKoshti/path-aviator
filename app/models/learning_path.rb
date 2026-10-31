@@ -48,6 +48,49 @@ class LearningPath < ApplicationRecord
     update!(share_token: nil)
   end
 
+  # Copies the plan for another person: same goal settings, title and steps,
+  # none of the progress, notes or evidence. No AI call is made.
+  def copy_for(user)
+    transaction do
+      goal = user.learning_goals.create!(learning_goal.slice(:topic, :current_level, :hours_per_week))
+      goal.create_learning_path!(user:, title:, summary:, status: :ready, generated_at: Time.current).tap do |copy|
+        path_steps.each do |step|
+          copy.path_steps.create!(step.slice(:position, :title, :description, :resource_type, :resource_url, :estimated_minutes))
+        end
+      end
+    end
+  end
+
+  # A finished path can get a public certificate at /c/:token. Publishing
+  # again keeps the same link (it may be on someone's LinkedIn already).
+  def certificate_published?
+    certificate_token.present?
+  end
+
+  def publish_certificate!
+    raise ArgumentError, "only a finished path gets a certificate" unless completed?
+    return if certificate_published?
+
+    update!(certificate_token: self.class.generate_unique_secure_token, certificate_issued_at: Time.current)
+  end
+
+  def revoke_certificate!
+    update!(certificate_token: nil, certificate_issued_at: nil)
+  end
+
+  def total_minutes
+    path_steps.sum(&:estimated_minutes)
+  end
+
+  # When the learner set off: planning day, or an earlier tick on a copied or re-planned path.
+  def started_at
+    [ created_at, *path_steps.filter_map(&:completed_at) ].min
+  end
+
+  def finished_at
+    path_steps.filter_map(&:completed_at).max
+  end
+
   def owner_first_name
     user.name.to_s.split.first
   end
