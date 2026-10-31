@@ -203,6 +203,17 @@ Pro is sold through a payment provider behind one interface, `Billing::Provider`
 - **Production** uses `Billing::Dodo` ([Dodo Payments](https://docs.dodopayments.com), merchant of record: it charges, files GST/VAT and pays out).
 - Prices come from `config/plans.yml`: ₹199/month and ₹1,499/year (shown **including GST**), $6/month and $48/year. Visitors from India (`CF-IPCountry: IN` or an `*-IN` browser language) see rupees, others dollars, and settings has an INR/USD toggle.
 
+**Webhooks.** `POST /webhooks/billing/:provider` needs no session or CSRF token; the signature proves the request is genuine. Dodo signs with [Standard Webhooks](https://www.standardwebhooks.com/) (`webhook-id`, `webhook-timestamp`, `webhook-signature`, HMAC-SHA256, compared in constant time) and requests more than 5 minutes old are rejected. Each event id is stored in `webhook_events` with a unique index, so a retried delivery returns 200 without being applied again. Subscriptions move through these states:
+
+| Event | Subscription | Plan |
+|---|---|---|
+| active, renewed | `active` | Pro |
+| payment failed (on hold, past due) | `past_due` | Pro for 3 more days, then Free |
+| cancelled | `canceled` | Pro until the paid period ends |
+| expired | `expired` | Free |
+
+Events older than one already applied are skipped. `BillingReconcileJob` runs daily at 4:30am UTC (`config/recurring.yml`) in case a webhook was missed: it expires cancelled subscriptions whose period is over, re-syncs plans after the grace period, and logs active subscriptions whose renewal never arrived.
+
 Set up Dodo: create four **subscription products** (Pro monthly and yearly, in INR and in USD; mark the INR ones tax-inclusive), copy their ids into the variables below, and add a webhook endpoint pointing at `https://APP_HOST/webhooks/billing/dodo`. Test mode and live mode have separate keys, products and webhooks.
 
 | Variable | Purpose |

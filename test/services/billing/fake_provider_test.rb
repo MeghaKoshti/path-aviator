@@ -23,8 +23,9 @@ class Billing::FakeProviderTest < ActiveSupport::TestCase
   end
 
   test "delivering an activation makes the user Pro through a signed webhook" do
-    subscription = @provider.deliver("activated", user: @user, subscription_id: "fake_sub_1", interval: "month",
-                                     currency: "inr", current_period_end: 1.month.from_now)
+    result = @provider.deliver("activated", user: @user, subscription_id: "fake_sub_1", interval: "month",
+                               currency: "inr", current_period_end: 1.month.from_now)
+    subscription = result.subscription
 
     assert subscription.active?
     assert_equal [ "fake", "fake_sub_1", "fake_cus_#{@user.id}" ], [ subscription.provider, subscription.external_id, subscription.customer_id ]

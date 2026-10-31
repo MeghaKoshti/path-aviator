@@ -49,6 +49,9 @@ Rails.application.routes.draw do
   get "sitemap.xml", to: "sitemaps#show", as: :sitemap, format: false, defaults: { format: "xml" }
   get "robots.txt", to: "sitemaps#robots", as: :robots, format: false, defaults: { format: "text" }
 
+  # Signed notifications from the payment provider (Billing::WebhookReceiver).
+  post "webhooks/billing/:provider", to: "webhooks/billing#create", as: :billing_webhook
+
   # Billing: checkout and the customer portal live at the payment provider.
   scope "billing", module: :billing, as: :billing do
     post "checkout", to: "checkouts#create", as: :checkout

@@ -38,3 +38,10 @@ production:
     class: DatabaseBackupJob
     queue: default
     schedule: every day at 2:30am
+
+  # Catches subscriptions whose webhook was missed: ends Pro for cancelled
+  # subscriptions after their paid period and for unpaid ones after the grace.
+  billing_reconcile:
+    class: BillingReconcileJob
+    queue: default
+    schedule: every day at 4:30am

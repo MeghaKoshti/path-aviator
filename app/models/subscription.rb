@@ -1,9 +1,20 @@
-# Our copy of a paid subscription at the payment provider. Webhooks update it
-# (Billing::WebhookReceiver) and it keeps users.plan in step.
+# Our copy of a paid subscription at the payment provider. Webhooks drive it
+# through these states (Billing::WebhookReceiver), and it keeps users.plan in
+# step:
+#
+#   activated / renewed  -> active     Pro
+#   payment_failed       -> past_due   Pro for PAST_DUE_GRACE after the first failure
+#   canceled             -> canceled   Pro until current_period_end
+#   expired              -> expired    Free
+#
+# BillingReconcileJob re-checks every day in case a webhook was missed.
 class Subscription < ApplicationRecord
+  PAST_DUE_GRACE = 3.days
+
   belongs_to :user
 
-  enum :status, { trialing: "trialing", active: "active", past_due: "past_due", canceled: "canceled" }, validate: true
+  enum :status, { trialing: "trialing", active: "active", past_due: "past_due", canceled: "canceled", expired: "expired" },
+       validate: true
 
   validates :provider, :external_id, presence: true
   validates :interval, inclusion: { in: Billing::INTERVALS }
@@ -11,26 +22,75 @@ class Subscription < ApplicationRecord
 
   scope :latest_first, -> { order(created_at: :desc, id: :desc) }
 
-  # Does this subscription entitle the user to Pro right now?
+  # Does this subscription entitle the user to Pro at this moment?
   def grants_pro?(now: Time.current)
-    active? || trialing?
+    case status
+    when "active", "trialing" then true
+    when "past_due" then past_due_at.nil? || now < grace_ends_at
+    when "canceled" then current_period_end.present? && now < current_period_end
+    else false
+    end
+  end
+
+  def grace_ends_at
+    past_due_at && past_due_at + PAST_DUE_GRACE
   end
 
   def plan_details
     Plan.find(plan)
   end
 
-  # Applies a Billing::Event from the provider.
+  # Applies a Billing::Event from the provider. Returns false (and changes
+  # nothing) when the event is older than one already applied.
   def apply_event!(event)
+    return false if stale?(event)
+
     copy_details(event.subscription)
-    upgrading = new_record? && event.type.in?(%w[activated renewed])
-    self.status = :active if event.type.in?(%w[activated renewed])
+    # A new (or ended) subscription turning active is an upgrade; a renewal
+    # or a recovered payment is not.
+    upgrading = (new_record? || expired? || canceled?) && event.type.in?(%w[activated renewed])
+    transition(event)
+    self.last_event_at = event.occurred_at if event.occurred_at
     save!
     user.sync_plan!
     Event.track(:upgraded, user: user, provider: provider, interval: interval, currency: currency) if upgrading
+    true
+  end
+
+  # The daily safety net for missed webhooks: a cancelled subscription whose
+  # paid period is over becomes expired. Returns true when something changed.
+  def reconcile!(now: Time.current)
+    expire = canceled? && current_period_end.present? && current_period_end <= now
+    update!(status: :expired) if expire
+
+    plan_before = user.plan
+    user.sync_plan!
+    expire || user.plan != plan_before
   end
 
   private
+    def stale?(event)
+      persisted? && last_event_at && event.occurred_at && event.occurred_at < last_event_at
+    end
+
+    def transition(event)
+      case event.type
+      when "activated", "renewed"
+        self.status = :active
+        self.past_due_at = nil
+      when "payment_failed"
+        self.status = :past_due
+        self.past_due_at ||= event.occurred_at || Time.current
+      when "canceled"
+        self.status = :canceled
+        self.cancel_at_period_end = true
+      when "expired"
+        self.status = :expired
+      end
+      # "updated" changes details only (dates, cancel flag); status changes
+      # come with their own events.
+    end
+
     def copy_details(info)
       self.customer_id = info.customer_id if info.customer_id.present?
       self.interval = info.interval if info.interval.present?

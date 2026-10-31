@@ -120,7 +120,10 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_153844) do
     t.boolean "cancel_at_period_end", default: false, null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "past_due_at"
+    t.datetime "last_event_at"
     t.index ["provider", "external_id"], name: "index_subscriptions_on_provider_and_external_id", unique: true
+    t.index ["status"], name: "index_subscriptions_on_status"
     t.index ["user_id"], name: "index_subscriptions_on_user_id"
   end
 
@@ -136,6 +139,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_153844) do
     t.boolean "weekly_digest", default: true, null: false
     t.datetime "weekly_digest_sent_at"
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
+  end
+
+  create_table "webhook_events", force: :cascade do |t|
+    t.string "provider", null: false
+    t.string "event_id", null: false
+    t.string "event_type"
+    t.text "payload"
+    t.datetime "processed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["provider", "event_id"], name: "index_webhook_events_on_provider_and_event_id", unique: true
   end
 
   add_foreign_key "data_exports", "users"
