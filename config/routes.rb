@@ -17,11 +17,16 @@ Rails.application.routes.draw do
     resource :note, only: %i[ show edit update ], module: :path_steps
   end
   resource :dashboard, only: :show
+  # Owner's dashboard; anyone not in ADMIN_EMAILS gets a 404.
+  namespace :admin do
+    root "dashboards#show"
+  end
   resource :settings, only: :show
   namespace :settings do
     resource :profile, only: :update
     resource :password, only: :update
     resource :preferences, only: :update
+    resource :data_export, only: %i[ create show ]
     resource :account, only: :destroy
   end
   resources :passwords, param: :token

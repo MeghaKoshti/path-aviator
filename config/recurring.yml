@@ -32,3 +32,9 @@ production:
     class: WeeklyDigestJob
     queue: default
     schedule: every hour at minute 2
+
+  # Copies the database to BACKUP_DIR every night; does nothing without it.
+  database_backup:
+    class: DatabaseBackupJob
+    queue: default
+    schedule: every day at 2:30am

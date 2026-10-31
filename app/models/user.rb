@@ -11,6 +11,9 @@ class User < ApplicationRecord
   # Paths are declared first so they are destroyed before the goals they point to.
   has_many :learning_paths, dependent: :destroy
   has_many :learning_goals, dependent: :destroy
+  has_many :data_exports, dependent: :destroy
+  # Analytics rows outlive the account, but no longer point at anyone.
+  has_many :events, dependent: :nullify
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
   normalizes :name, with: ->(name) { name.strip.presence }
@@ -33,6 +36,12 @@ class User < ApplicationRecord
   validates :password, length: { minimum: 8 }, allow_nil: true
   validates :name, length: { maximum: 100 }, allow_nil: true
 
+  # People listed in ADMIN_EMAILS (comma-separated) can open /admin.
+  def admin?
+    admins = ENV.fetch("ADMIN_EMAILS", "").split(",").map { |email| email.strip.downcase }
+    !demo? && admins.include?(email_address)
+  end
+
   # "Today", "this week" and streaks follow this zone.
   def zone
     ActiveSupport::TimeZone[time_zone] || ActiveSupport::TimeZone["UTC"]
@@ -49,13 +58,13 @@ class User < ApplicationRecord
     email_address.to_s.casecmp?(DemoAccount.email)
   end
 
-  # Pro feature. `pro?` arrives with billing; until then nobody has it.
+  # Pro feature (see ProAccess).
   def weekly_link_recheck?
-    respond_to?(:pro?) && pro?
+    ProAccess.granted?(self)
   end
 
   # Everyone gets one path planned from a job post; after that it's Pro.
   def can_plan_from_job_post?
-    (respond_to?(:pro?) && pro?) || !learning_goals.where.not(job_post: nil).exists?
+    ProAccess.granted?(self) || !learning_goals.where.not(job_post: nil).exists?
   end
 end

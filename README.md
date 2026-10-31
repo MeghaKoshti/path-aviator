@@ -27,6 +27,7 @@
 | Checked resource links: SSRF-safe checker, badges, a substitute for broken links, weekly recheck (Pro) | ✅ Done |
 | Path from a job post or a finish date: skills it covers, steps sized to the date, on track / behind | ✅ Done |
 | Per-user time zone (detected at sign-up, editable) and a Sunday check-in email with one-click unsubscribe | ✅ Done |
+| Ops: `/admin` for ADMIN_EMAILS, error reporting, first-party activation events, "Download my data", nightly backups | ✅ Done |
 | CI: tests, system tests, RuboCop, Brakeman, importmap audit | ✅ Done |
 | Privacy, terms, refund and contact pages, sign-up consent | ✅ Done (needs owner review) |
 | Pricing page (INR/USD, monthly/yearly toggle, FAQ) and job-switch landing copy | ✅ Done |
@@ -145,6 +146,14 @@ The demo account is shared, so its name, email and password can't be changed, it
 GEMINI_API_KEY=your-key bin/dev
 ```
 
+### Ops
+
+- **`/admin`** (only for `ADMIN_EMAILS`, a 404 for everyone else): users, verified and Pro users (once billing lands), paths by status, generations today and this month, an estimated AI cost, the activation funnel and the last 50 failed generations.
+- **Errors:** a `Rails.error` subscriber sends every reported or unhandled error to `ErrorReporter`. The log adapter is the default; a Sentry or AppSignal adapter is one more class behind `ERROR_REPORTER`.
+- **Analytics:** an `events` table records `signed_up`, `path_ready`, `path_failed`, `first_step_done`, `returned_week_2` and `upgraded`. First-party only, no scripts; a deleted account's events stay without the user.
+- **Download my data:** Settings builds a `.tar.gz` in a background job with `data.json` (account, goals including job posts, paths, steps, notes, events) and a Markdown checklist per path.
+- **Backups:** see `BACKUP_DIR` under Deploy.
+
 ### Time zones and the weekly email
 
 Sign-up stores the browser's time zone (a Stimulus controller fills a hidden field) and Settings can change it. Every request runs in the user's zone (`Time.use_zone`), so the week, "today" and streaks follow their local midnight. `WeeklyDigestJob` runs hourly and sends `WeeklyDigestMailer` to each opted-in user at 6pm on their own Sunday, if they learned something in the last 30 days, never to the demo account. Each email has a signed one-click unsubscribe link plus `List-Unsubscribe` headers. Preview it at `/rails/mailers/weekly_digest_mailer/check_in`.
@@ -231,6 +240,11 @@ Add an `A` record, for example `pathaviator.example.com → 203.0.113.10`, and w
 | `LEGAL_OWNER_NAME` | Yes, before launch | app | Your legal name, shown as the operator and grievance officer on the policy pages |
 | `LINKEDIN_ORGANIZATION_ID` | No | app | Your LinkedIn company page ID. When set, "Add to LinkedIn" on certificates links to that page instead of using the plain name "Path Aviator" |
 | `SUPPORT_EMAIL` | Yes, before launch | app | The monitored support and grievance address shown on the policy and contact pages |
+| `ADMIN_EMAILS` | No | app | Comma-separated emails that can open `/admin`. Everyone else gets a 404 there |
+| `ERROR_REPORTER` | No | app | Where `Rails.error` reports go. `log` (default) writes `[ErrorReporter]` lines to the log |
+| `BACKUP_DIR` | No | app | Folder for the nightly SQLite backup (e.g. a second volume). No backups without it |
+| `BACKUP_KEEP` | No | app | How many nightly backups to keep. Default 7 |
+| `AI_USD_PER_MILLION_TOKENS` | No | app | Price used for the admin page's AI cost estimate. Default 1.5 |
 
 Keep them in a file that git ignores (the `/.env*` rule covers `.env.deploy`) and load it before each Kamal command:
 
@@ -283,6 +297,8 @@ User.find_by(email_address: DemoAccount.email)&.destroy
 | `bin/kamal logs` | Follow the app logs |
 | `bin/kamal console` | Rails console on the server |
 | `bin/kamal rollback <version>` | Go back to an earlier image (see `bin/kamal app images`) |
+
+With `BACKUP_DIR` set, `DatabaseBackupJob` writes a consistent copy of the database there every night at 2:30am UTC (`VACUUM INTO`) and keeps the newest `BACKUP_KEEP`. Point it at a second volume or a mounted disk, and copy that off the server.
 
 Everything the app stores is in the `path_aviator_storage` volume (`/var/lib/docker/volumes/path_aviator_storage/_data` on the server). Turn on your provider's server backups, or copy a consistent snapshot with `bin/kamal app exec --reuse "sqlite3 storage/production.sqlite3 '.backup storage/backup.sqlite3'"` and download it.
 

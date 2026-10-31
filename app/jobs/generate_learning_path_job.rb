@@ -1,5 +1,6 @@
 class GenerateLearningPathJob < ApplicationJob
   FAILURE_MESSAGE = "We couldn't build this path. Please try again.".freeze
+  PROMPT_TOKENS = 900
 
   queue_as :default
   # The path may have been deleted before the job ran; nothing left to do.
@@ -9,8 +10,13 @@ class GenerateLearningPathJob < ApplicationJob
     return unless learning_path.generating?
 
     result = generate(learning_path.learning_goal)
-    CheckLinksJob.perform_later(learning_path) if save_result(learning_path, result)
+    if save_result(learning_path, result)
+      Event.track(:path_ready, user: learning_path.user, path_id: learning_path.id, estimated_tokens: estimated_tokens(result))
+      CheckLinksJob.perform_later(learning_path)
+    end
   rescue PathGenerator::Error => e
+    # Expected now and then (timeouts, bad JSON), so a warning, not an alarm.
+    Rails.error.report(e, handled: true, severity: :warning, context: { learning_path_id: learning_path.id })
     mark_failed(learning_path, e)
   rescue StandardError => e
     # Don't leave the user looking at a spinner forever; re-raise so the error
@@ -65,12 +71,19 @@ class GenerateLearningPathJob < ApplicationJob
     # can't clobber a path that a newer job already finished.
     def mark_failed(learning_path, error)
       Rails.logger.error("[GenerateLearningPathJob] path #{learning_path.id} failed: #{error.class}: #{error.message}")
+      Event.track(:path_failed, user: User.find_by(id: learning_path.user_id), path_id: learning_path.id, error: "#{error.class.name}: #{error.message.truncate(200)}")
       LearningPath.where(id: learning_path.id, status: LearningPath.statuses[:generating]).update_all(
         status: LearningPath.statuses[:failed],
         error_message: FAILURE_MESSAGE,
         raw_response: error.try(:raw),
         updated_at: Time.current
       )
+    end
+
+    # No token counts come back from the generator yet, so the admin page's AI
+    # cost is estimated: about 4 characters a token for the answer, plus the prompt.
+    def estimated_tokens(result)
+      PROMPT_TOKENS + result.raw.to_s.length / 4
     end
 
     # Reload so the broadcast shows what is really saved, not attributes left

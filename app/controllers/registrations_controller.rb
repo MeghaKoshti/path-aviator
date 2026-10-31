@@ -13,6 +13,7 @@ class RegistrationsController < ApplicationController
     @user = User.new(registration_params)
 
     if @user.save
+      Event.track(:signed_up, user: @user)
       start_new_session_for @user
       if (shared = path_to_copy)
         redirect_to shared.copy_for(@user), notice: "Welcome aboard! The plan is copied to your account."

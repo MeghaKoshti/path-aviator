@@ -191,4 +191,29 @@ class GenerateLearningPathJobTest < ActiveJob::TestCase
 
     assert_equal [ "SQL", "PostgreSQL", "Python" ], @path.reload.skills
   end
+
+  test "records a ready path with an estimated token count" do
+    raw = valid_json
+    PathGenerator.client = ScriptedClient.new(raw)
+    GenerateLearningPathJob.perform_now(@path)
+
+    event = Event.named(:path_ready).sole
+    assert_equal @path.user, event.user
+    assert_equal GenerateLearningPathJob::PROMPT_TOKENS + raw.length / 4, event.properties["estimated_tokens"]
+  end
+
+  test "records a failure and reports it as a warning" do
+    PathGenerator.client = ScriptedClient.new(PathGenerator::Timeout.new("slow"))
+    reports = []
+    adapter = Object.new
+    adapter.define_singleton_method(:call) { |error, **details| reports << [ error, details ] }
+    ErrorReporter.adapter = adapter
+
+    GenerateLearningPathJob.perform_now(@path)
+
+    assert_equal "PathGenerator::Timeout: slow", Event.named(:path_failed).sole.properties["error"]
+    assert_equal :warning, reports.sole.last[:severity]
+  ensure
+    ErrorReporter.adapter = nil
+  end
 end

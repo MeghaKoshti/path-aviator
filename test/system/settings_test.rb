@@ -24,6 +24,7 @@ class SettingsTest < ApplicationSystemTestCase
     assert_button "Save profile", disabled: true
     assert_button "Change password", disabled: true
     assert_button "Save preferences", disabled: true
+    assert_button "Prepare my data", disabled: true
     assert_button "Delete my account", disabled: true
   end
 

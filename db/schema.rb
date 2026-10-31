@@ -10,7 +10,25 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_31_102832) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_31_153844) do
+  create_table "data_exports", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "status", default: "pending", null: false
+    t.binary "archive"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_data_exports_on_user_id"
+  end
+
+  create_table "events", force: :cascade do |t|
+    t.integer "user_id"
+    t.string "name", null: false
+    t.json "properties", default: {}, null: false
+    t.datetime "created_at", null: false
+    t.index ["name", "created_at"], name: "index_events_on_name_and_created_at"
+    t.index ["user_id", "name"], name: "index_events_on_user_id_and_name"
+  end
+
   create_table "learning_goals", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "topic", null: false
@@ -86,6 +104,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_102832) do
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
+  add_foreign_key "data_exports", "users"
+  add_foreign_key "events", "users", on_delete: :nullify
   add_foreign_key "learning_goals", "users"
   add_foreign_key "learning_paths", "learning_goals"
   add_foreign_key "learning_paths", "users"

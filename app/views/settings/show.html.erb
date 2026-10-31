@@ -74,6 +74,9 @@
       <% end %>
     </div>
 
+    <%= turbo_stream_from Current.user, :data_exports %>
+    <%= render "settings/data_export", data_export: Current.user.data_exports.order(:created_at).last, locked: locked %>
+
     <section class="rounded-panel border border-danger-600/40 bg-surface-raised p-6 shadow-panel sm:p-8" aria-labelledby="delete-account-heading">
       <h2 id="delete-account-heading" class="mb-2 text-lg font-semibold text-ink">Delete account</h2>
       <p class="text-pretty text-ink-muted">
