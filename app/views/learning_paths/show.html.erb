@@ -1,0 +1,7 @@
+<% content_for :title, @learning_path.title.presence || @learning_path.learning_goal.topic %>
+
+<%# The generation job broadcasts the finished partial on this stream. %>
+<%= turbo_stream_from Current.user, :learning_paths %>
+<p id="path-announcer" class="sr-only" aria-live="polite"></p>
+
+<%= render @learning_path %>

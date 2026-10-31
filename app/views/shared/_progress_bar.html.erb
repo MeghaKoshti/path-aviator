@@ -1,0 +1,18 @@
+<%#
+  Progress bar built on the native <progress> element (implicit role and value semantics).
+  Locals: value: 0–100, label: accessible name (default "Progress"), show_value: (default true)
+%>
+<%
+  value = local_assigns.fetch(:value, 0).to_i.clamp(0, 100)
+  label = local_assigns.fetch(:label, "Progress")
+%>
+<div class="flex items-center gap-3">
+  <progress value="<%= value %>" max="100" aria-label="<%= label %>"
+            class="h-2 w-full appearance-none overflow-hidden rounded-full bg-surface-sunken
+                   [&::-webkit-progress-bar]:bg-surface-sunken
+                   [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-brand-600 [&::-webkit-progress-value]:transition-all
+                   [&::-moz-progress-bar]:rounded-full [&::-moz-progress-bar]:bg-brand-600"><%= value %>%</progress>
+  <% if local_assigns.fetch(:show_value, true) %>
+    <span class="w-10 shrink-0 text-right text-sm font-semibold tabular-nums text-ink-muted" aria-hidden="true"><%= value %>%</span>
+  <% end %>
+</div>

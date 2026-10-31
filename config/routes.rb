@@ -1,5 +1,24 @@
 Rails.application.routes.draw do
   resource :session
+  resource :registration, only: %i[ new create ]
+  resources :learning_goals, only: %i[ new create ]
+  resources :learning_paths, only: %i[ show destroy ] do
+    post :regenerate, on: :member
+    resource :share, only: %i[ create destroy ], module: :learning_paths
+  end
+  # Public, read-only view of a shared path.
+  get "p/:token", to: "shared_paths#show", as: :shared_path
+  resources :path_steps, only: [] do
+    patch :toggle, on: :member
+    resource :note, only: %i[ show edit update ], module: :path_steps
+  end
+  resource :dashboard, only: :show
+  resource :settings, only: :show
+  namespace :settings do
+    resource :profile, only: :update
+    resource :password, only: :update
+    resource :account, only: :destroy
+  end
   resources :passwords, param: :token
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -11,7 +30,5 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  # Defines the root path route ("/")
-  # root "posts#index"
-  resources :users, only: [ :new, :create ]
+  root "pages#home"
 end

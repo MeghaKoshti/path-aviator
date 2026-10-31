@@ -1,0 +1,10 @@
+<%#
+  Raised panel. Render it with a block: render("shared/card", title: "Your path") { ... }
+  Locals: title: (optional heading), padded: (default true)
+%>
+<section class="<%= class_names("rounded-panel border border-line bg-surface-raised shadow-panel", "p-6 sm:p-8": local_assigns.fetch(:padded, true)) %>">
+  <% if local_assigns[:title] %>
+    <h2 class="mb-4 text-lg font-semibold text-ink"><%= title %></h2>
+  <% end %>
+  <%= yield %>
+</section>

@@ -1,0 +1,37 @@
+rails_intro:
+  learning_path: rails
+  position: 1
+  title: Getting Started with Rails
+  description: Follow the official guide and build the blog app.
+  resource_type: docs
+  resource_url: https://guides.rubyonrails.org/getting_started.html
+  estimated_minutes: 90
+  completed_at: <%= 1.day.ago.to_fs(:db) %>
+  note: Redo the blog with my own models.
+
+rails_models:
+  learning_path: rails
+  position: 2
+  title: Active Record basics
+  description: Models, migrations and validations.
+  resource_type: docs
+  resource_url: https://guides.rubyonrails.org/active_record_basics.html
+  estimated_minutes: 60
+
+rails_hotwire:
+  learning_path: rails
+  position: 3
+  title: Hotwire walkthrough
+  description: Add Turbo Frames and Streams to the blog.
+  resource_type: video
+  resource_url: https://hotwired.dev/
+  estimated_minutes: 45
+
+rails_deploy:
+  learning_path: rails
+  position: 4
+  title: Deploy with Kamal
+  description: Ship the app to a small VPS.
+  resource_type: practice
+  resource_url: https://kamal-deploy.org/
+  estimated_minutes: 120

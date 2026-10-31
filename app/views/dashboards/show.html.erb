@@ -1,0 +1,18 @@
+<% content_for :title, "Dashboard" %>
+<%= turbo_stream_from Current.user, :learning_paths %>
+
+<%= render "dashboards/header", learning_paths: @learning_paths %>
+
+<% if @learning_paths.any? %>
+  <div class="mt-8"><%= render "dashboards/learning_stats", stats: @learning_stats %></div>
+<% end %>
+
+<div class="mt-8">
+  <% if @learning_paths.any? %>
+    <ul id="learning_path_cards" class="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3" role="list">
+      <%= render partial: "learning_paths/card", collection: @learning_paths, as: :learning_path %>
+    </ul>
+  <% else %>
+    <%= render "dashboards/empty_state" %>
+  <% end %>
+</div>

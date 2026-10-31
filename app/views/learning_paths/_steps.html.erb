@@ -1,0 +1,9 @@
+<%# The route: one waypoint per step. Replaced over a Turbo Stream (morph) when a step is ticked. %>
+<% steps = local_assigns[:steps] || learning_path.path_steps.to_a %>
+<% next_step = learning_path.next_step %>
+<ol id="<%= dom_id(learning_path, :steps) %>" class="mt-6"
+    data-controller="keep-focus" data-action="turbo:submit-start->keep-focus#remember turbo:submit-end->keep-focus#restore">
+  <% steps.each do |step| %>
+    <%= render "path_steps/path_step", path_step: step, up_next: step == next_step, last: step == steps.last %>
+  <% end %>
+</ol>

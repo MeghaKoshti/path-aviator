@@ -1,0 +1,32 @@
+<%
+  goal = learning_path.learning_goal
+  steps = learning_path.path_steps.to_a
+%>
+<div class="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_19rem] lg:gap-x-14">
+  <header class="lg:col-start-1">
+    <div class="flex flex-wrap gap-2">
+      <%= ui_badge goal_level_label(goal), :brand %>
+      <%= ui_badge goal_pace_label(goal) %>
+    </div>
+    <h1 class="type-display mt-4 text-3xl text-balance text-ink sm:text-[2.5rem]"><%= learning_path.title %></h1>
+    <% if learning_path.summary.present? %>
+      <p class="mt-4 max-w-2xl text-lg leading-relaxed text-pretty text-ink-muted"><%= learning_path.summary %></p>
+    <% end %>
+  </header>
+
+  <aside class="lg:col-start-2 lg:row-span-2 lg:row-start-1" aria-label="Progress">
+    <div class="space-y-4 lg:sticky lg:top-24">
+      <%= render "learning_paths/progress", learning_path: learning_path %>
+      <%= render "learning_paths/share", learning_path: learning_path %>
+      <%= render "learning_paths/manage", learning_path: learning_path %>
+    </div>
+  </aside>
+
+  <section class="min-w-0 lg:col-start-1" aria-labelledby="<%= dom_id(learning_path, :route_heading) %>">
+    <h2 id="<%= dom_id(learning_path, :route_heading) %>" class="text-lg font-semibold text-ink">Your route</h2>
+    <p class="mt-1 text-sm text-ink-muted">
+      <%= pluralize(steps.size, "step") %>, about <%= format_minutes(steps.sum(&:estimated_minutes)) %> in total. Tick a step when you’ve finished it.
+    </p>
+    <%= render "learning_paths/steps", learning_path: learning_path, steps: steps %>
+  </section>
+</div>

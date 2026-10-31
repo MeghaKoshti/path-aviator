@@ -1,0 +1,9 @@
+<%# Only seen as a whole page without JavaScript; Turbo pulls the frame into the path page. %>
+<% content_for :title, "Note for #{@path_step.title}" %>
+
+<div class="mx-auto max-w-2xl">
+  <%= link_to "Back to #{@path_step.learning_path.title}", learning_path_path(@path_step.learning_path, anchor: dom_id(@path_step)),
+        class: "text-sm font-semibold text-brand-700 underline-offset-4 hover:underline" %>
+  <h1 class="type-display mt-4 text-3xl text-balance text-ink">Note for “<%= @path_step.title %>”</h1>
+  <%= render "path_steps/notes/form", path_step: @path_step %>
+</div>

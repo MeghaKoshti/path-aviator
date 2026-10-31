@@ -1,0 +1,39 @@
+# The single source of truth for plans, prices and limits.
+# Prices are in the smallest currency unit (paise / cents) so billing code never
+# deals with floats. Change a price here and the pricing page, checkout and
+# quota checks all follow.
+free:
+  name: Free
+  monthly_generations: 3
+  prices: {}
+  features:
+    - progress_tracking
+    - notes
+    - weekly_stats
+    - share_link
+    - link_checking
+    - data_export
+
+pro:
+  name: Pro
+  # Fair-use ceiling, not advertised as a number on the pricing page.
+  monthly_generations: 30
+  prices:
+    inr:
+      month: 19900
+      year: 149900
+    usd:
+      month: 600
+      year: 4800
+  features:
+    - progress_tracking
+    - notes
+    - weekly_stats
+    - share_link
+    - link_checking
+    - data_export
+    - unlimited_paths
+    - weekly_link_recheck
+    - job_post_paths
+    - certificates
+    - no_share_branding

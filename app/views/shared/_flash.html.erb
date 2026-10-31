@@ -1,0 +1,22 @@
+<%# Toast-style flash messages. Notices auto-dismiss; alerts stay until closed. %>
+<div id="flash" class="pointer-events-none fixed inset-x-0 top-4 z-50 flex flex-col items-center gap-2 px-4 sm:top-20 sm:items-end sm:px-6">
+  <% flash.each do |type, message| %>
+    <% next unless message.is_a?(String) %>
+    <% alert = type.to_s == "alert" %>
+    <div class="pointer-events-auto flex w-full max-w-sm animate-toast-in items-start gap-3 rounded-control border bg-surface-raised p-4 shadow-pop motion-reduce:animate-none <%= alert ? "border-danger-600/40" : "border-line" %>"
+         role="<%= alert ? "alert" : "status" %>"
+         data-controller="flash"
+         data-flash-dismiss-after-value="<%= alert ? 0 : 6000 %>"
+         data-action="mouseenter->flash#pause mouseleave->flash#resume focusin->flash#pause focusout->flash#resume">
+      <% if alert %>
+        <svg class="mt-0.5 size-5 shrink-0 text-danger-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm-.75-11.5a.75.75 0 0 1 1.5 0v4a.75.75 0 0 1-1.5 0v-4ZM10 15a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z" clip-rule="evenodd"/></svg>
+      <% else %>
+        <svg class="mt-0.5 size-5 shrink-0 text-success-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.86-9.86a.75.75 0 0 0-1.22-.88l-3.24 4.5-1.6-1.6a.75.75 0 1 0-1.06 1.06l2.22 2.22a.75.75 0 0 0 1.14-.09l3.76-5.21Z" clip-rule="evenodd"/></svg>
+      <% end %>
+      <p class="flex-1 text-sm text-ink"><%= message %></p>
+      <button type="button" class="-m-1 rounded-md p-1 text-ink-subtle hover:bg-surface-sunken hover:text-ink" data-action="flash#dismiss" aria-label="Dismiss message">
+        <svg class="size-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z"/></svg>
+      </button>
+    </div>
+  <% end %>
+</div>

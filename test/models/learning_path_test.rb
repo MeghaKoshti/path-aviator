@@ -1,0 +1,154 @@
+require "test_helper"
+# turbo-rails only auto-includes this when Action Cable is already loaded.
+require "turbo/broadcastable/test_helper"
+
+class LearningPathTest < ActiveSupport::TestCase
+  include ActiveJob::TestHelper
+  include Turbo::Broadcastable::TestHelper
+
+  setup do
+    @path = learning_paths(:rails)
+  end
+
+  test "new paths start out generating" do
+    assert LearningPath.new.generating?
+  end
+
+  test "fixture counters match the fixture steps" do
+    assert_equal @path.path_steps.count, @path.path_steps_count
+    assert_equal @path.path_steps.completed.count, @path.completed_steps_count
+  end
+
+  test "steps come back ordered by position" do
+    assert_equal [ 1, 2, 3, 4 ], @path.path_steps.map(&:position)
+  end
+
+  test "progress percent is rounded and 0 without steps" do
+    assert_equal 25, @path.progress_percent
+    assert_equal 0, learning_paths(:sql).progress_percent
+
+    @path.completed_steps_count = 1
+    @path.path_steps_count = 3
+    assert_equal 33, @path.progress_percent
+  end
+
+  test "remaining minutes sums incomplete steps, with or without preloading" do
+    assert_equal 60 + 45 + 120, @path.remaining_minutes
+    assert_equal 225, LearningPath.includes(:path_steps).find(@path.id).remaining_minutes
+  end
+
+  test "next step is the first incomplete step by position" do
+    assert_equal path_steps(:rails_models), @path.next_step
+    assert_equal path_steps(:rails_models), LearningPath.includes(:path_steps).find(@path.id).next_step
+  end
+
+  test "completed only when ready and every step is done" do
+    assert_not @path.completed?
+
+    @path.path_steps.incomplete.each(&:toggle_completion!)
+    assert @path.reload.completed?
+    assert_nil @path.next_step
+    assert_equal 100, @path.progress_percent
+    assert_equal 0, @path.remaining_minutes
+  end
+
+  test "a path with no steps is never completed" do
+    assert_not learning_paths(:sql).completed?
+  end
+
+  test "ready paths need a title" do
+    path = learning_paths(:sql)
+    path.status = :ready
+    assert_not path.valid?
+    assert path.errors.of_kind?(:title, :blank)
+  end
+
+  test "goal must belong to the same user" do
+    path = users(:two).learning_paths.new(learning_goal: learning_goals(:rails))
+    assert_not path.valid?
+    assert_includes path.errors[:learning_goal], "must belong to the same user"
+  end
+
+  test "a goal can only have one path" do
+    path = users(:one).learning_paths.new(learning_goal: learning_goals(:rails))
+    assert_not path.valid?
+    assert path.errors.of_kind?(:learning_goal_id, :taken)
+  end
+
+  test "destroying the goal destroys its path and steps" do
+    assert_difference -> { LearningPath.count } => -1, -> { PathStep.count } => -4 do
+      learning_goals(:rails).destroy
+    end
+  end
+
+  test "destroying a user removes paths, steps and goals" do
+    assert_difference -> { LearningPath.count } => -2, -> { LearningGoal.count } => -2 do
+      users(:one).destroy
+    end
+  end
+
+  test "regenerate! clears steps and progress and queues a new generation" do
+    assert_difference -> { PathStep.count } => -4 do
+      assert_enqueued_with(job: GenerateLearningPathJob, args: [ @path ]) { @path.regenerate! }
+    end
+    assert_not PathStep.where.not(note: nil).exists?, "notes should go with the old steps"
+
+    assert @path.generating?
+    assert_equal 0, @path.path_steps_count
+    assert_equal 0, @path.completed_steps_count
+    assert_nil @path.generated_at
+    assert_nil @path.raw_response
+    assert_empty @path.path_steps
+
+    @path.reload
+    assert_equal [ 0, 0 ], [ @path.path_steps_count, @path.completed_steps_count ]
+  end
+
+  test "regenerate! on a failed path clears the error" do
+    path = learning_paths(:docker)
+    path.regenerate!
+    assert path.reload.generating?
+    assert_nil path.error_message
+  end
+
+  test "regenerate! followed by the job produces a fresh ready path" do
+    perform_enqueued_jobs { @path.regenerate! }
+
+    @path.reload
+    assert @path.ready?
+    assert_equal 8, @path.path_steps_count
+    assert_equal 0, @path.progress_percent
+  end
+
+  test "broadcast_refresh replaces the path page and its dashboard card on the user's stream" do
+    streams = capture_turbo_stream_broadcasts([ @path.user, :learning_paths ]) { @path.broadcast_refresh }
+
+    assert_equal %w[replace replace], streams.map { |stream| stream["action"] }
+    assert_equal [ ActionView::RecordIdentifier.dom_id(@path), ActionView::RecordIdentifier.dom_id(@path, :card) ],
+      streams.map { |stream| stream["target"] }
+    assert streams.all? { |stream| stream.to_html.include?(@path.title) }
+  end
+
+  test "paths are private until shared, and a new link replaces the old" do
+    goal = users(:two).learning_goals.create!(topic: "Rust", current_level: :beginner, hours_per_week: 2)
+    assert_nil goal.create_learning_path!(user: users(:two)).share_token
+    assert_not @path.shared?
+
+    @path.share!
+    first = @path.share_token
+    assert @path.shared?
+    assert_equal 24, first.length
+
+    @path.share!
+    assert_not_equal first, @path.share_token
+
+    @path.unshare!
+    assert_not @path.reload.shared?
+  end
+
+  test "owner_first_name is the first word of the name, or nil" do
+    assert_equal "Riya", @path.owner_first_name
+    @path.user.name = nil
+    assert_nil @path.owner_first_name
+  end
+end

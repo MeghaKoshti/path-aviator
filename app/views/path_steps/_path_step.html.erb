@@ -1,0 +1,53 @@
+<%#
+  One leg of the route. Locals: path_step:, up_next: (bool), last: (bool)
+  read_only: true for the public share page: no checkbox and no note.
+%>
+<%
+  done = path_step.completed?
+  read_only = local_assigns.fetch(:read_only, false)
+%>
+<li id="<%= dom_id(path_step) %>" class="relative flex scroll-mt-24 gap-4 <%= "pb-6" unless last %>">
+  <% unless last %>
+    <%# Route line down to the next waypoint: solid once this leg is flown. %>
+    <span class="<%= class_names("absolute bottom-0 left-[15px] top-9 border-l-2", done ? "border-route" : "border-dashed border-line-strong/50") %>" aria-hidden="true"></span>
+  <% end %>
+
+  <% if read_only %>
+    <span class="<%= class_names("relative z-10 flex size-8 shrink-0 self-start items-center justify-center rounded-full border-2",
+                                 done ? "border-route bg-route text-white" : "border-ink-subtle bg-surface text-transparent") %>">
+      <svg class="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>
+    </span>
+  <% else %>
+    <%= render "path_steps/waypoint", path_step: path_step %>
+  <% end %>
+
+  <div class="<%= class_names("min-w-0 flex-1 rounded-panel", up_next ? "border border-route/30 bg-surface-raised p-5 shadow-panel" : "px-1 pb-2 pt-1") %>">
+    <div class="flex flex-wrap items-center gap-2 text-sm text-ink-subtle">
+      <span>Step <%= path_step.position %><%= tag.span(", done", class: "sr-only") if read_only && done %></span>
+      <%= ui_badge resource_type_label(path_step.resource_type) %>
+      <span class="inline-flex items-center gap-1 tabular-nums">
+        <svg class="size-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="10" cy="10" r="7.25"/><path d="M10 6v4l2.5 1.5" stroke-linecap="round"/></svg>
+        <%= format_minutes(path_step.estimated_minutes) %>
+      </span>
+      <% if up_next %>
+        <span class="ml-auto inline-flex items-center rounded-full bg-route-soft px-2.5 py-0.5 text-xs font-semibold text-route">Up next</span>
+      <% end %>
+    </div>
+
+    <h3 id="<%= dom_id(path_step, :title) %>" class="<%= class_names("mt-2 text-lg font-semibold text-pretty", done ? "text-ink-subtle line-through decoration-ink-subtle/50" : "text-ink") %>">
+      <%= path_step.title %>
+    </h3>
+    <% if path_step.description.present? %>
+      <p class="mt-1 max-w-prose text-pretty text-ink-muted"><%= path_step.description %></p>
+    <% end %>
+
+    <%= link_to path_step.resource_url, target: "_blank", rel: "noopener noreferrer",
+          class: "mt-3 inline-flex items-center gap-1.5 rounded-sm font-semibold text-brand-700 underline-offset-4 hover:underline" do %>
+      <%= resource_action_label(path_step.resource_type) %>
+      <span class="sr-only">for “<%= path_step.title %>” (opens in a new tab)</span>
+      <svg class="size-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4H4.75A.75.75 0 0 0 4 4.75v10.5c0 .41.34.75.75.75h10.5c.41 0 .75-.34.75-.75V12M11 4h5v5M16 4l-7 7"/></svg>
+    <% end %>
+
+    <%= render "path_steps/notes/note", path_step: path_step unless read_only %>
+  </div>
+</li>

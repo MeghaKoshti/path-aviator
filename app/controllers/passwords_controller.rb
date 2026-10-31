@@ -1,14 +1,18 @@
 class PasswordsController < ApplicationController
+  layout "auth"
   allow_unauthenticated_access
   before_action :set_user_by_token, only: %i[ edit update ]
+  # Limits per IP, so the answer never depends on whether the email has an account.
+  rate_limit to: 5, within: 3.minutes, only: :create,
+    with: -> { redirect_to new_password_path, alert: "Too many reset requests. Try again in a few minutes." }
 
   def new
   end
 
   def create
-    if user = User.find_by(email_address: params[:email_address])
-      PasswordsMailer.reset(user).deliver_later
-    end
+    user = User.find_by(email_address: params[:email_address])
+    # The demo account's password is public and fixed, so a reset is never sent.
+    PasswordsMailer.reset(user).deliver_later if user && !user.demo?
 
     redirect_to new_session_path, notice: "Password reset instructions sent (if user with that email address exists)."
   end
@@ -17,10 +21,15 @@ class PasswordsController < ApplicationController
   end
 
   def update
-    if @user.update(params.permit(:password, :password_confirmation))
+    # has_secure_password silently ignores a blank password, so check it here.
+    if params[:password].blank?
+      redirect_to edit_password_path(params[:token]), alert: "Enter a new password."
+    elsif @user.update(params.permit(:password, :password_confirmation))
+      # Anyone still signed in with the old password is signed out.
+      @user.sessions.destroy_all
       redirect_to new_session_path, notice: "Password has been reset."
     else
-      redirect_to edit_password_path(params[:token]), alert: "Passwords did not match."
+      redirect_to edit_password_path(params[:token]), alert: @user.errors.full_messages.to_sentence
     end
   end
 

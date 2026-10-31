@@ -1,0 +1,17 @@
+<%#
+  The step's checkbox, drawn as a waypoint on the route. It is a real button in
+  a form (works without JavaScript) exposed as a checkbox named by the step title.
+%>
+<% done = path_step.completed? %>
+<%= button_to toggle_path_step_path(path_step), method: :patch,
+      form: { class: "relative z-10 -m-1 shrink-0 self-start" },
+      id: dom_id(path_step, :toggle),
+      role: "checkbox",
+      title: done ? "Mark as not done" : "Mark as done",
+      aria: { checked: done, labelledby: dom_id(path_step, :title) },
+      class: "group/waypoint flex size-10 cursor-pointer items-center justify-center rounded-full" do %>
+  <span class="<%= class_names("flex size-8 items-center justify-center rounded-full border-2 transition-colors",
+                               done ? "border-route bg-route text-white group-hover/waypoint:bg-route/85" : "border-ink-subtle bg-surface text-transparent group-hover/waypoint:border-route group-hover/waypoint:text-route/60") %>">
+    <svg class="size-4" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3.5 8.5 3 3 6-7"/></svg>
+  </span>
+<% end %>

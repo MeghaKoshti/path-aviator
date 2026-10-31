@@ -1,0 +1,28 @@
+<%#
+  A step's note, or the button to add one. Locals: path_step:, focus: (bool)
+  focus: true puts keyboard focus back on the button after Save or Cancel.
+  Not data-turbo-permanent: that would also keep an open editor when someone
+  leaves the page and comes back. The editor protects itself from morphs.
+%>
+<% focus = local_assigns.fetch(:focus, false) %>
+<%= turbo_frame_tag dom_id(path_step, :note), class: "mt-4 block" do %>
+  <% if path_step.note %>
+    <div class="max-w-prose rounded-control border-l-[3px] border-brand-300 bg-brand-50 py-3 pl-4 pr-2">
+      <div class="flex items-center justify-between gap-3">
+        <p class="flex items-center gap-1.5 text-sm font-semibold text-brand-800">
+          <svg class="size-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 3.75h7.5L15.5 7v9.25H5z"/><path d="M8 10h4.5M8 13h3"/></svg>
+          Your note
+        </p>
+        <%= link_to edit_path_step_note_path(path_step), class: ui_button_classes(variant: :ghost, size: :sm, extra: "-my-1"), autofocus: focus do %>
+          Edit<span class="sr-only"> note for “<%= path_step.title %>”</span>
+        <% end %>
+      </div>
+      <p class="mt-1 whitespace-pre-line text-pretty text-ink"><%= path_step.note %></p>
+    </div>
+  <% else %>
+    <%= link_to edit_path_step_note_path(path_step), class: ui_button_classes(variant: :ghost, size: :sm, extra: "-ml-3"), autofocus: focus do %>
+      <svg class="size-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M10 4.5v11M4.5 10h11"/></svg>
+      Add note<span class="sr-only"> for “<%= path_step.title %>”</span>
+    <% end %>
+  <% end %>
+<% end %>

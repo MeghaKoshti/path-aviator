@@ -1,0 +1,19 @@
+<%#
+  Page heading and path count. Re-rendered over a Turbo Stream after a path is
+  deleted; focus: true moves keyboard focus here so it isn't lost with the card.
+%>
+<div id="dashboard_header" class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+  <div>
+    <h1 class="type-display text-3xl text-ink focus:outline-none sm:text-4xl"
+        <%= "tabindex=-1 autofocus" if local_assigns[:focus] %>>Your learning paths</h1>
+    <% if learning_paths.any? %>
+      <p class="mt-2 text-ink-muted">
+        <%= pluralize(learning_paths.size, "path") %>,
+        <%= learning_paths.count(&:completed?) %> complete.
+      </p>
+    <% end %>
+  </div>
+  <% if learning_paths.any? %>
+    <%= ui_button "Start another path", new_learning_goal_path, class: "shrink-0" %>
+  <% end %>
+</div>

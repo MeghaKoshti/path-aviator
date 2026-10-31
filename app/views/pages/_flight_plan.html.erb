@@ -1,0 +1,77 @@
+<%# Hero illustration: an example path drawn as a flight plan. Static sample content. %>
+<%
+  legs = [
+    { title: "Ruby basics", kind: "Course", time: "3 h", done: true },
+    { title: "Rails getting started guide", kind: "Docs", time: "2 h", done: true },
+    { title: "Models and Active Record", kind: "Video", time: "90 min", current: true },
+    { title: "Build a blog with Hotwire", kind: "Practice", time: "4 h" },
+    { title: "Testing with Minitest", kind: "Article", time: "1 h" },
+    { title: "Deploy with Kamal", kind: "Docs", time: "1 h" }
+  ]
+  waypoints = [ [ 28, 152 ], [ 108, 120 ], [ 184, 134 ], [ 266, 76 ], [ 356, 96 ], [ 452, 30 ] ]
+%>
+<figure class="relative mx-auto w-full max-w-lg rounded-panel border border-line bg-surface-raised shadow-pop lg:max-w-none" aria-labelledby="flight-plan-caption">
+  <figcaption id="flight-plan-caption" class="sr-only">Example learning path: Ruby on Rails for a beginner, six steps, two completed.</figcaption>
+
+  <div class="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4 sm:px-6">
+    <p class="font-semibold text-ink">Ruby on Rails, from scratch</p>
+    <div class="flex gap-2">
+      <%= ui_badge "Beginner", :brand %>
+      <%= ui_badge "6 h a week" %>
+    </div>
+  </div>
+
+  <div class="bg-chart-grid border-b border-line bg-surface px-3 py-4 sm:px-5" aria-hidden="true">
+    <svg class="h-auto w-full" viewBox="0 0 480 180" fill="none">
+      <defs>
+        <mask id="flown-mask">
+          <path d="M28 152 C 64 140, 80 122, 108 120 S 158 142, 184 134" stroke="white" stroke-width="8" pathLength="1000" stroke-dasharray="1000" class="animate-route-draw motion-reduce:animate-none"/>
+        </mask>
+      </defs>
+      <%# Planned route, then the flown part drawn over it. %>
+      <path d="M28 152 C 64 140, 80 122, 108 120 S 158 142, 184 134 S 236 82, 266 76 S 326 104, 356 96 S 424 44, 452 30" class="stroke-route/50" stroke-width="2" stroke-dasharray="5 7" stroke-linecap="round"/>
+      <path d="M28 152 C 64 140, 80 122, 108 120 S 158 142, 184 134" class="stroke-route" stroke-width="3" stroke-linecap="round" mask="url(#flown-mask)"/>
+
+      <% waypoints.each_with_index do |(x, y), i| %>
+        <% leg = legs[i] %>
+        <% if leg[:done] %>
+          <circle cx="<%= x %>" cy="<%= y %>" r="6" class="fill-route"/>
+        <% elsif leg[:current] %>
+          <circle cx="<%= x %>" cy="<%= y %>" r="11" class="fill-route-soft"/>
+          <circle cx="<%= x %>" cy="<%= y %>" r="6" class="fill-white stroke-route" stroke-width="3"/>
+        <% elsif i == waypoints.size - 1 %>
+          <path d="M<%= x %> <%= y - 9 %> l8 14 h-16 z" class="fill-brand-700"/>
+        <% else %>
+          <circle cx="<%= x %>" cy="<%= y %>" r="5" class="fill-white stroke-route/60" stroke-width="2"/>
+        <% end %>
+      <% end %>
+      <text x="28" y="174" text-anchor="middle" class="fill-ink-subtle text-[11px] font-semibold">Start</text>
+      <text x="452" y="56" text-anchor="middle" class="fill-brand-700 text-[11px] font-semibold">Shipped</text>
+    </svg>
+  </div>
+
+  <ol class="divide-y divide-line">
+    <% legs.each_with_index do |leg, i| %>
+      <li class="<%= class_names("flex items-center gap-3 px-5 py-2.5 sm:px-6", "bg-route-soft/50": leg[:current]) %>">
+        <% if leg[:done] %>
+          <span class="flex size-5 shrink-0 items-center justify-center rounded-full bg-route text-white">
+            <svg class="size-3" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m2.5 6.5 2.2 2L9.5 3.5"/></svg>
+            <span class="sr-only">Done:</span>
+          </span>
+        <% else %>
+          <span class="<%= class_names("size-5 shrink-0 rounded-full border-2", leg[:current] ? "border-route" : "border-line-strong/50") %>" aria-hidden="true"></span>
+        <% end %>
+        <span class="<%= class_names("min-w-0 flex-1 truncate text-[0.9375rem]", leg[:done] ? "text-ink-subtle line-through decoration-ink-subtle/50" : "text-ink", "font-semibold": leg[:current]) %>">
+          <%= leg[:title] %>
+        </span>
+        <span class="hidden w-16 text-sm text-ink-subtle sm:block"><%= leg[:kind] %></span>
+        <span class="w-14 text-right text-sm tabular-nums text-ink-muted"><%= leg[:time] %></span>
+      </li>
+    <% end %>
+  </ol>
+
+  <div class="flex items-center gap-4 border-t border-line px-5 py-4 sm:px-6">
+    <div class="flex-1"><%= render "shared/progress_bar", value: 33, label: "Example path progress" %></div>
+    <p class="shrink-0 text-sm text-ink-muted">7 h 30 m left</p>
+  </div>
+</figure>

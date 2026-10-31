@@ -1,0 +1,11 @@
+<%# Brand lockup: route mark + wordmark. Locals: href: (default root), tone: :dark or :light %>
+<% light = local_assigns[:tone] == :light %>
+<%= link_to local_assigns.fetch(:href, root_path), class: "inline-flex items-center gap-2.5 rounded-md", aria: { label: "Path Aviator home" } do %>
+  <svg class="size-8 shrink-0" viewBox="0 0 32 32" aria-hidden="true">
+    <rect width="32" height="32" rx="9" class="<%= light ? "fill-white" : "fill-brand-700" %>"/>
+    <path d="M8.5 23.5c4.5 0 5-6.5 9-7.5s4.5-3.5 5.5-6" fill="none" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 2.5" class="<%= light ? "stroke-brand-700" : "stroke-white" %>"/>
+    <circle cx="8.5" cy="23.5" r="2.6" class="fill-route"/>
+    <path d="M25.5 6.5 24.6 13l-2-2.4-3 .6z" class="<%= light ? "fill-brand-700" : "fill-white" %>"/>
+  </svg>
+  <span class="type-display text-[1.0625rem] <%= light ? "text-white" : "text-ink" %>">Path Aviator</span>
+<% end %>
