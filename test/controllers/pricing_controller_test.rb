@@ -49,13 +49,35 @@ class PricingControllerTest < ActionDispatch::IntegrationTest
     assert_select "details a[href=?]", refunds_path
   end
 
-  test "signed-in free users see a clear next step until checkout exists" do
+  test "signed-in free users upgrade straight to checkout" do
+    sign_in_as users(:one)
+
+    get pricing_path(currency: "inr", interval: "year")
+
+    assert_select "form[action=?][method=post]", billing_checkout_path do
+      assert_select "input[name=interval][value=year]"
+      assert_select "input[name=currency][value=inr]"
+      assert_select "button", "Upgrade to Pro"
+    end
+    assert_select "a[href=?]", new_registration_path, text: "Get Pro", count: 0
+  end
+
+  test "without a payment provider set up, signed-in users are told checkout opens soon" do
+    sign_in_as users(:one)
+
+    with_env("BILLING_PROVIDER" => "dodo", "DODO_API_KEY" => nil) { get pricing_path }
+
+    assert_select "[aria-labelledby=pro-plan]", /Pro checkout opens soon/
+    assert_select "form[action=?]", billing_checkout_path, count: 0
+  end
+
+  test "Pro users are pointed to settings" do
+    users(:one).update!(plan: :pro)
     sign_in_as users(:one)
 
     get pricing_path
 
-    assert_select "[aria-labelledby=pro-plan]", /Pro checkout opens soon/ unless respond_to?(:billing_checkout_path)
-    assert_select "a[href=?]", new_registration_path, text: "Get Pro", count: 0
+    assert_select "[aria-labelledby=pro-plan]", /You’re on Pro/
   end
 
   test "pricing is linked from the landing header, hero and footer" do

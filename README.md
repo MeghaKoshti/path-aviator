@@ -195,6 +195,24 @@ Sign-up sends a link to confirm the address (a signed token from `generates_toke
 
 Emails use one branded layout (`app/views/layouts/mailer.*`) with HTML and text parts. Preview them at `/rails/mailers` in development (`test/mailers/previews`). In development nothing is sent; in production set the `SMTP_*` variables below.
 
+### Billing
+
+Pro is sold through a payment provider behind one interface, `Billing::Provider` (`app/services/billing/`): `create_checkout(user:, plan:, interval:, currency:)` returns the hosted checkout URL, `portal_url(subscription)` the page where subscribers update their card or cancel, and `verify_webhook(headers, body)` turns a signed webhook into a `Billing::Event`. `Billing::WebhookReceiver` applies events to `Subscription` and keeps `users.plan` in step.
+
+- **Development and tests** use `Billing::FakeProvider`: "Upgrade" opens a local test checkout, and "Pay" sends a webhook signed exactly like a real one through the same code path, so the whole flow works offline. It is never available in production.
+- **Production** uses `Billing::Dodo` ([Dodo Payments](https://docs.dodopayments.com), merchant of record: it charges, files GST/VAT and pays out).
+- Prices come from `config/plans.yml`: ₹199/month and ₹1,499/year (shown **including GST**), $6/month and $48/year. Visitors from India (`CF-IPCountry: IN` or an `*-IN` browser language) see rupees, others dollars, and settings has an INR/USD toggle.
+
+Set up Dodo: create four **subscription products** (Pro monthly and yearly, in INR and in USD; mark the INR ones tax-inclusive), copy their ids into the variables below, and add a webhook endpoint pointing at `https://APP_HOST/webhooks/billing/dodo`. Test mode and live mode have separate keys, products and webhooks.
+
+| Variable | Purpose |
+|---|---|
+| `BILLING_PROVIDER` | `fake` or `dodo`. Defaults to `dodo` in production and `fake` elsewhere. |
+| `DODO_API_KEY` | Dodo API key (secret). Without it, or any product id, Upgrade buttons are hidden. |
+| `DODO_WEBHOOK_SECRET` | The endpoint's signing secret (`whsec_...`, secret). |
+| `DODO_ENVIRONMENT` | `test_mode` (default, `test.dodopayments.com`) or `live_mode` (`live.dodopayments.com`). |
+| `DODO_PRODUCT_PRO_MONTHLY_INR`, `DODO_PRODUCT_PRO_YEARLY_INR`, `DODO_PRODUCT_PRO_MONTHLY_USD`, `DODO_PRODUCT_PRO_YEARLY_USD` | Dodo product id (`pdt_...`) for each price. |
+
 ### Run tests and checks
 
 ```bash
@@ -267,6 +285,10 @@ Add an `A` record, for example `pathaviator.example.com → 203.0.113.10`, and w
 | `AI_USD_PER_MILLION_TOKENS` | No | app | Price used for the admin page's AI cost estimate. Default 1.5 |
 | `AI_DAILY_GENERATION_LIMIT` | No | app | Global cap on AI generations per UTC day. Default `500` |
 | `GEMINI_THINKING_BUDGET` | No | app | Cap on Gemini thinking tokens. Default `1024` |
+| `BILLING_PROVIDER` | No | app | Payment provider, default `dodo` (see [Billing](#billing)) |
+| `DODO_API_KEY`, `DODO_WEBHOOK_SECRET` | For payments | secret | Dodo Payments API key and webhook signing secret |
+| `DODO_ENVIRONMENT` | No | app | `test_mode` (default) or `live_mode` |
+| `DODO_PRODUCT_PRO_{MONTHLY,YEARLY}_{INR,USD}` | For payments | app | Dodo product id for each of the four prices |
 
 Keep them in a file that git ignores (the `/.env*` rule covers `.env.deploy`) and load it before each Kamal command:
 

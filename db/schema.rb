@@ -107,6 +107,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_153844) do
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
+  create_table "subscriptions", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "provider", null: false
+    t.string "external_id", null: false
+    t.string "customer_id"
+    t.string "plan", default: "pro", null: false
+    t.string "interval", null: false
+    t.string "currency", null: false
+    t.string "status", null: false
+    t.datetime "current_period_end"
+    t.boolean "cancel_at_period_end", default: false, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["provider", "external_id"], name: "index_subscriptions_on_provider_and_external_id", unique: true
+    t.index ["user_id"], name: "index_subscriptions_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.string "email_address", null: false
     t.string "password_digest", null: false
@@ -130,4 +147,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_153844) do
   add_foreign_key "learning_paths", "users"
   add_foreign_key "path_steps", "learning_paths"
   add_foreign_key "sessions", "users"
+  add_foreign_key "subscriptions", "users"
 end

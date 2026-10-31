@@ -201,4 +201,37 @@ class SettingsControllerTest < ActionDispatch::IntegrationTest
     assert_match "Check riya.new@example.com", flash[:notice]
     assert_not @user.reload.email_verified?
   end
+
+  test "free users can pick monthly or yearly in rupees or dollars" do
+    get settings_path(currency: "inr")
+
+    assert_select "#plan" do
+      assert_select "form[action=?]", billing_checkout_path(interval: "month", currency: "inr")
+      assert_select "form[action=?] button", billing_checkout_path(interval: "year", currency: "inr"), text: "Upgrade yearly"
+      assert_select "p", /₹199/
+      assert_select "p", /₹1,499/
+      assert_select "p", /incl. GST, save 37%/
+      assert_select "a[aria-current=true]", "INR"
+    end
+
+    get settings_path(currency: "usd")
+    assert_select "#plan p", /\$48/
+    assert_select "#plan p", text: /incl. GST/, count: 0
+  end
+
+  test "subscribers see their renewal date and a manage link instead of upgrade" do
+    travel_to Time.utc(2026, 10, 24) do
+      @user.subscriptions.create!(provider: "fake", external_id: "fake_sub_1", interval: "year", currency: "usd", status: "active", current_period_end: 1.year.from_now)
+      @user.update!(plan: :pro)
+
+      get settings_path
+
+      assert_select "#subscription" do
+        assert_select "p", /Pro, yearly\s+· \$48/
+        assert_select "p", /Renews on 24 October 2027/
+        assert_select "form[action=?] button", billing_portal_path, text: "Manage or cancel"
+      end
+      assert_select "form[action^=?]", billing_checkout_path, count: 0
+    end
+  end
 end

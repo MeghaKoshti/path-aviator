@@ -17,8 +17,10 @@ class PricingHelperTest < ActionView::TestCase
     assert_equal 33, yearly_savings_percent(Plan.pro, currency: :usd)
   end
 
-  test "pro_user? works before and after users get a plan" do
-    assert_not pro_user?(Object.new)
-    assert pro_user?(Struct.new(:pro?).new(true))
+  test "pro_user? follows the user's plan" do
+    assert_not pro_user?(nil)
+    assert_not pro_user?(users(:one))
+    users(:one).update!(plan: :pro)
+    assert pro_user?(users(:one))
   end
 end

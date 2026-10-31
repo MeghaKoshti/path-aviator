@@ -48,6 +48,20 @@ Rails.application.routes.draw do
   end
   get "sitemap.xml", to: "sitemaps#show", as: :sitemap, format: false, defaults: { format: "xml" }
   get "robots.txt", to: "sitemaps#robots", as: :robots, format: false, defaults: { format: "text" }
+
+  # Billing: checkout and the customer portal live at the payment provider.
+  scope "billing", module: :billing, as: :billing do
+    post "checkout", to: "checkouts#create", as: :checkout
+    get "return", to: "returns#show", as: :return
+    post "portal", to: "portals#create", as: :portal
+    # The fake provider's "hosted" pages (development and tests only).
+    unless Rails.env.production?
+      get "fake/checkout/:token", to: "fake_checkouts#show", as: :fake_checkout
+      post "fake/checkout/:token", to: "fake_checkouts#create"
+      get "fake/portal", to: "fake_checkouts#portal", as: :fake_portal
+      post "fake/portal/cancel", to: "fake_checkouts#cancel", as: :fake_portal_cancel
+    end
+  end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

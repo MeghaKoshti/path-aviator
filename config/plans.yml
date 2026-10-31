@@ -18,6 +18,8 @@ pro:
   name: Pro
   # Fair-use ceiling, not advertised as a number on the pricing page.
   monthly_generations: 30
+  # INR prices include GST (₹199 incl. GST); the merchant of record shows
+  # the tax line. USD prices are before any local sales tax or VAT.
   prices:
     inr:
       month: 19900

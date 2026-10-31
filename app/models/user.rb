@@ -9,6 +9,7 @@ class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
   has_many :generations, dependent: :delete_all
+  has_many :subscriptions, dependent: :destroy
   # Paths are declared first so they are destroyed before the goals they point to.
   has_many :learning_paths, dependent: :destroy
   has_many :learning_goals, dependent: :destroy
@@ -84,6 +85,15 @@ class User < ApplicationRecord
   # The Plan catalog entry (limits, prices, features) for the user's plan.
   def current_plan
     Plan.find(plan)
+  end
+
+  def current_subscription
+    subscriptions.latest_first.first
+  end
+
+  # Pro while any subscription grants it, Free otherwise.
+  def sync_plan!
+    update!(plan: subscriptions.any?(&:grants_pro?) ? :pro : :free)
   end
 
   def generation_quota

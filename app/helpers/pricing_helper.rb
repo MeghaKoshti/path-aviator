@@ -80,9 +80,9 @@ module PricingHelper
     ]
   end
 
-  # The checkout route arrives with billing; until then "Upgrade" goes to sign-up.
+  # "Upgrade" is offered only when a payment provider is set up for this currency.
   def pro_checkout_available?
-    respond_to?(:billing_checkout_path)
+    Billing.available?
   end
 
   def pro_user?(user)

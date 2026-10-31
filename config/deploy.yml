@@ -52,6 +52,9 @@ env:
     - GEMINI_API_KEY
     # Optional: needed to send password-reset emails (see SMTP_* below).
     - SMTP_PASSWORD
+    # Optional: payments through Dodo (see the DODO_* settings below).
+    - DODO_API_KEY
+    - DODO_WEBHOOK_SECRET
   clear:
     # Used for mailer links and Rails host checks; must match proxy.host.
     APP_HOST: <%= ENV.fetch("APP_HOST") %>
@@ -80,6 +83,15 @@ env:
     # app, and a cap on Gemini's (billed) thinking tokens per request.
     AI_DAILY_GENERATION_LIMIT: "<%= ENV.fetch("AI_DAILY_GENERATION_LIMIT", "500") %>"
     GEMINI_THINKING_BUDGET: "<%= ENV.fetch("GEMINI_THINKING_BUDGET", "1024") %>"
+
+    # Payments (Dodo Payments). Without the key and product ids the Upgrade
+    # buttons stay hidden.
+    BILLING_PROVIDER: "<%= ENV.fetch("BILLING_PROVIDER", "dodo") %>"
+    DODO_ENVIRONMENT: "<%= ENV.fetch("DODO_ENVIRONMENT", "test_mode") %>"
+    DODO_PRODUCT_PRO_MONTHLY_INR: "<%= ENV["DODO_PRODUCT_PRO_MONTHLY_INR"] %>"
+    DODO_PRODUCT_PRO_YEARLY_INR: "<%= ENV["DODO_PRODUCT_PRO_YEARLY_INR"] %>"
+    DODO_PRODUCT_PRO_MONTHLY_USD: "<%= ENV["DODO_PRODUCT_PRO_MONTHLY_USD"] %>"
+    DODO_PRODUCT_PRO_YEARLY_USD: "<%= ENV["DODO_PRODUCT_PRO_YEARLY_USD"] %>"
 
     # Set number of processes dedicated to Solid Queue (default: 1)
     # JOB_CONCURRENCY: 3
