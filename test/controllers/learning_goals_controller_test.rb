@@ -126,6 +126,7 @@ class LearningGoalsControllerTest < ActionDispatch::IntegrationTest
 
     get new_learning_goal_path(from: "job_post")
     assert_select "h2", "Planning from a job post is part of Pro"
+    assert_select "a[href=?]", pricing_path, text: "Upgrade to Pro"
     assert_select "form[action=?]", learning_goals_path, count: 0
 
     assert_no_difference -> { LearningGoal.count } do

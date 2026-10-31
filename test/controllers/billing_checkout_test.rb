@@ -78,7 +78,7 @@ class BillingCheckoutTest < ActionDispatch::IntegrationTest
     failing = Object.new
     def failing.create_checkout(**) = raise(Billing::RequestFailed, "boom")
 
-    Billing.stub(:provider, failing) do
+    Billing.stub(:provider_for, failing) do
       post billing_checkout_path
     end
 

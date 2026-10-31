@@ -1,5 +1,4 @@
-# The numbers on /admin. Columns that arrive with billing (users.plan,
-# users.email_verified_at) are counted only once they exist.
+# The numbers on /admin.
 class AdminStats
   FUNNEL = %w[signed_up path_ready first_step_done returned_week_2 upgraded].freeze
   # A blended Gemini Flash price for prompt and answer tokens together; the
@@ -14,11 +13,11 @@ class AdminStats
   def new_users_this_week = User.where(created_at: (@now - 7.days)..).count
 
   def verified_users
-    User.where.not(email_verified_at: nil).count if User.column_names.include?("email_verified_at")
+    User.where.not(email_verified_at: nil).count
   end
 
   def pro_users
-    User.where(plan: "pro").count if User.column_names.include?("plan")
+    User.pro.count
   end
 
   # { "ready" => 12, "generating" => 1, "failed" => 2 }, every status listed.

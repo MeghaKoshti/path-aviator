@@ -24,14 +24,8 @@ class RecheckLinksJobTest < ActiveJob::TestCase
   end
 
   private
-    # Billing (User#pro?) lands in another branch. Until then, stand in for it.
     def with_pro_users(*pro_users)
-      emails = pro_users.map(&:email_address)
-      User.alias_method(:weekly_link_recheck_without_stub?, :weekly_link_recheck?)
-      User.define_method(:weekly_link_recheck?) { emails.include?(email_address) }
+      pro_users.each { |user| user.update!(plan: :pro) }
       yield
-    ensure
-      User.alias_method(:weekly_link_recheck?, :weekly_link_recheck_without_stub?)
-      User.remove_method(:weekly_link_recheck_without_stub?)
     end
 end

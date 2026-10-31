@@ -3,8 +3,8 @@
   cost = @stats.estimated_cost_this_month_usd
   tiles = [
     [ "Users", @stats.users, "#{@stats.new_users_this_week} new this week" ],
-    [ "Verified", @stats.verified_users || "–", @stats.verified_users ? "email confirmed" : "arrives with email verification" ],
-    [ "Pro", @stats.pro_users || "–", @stats.pro_users ? "paying users" : "arrives with billing" ],
+    [ "Verified", @stats.verified_users, "email confirmed" ],
+    [ "Pro", @stats.pro_users, "paying users" ],
     [ "Generations", @stats.generations_today, "today, #{@stats.generations_this_month} this month" ],
     [ "AI cost (est.)", cost.zero? && @stats.estimated_tokens_this_month.positive? ? "< $0.01" : number_to_currency(cost, unit: "$"), "#{number_with_delimiter(@stats.estimated_tokens_this_month)} tokens this month" ]
   ]

@@ -16,6 +16,8 @@ module Billing
   class SignatureError < Error; end
 
   INTERVALS = %w[month year].freeze
+  # Providers with no hosted customer portal: subscribers cancel in settings.
+  CANCEL_IN_APP = %w[razorpay].freeze
   CURRENCIES = %w[inr usd].freeze
 
   Checkout = Data.define(:url)
@@ -44,13 +46,20 @@ module Billing
 
         FakeProvider.new
       when "dodo" then Dodo.new
+      when "razorpay" then Razorpay.new
       else raise NotConfigured, "Unknown billing provider: #{name}"
       end
     end
 
+    # Who takes payments in this currency: BILLING_PROVIDER_INR or _USD when
+    # set (e.g. Razorpay for rupees, Dodo for dollars), otherwise the default.
+    def provider_for(currency)
+      provider(ENV["BILLING_PROVIDER_#{currency.to_s.upcase}"].presence || provider_name)
+    end
+
     # Whether Upgrade buttons should be shown at all.
-    def available?
-      provider.configured?
+    def available?(currency = nil)
+      (currency ? provider_for(currency) : provider).configured?
     rescue NotConfigured
       false
     end

@@ -9,7 +9,7 @@ class Billing::CheckoutsController < ApplicationController
     elsif Current.user.pro?
       redirect_to settings_path(anchor: "plan"), notice: "You’re already on Pro."
     else
-      checkout = Billing.provider.create_checkout(user: Current.user, plan: Plan.pro, interval: interval, currency: currency)
+      checkout = Billing.provider_for(currency).create_checkout(user: Current.user, plan: Plan.pro, interval: interval, currency: currency)
       redirect_to checkout.url, allow_other_host: true, status: :see_other
     end
   rescue Billing::Error => e

@@ -82,7 +82,7 @@ module PricingHelper
 
   # "Upgrade" is offered only when a payment provider is set up for this currency.
   def pro_checkout_available?
-    Billing.available?
+    Billing.available?(pricing_currency)
   end
 
   def pro_user?(user)

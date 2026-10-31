@@ -149,7 +149,7 @@ GEMINI_API_KEY=your-key bin/dev
 
 ### Ops
 
-- **`/admin`** (only for `ADMIN_EMAILS`, a 404 for everyone else): users, verified and Pro users (once billing lands), paths by status, generations today and this month, an estimated AI cost, the activation funnel and the last 50 failed generations.
+- **`/admin`** (only for `ADMIN_EMAILS`, a 404 for everyone else): users, verified and Pro users, paths by status, generations today and this month, an estimated AI cost, the activation funnel and the last 50 failed generations.
 - **Errors:** a `Rails.error` subscriber sends every reported or unhandled error to `ErrorReporter`. The log adapter is the default; a Sentry or AppSignal adapter is one more class behind `ERROR_REPORTER`.
 - **Analytics:** an `events` table records `signed_up`, `path_ready`, `path_failed`, `first_step_done`, `returned_week_2` and `upgraded`. First-party only, no scripts; a deleted account's events stay without the user.
 - **Download my data:** Settings builds a `.tar.gz` in a background job with `data.json` (account, goals including job posts, paths, steps, notes, events) and a Markdown checklist per path.
@@ -201,6 +201,7 @@ Pro is sold through a payment provider behind one interface, `Billing::Provider`
 
 - **Development and tests** use `Billing::FakeProvider`: "Upgrade" opens a local test checkout, and "Pay" sends a webhook signed exactly like a real one through the same code path, so the whole flow works offline. It is never available in production.
 - **Production** uses `Billing::Dodo` ([Dodo Payments](https://docs.dodopayments.com), merchant of record: it charges, files GST/VAT and pays out).
+- **`Billing::Razorpay`** ([Razorpay Subscriptions](https://razorpay.com/docs/api/payments/subscriptions/)) is the fallback, or the rupee provider: Dodo pays out only in USD/EUR/GBP, so `BILLING_PROVIDER_INR=razorpay` sends INR checkouts to Razorpay while USD stays with Dodo. With Razorpay you are the seller of record and handle GST yourself. It has no customer portal, so subscribers cancel from settings (renewal stops at the end of the paid cycle). Its webhooks are an HMAC-SHA256 hex digest of the raw body in `X-Razorpay-Signature`, made idempotent with `x-razorpay-event-id`; point them at `https://APP_HOST/webhooks/billing/razorpay` with the `subscription.*` events.
 - Prices come from `config/plans.yml`: ₹199/month and ₹1,499/year (shown **including GST**), $6/month and $48/year. Visitors from India (`CF-IPCountry: IN` or an `*-IN` browser language) see rupees, others dollars, and settings has an INR/USD toggle.
 
 **Webhooks.** `POST /webhooks/billing/:provider` needs no session or CSRF token; the signature proves the request is genuine. Dodo signs with [Standard Webhooks](https://www.standardwebhooks.com/) (`webhook-id`, `webhook-timestamp`, `webhook-signature`, HMAC-SHA256, compared in constant time) and requests more than 5 minutes old are rejected. Each event id is stored in `webhook_events` with a unique index, so a retried delivery returns 200 without being applied again. Subscriptions move through these states:
@@ -223,6 +224,10 @@ Set up Dodo: create four **subscription products** (Pro monthly and yearly, in I
 | `DODO_WEBHOOK_SECRET` | The endpoint's signing secret (`whsec_...`, secret). |
 | `DODO_ENVIRONMENT` | `test_mode` (default, `test.dodopayments.com`) or `live_mode` (`live.dodopayments.com`). |
 | `DODO_PRODUCT_PRO_MONTHLY_INR`, `DODO_PRODUCT_PRO_YEARLY_INR`, `DODO_PRODUCT_PRO_MONTHLY_USD`, `DODO_PRODUCT_PRO_YEARLY_USD` | Dodo product id (`pdt_...`) for each price. |
+| `BILLING_PROVIDER_INR`, `BILLING_PROVIDER_USD` | Optional per-currency override of `BILLING_PROVIDER`, e.g. `razorpay` for rupees. |
+| `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` | Razorpay API keys (the secret is secret). |
+| `RAZORPAY_WEBHOOK_SECRET` | The secret you set on the Razorpay webhook (secret). |
+| `RAZORPAY_PLAN_PRO_MONTHLY_INR`, `RAZORPAY_PLAN_PRO_YEARLY_INR` | Razorpay plan ids (`plan_...`, create them at ₹199/month and ₹1,499/year incl. GST). `..._USD` variants are optional. |
 
 ### Run tests and checks
 
@@ -300,6 +305,9 @@ Add an `A` record, for example `pathaviator.example.com → 203.0.113.10`, and w
 | `DODO_API_KEY`, `DODO_WEBHOOK_SECRET` | For payments | secret | Dodo Payments API key and webhook signing secret |
 | `DODO_ENVIRONMENT` | No | app | `test_mode` (default) or `live_mode` |
 | `DODO_PRODUCT_PRO_{MONTHLY,YEARLY}_{INR,USD}` | For payments | app | Dodo product id for each of the four prices |
+| `BILLING_PROVIDER_INR`, `BILLING_PROVIDER_USD` | No | app | Per-currency provider, e.g. `razorpay` for INR |
+| `RAZORPAY_KEY_ID`, `RAZORPAY_PLAN_PRO_{MONTHLY,YEARLY}_INR` | For Razorpay | app | Razorpay key id and plan ids |
+| `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET` | For Razorpay | secret | Razorpay key secret and webhook secret |
 
 Keep them in a file that git ignores (the `/.env*` rule covers `.env.deploy`) and load it before each Kamal command:
 

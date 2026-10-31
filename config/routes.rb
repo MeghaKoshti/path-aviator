@@ -57,6 +57,7 @@ Rails.application.routes.draw do
     post "checkout", to: "checkouts#create", as: :checkout
     get "return", to: "returns#show", as: :return
     post "portal", to: "portals#create", as: :portal
+    post "cancel", to: "cancellations#create", as: :cancellation
     # The fake provider's "hosted" pages (development and tests only).
     unless Rails.env.production?
       get "fake/checkout/:token", to: "fake_checkouts#show", as: :fake_checkout

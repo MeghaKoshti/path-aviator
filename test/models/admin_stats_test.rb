@@ -29,9 +29,11 @@ class AdminStatsTest < ActiveSupport::TestCase
     assert_equal 0, funnel["upgraded"]
   end
 
-  test "billing columns are optional until that branch lands" do
+  test "counts confirmed and Pro users" do
+    users(:one).update!(plan: :pro)
     stats = AdminStats.new
-    assert_equal User.column_names.include?("plan"), !stats.pro_users.nil?
-    assert_equal User.column_names.include?("email_verified_at"), !stats.verified_users.nil?
+
+    assert_equal User.where.not(email_verified_at: nil).count, stats.verified_users
+    assert_equal 1, stats.pro_users
   end
 end

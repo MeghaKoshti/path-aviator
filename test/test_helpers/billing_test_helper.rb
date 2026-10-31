@@ -27,6 +27,21 @@ module BillingTestHelper
                       product_ids: DODO_PRODUCT_IDS, http: http, **options)
   end
 
+  RAZORPAY_TEST_SECRET = "razorpay-test-webhook-secret".freeze
+  RAZORPAY_PLAN_IDS = { [ "month", "inr" ] => "plan_pro_monthly_inr", [ "year", "inr" ] => "plan_pro_yearly_inr",
+                        [ "month", "usd" ] => nil, [ "year", "usd" ] => nil }.freeze
+
+  def razorpay_provider(http: FakeHttp.new, **options)
+    Billing::Razorpay.new(key_id: "rzp_test_key", key_secret: "rzp_test_secret", webhook_secret: RAZORPAY_TEST_SECRET,
+                          plan_ids: RAZORPAY_PLAN_IDS, http: http, **options)
+  end
+
+  # A recorded Razorpay webhook for this user, signed with the test secret.
+  def razorpay_webhook(name, user:, id: "evt_#{SecureRandom.hex(8)}", secret: RAZORPAY_TEST_SECRET)
+    body = file_fixture("razorpay/#{name}.json").read.gsub("USER_ID", user.id.to_s)
+    [ { "x-razorpay-signature" => OpenSSL::HMAC.hexdigest("SHA256", secret, body), "x-razorpay-event-id" => id }, body ]
+  end
+
   # A recorded Dodo webhook (test/fixtures/files/dodo) for this user, signed
   # with the test secret. Returns [headers, body].
   def dodo_webhook(name, user:, id: "msg_#{SecureRandom.hex(8)}", timestamp: Time.current.to_i, secret: DODO_TEST_SECRET)

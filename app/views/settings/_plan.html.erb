@@ -3,7 +3,7 @@
   quota = user.generation_quota
   subscription = user.current_subscription
   currency = billing_currency
-  can_upgrade = user.free? && !user.demo? && Billing.available?
+  can_upgrade = user.free? && !user.demo? && Billing.available?(currency)
 %>
 <section id="plan" class="scroll-mt-24 rounded-panel border border-line bg-surface-raised p-6 shadow-panel sm:p-8" aria-labelledby="plan-heading">
   <div class="flex flex-wrap items-center gap-2">
@@ -40,7 +40,14 @@
           <% end %>
         </p>
       <% end %>
-      <% unless subscription.expired? %>
+      <% if subscription.cancel_in_app? %>
+        <% unless subscription.expired? || subscription.canceled? || subscription.cancel_at_period_end? %>
+          <div class="mt-3">
+            <%= ui_button "Cancel subscription", billing_cancellation_path, method: :post, variant: :danger_ghost, size: :sm,
+                  data: { turbo_confirm: "Cancel Pro? You keep it until #{period_end}, and you won’t be charged again." } %>
+          </div>
+        <% end %>
+      <% elsif !subscription.expired? %>
         <div class="mt-3">
           <%# Off Turbo: the answer is a redirect to the provider's site. %>
           <%= ui_button subscription.past_due? ? "Update payment method" : "Manage or cancel", billing_portal_path, method: :post,

@@ -36,6 +36,11 @@ class Subscription < ApplicationRecord
     past_due_at && past_due_at + PAST_DUE_GRACE
   end
 
+  # Cancelled in settings rather than in the provider's portal (Razorpay).
+  def cancel_in_app?
+    Billing::CANCEL_IN_APP.include?(provider)
+  end
+
   def plan_details
     Plan.find(plan)
   end

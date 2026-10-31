@@ -39,16 +39,10 @@
         Your first job-post path was free. Pro plans as many as you need, each sized to your interview date.
         You can still plan any path from a topic.
       </p>
-      <% if lookup_context.exists?("upgrade_prompt", [ "shared" ], true) %>
-        <div class="mt-5"><%= render "shared/upgrade_prompt", reason: :job_post_paths %></div>
-      <% else %>
-        <div class="mt-5 flex flex-wrap gap-3">
-          <% if respond_to?(:pricing_path) %>
-            <%= ui_button "See Pro", pricing_path %>
-          <% end %>
-          <%= ui_button "Start from a topic", new_learning_goal_path, variant: :secondary %>
-        </div>
-      <% end %>
+      <div class="mt-5 flex flex-wrap gap-3">
+        <%= ui_button "Upgrade to Pro", upgrade_path %>
+        <%= ui_button "Start from a topic", new_learning_goal_path, variant: :secondary %>
+      </div>
     </section>
   <% elsif @refusal == :limit %>
     <div class="mt-6"><%= render "shared/upgrade_prompt", reason: :limit %></div>
