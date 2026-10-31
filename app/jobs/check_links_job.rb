@@ -32,6 +32,8 @@ class CheckLinksJob < ApplicationJob
     # The attributes to save when the generator found a link that works, or
     # nothing (the step stays broken) when it didn't.
     def substitute_for(step)
+      return {} unless record_replacement_call(step)
+
       replacement = PathGenerator.replace_step(step)
       result = @checker.check(replacement.resource_url)
       return {} if result.broken?
@@ -45,6 +47,19 @@ class CheckLinksJob < ApplicationJob
     rescue PathGenerator::Error => e
       Rails.logger.warn("[CheckLinksJob] no substitute for step #{step.id}: #{e.class}: #{e.message}")
       {}
+    end
+
+    # Each substitute is an AI call, so it is metered by the daily cost cap
+    # (not the user's monthly quota). Once the cap is hit the step simply
+    # keeps its search fallback.
+    def record_replacement_call(step)
+      if Generation.daily_limit_reached?
+        Rails.logger.warn("[AI cost guard] daily limit reached; no substitute for step #{step.id}")
+        return false
+      end
+
+      path = step.learning_path
+      path.user.generations.create!(kind: "link_replacement", learning_path: path)
     end
 
     # Swaps just the step's link and badge, so a note being edited isn't lost.

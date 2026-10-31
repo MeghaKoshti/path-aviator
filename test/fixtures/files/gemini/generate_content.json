@@ -1,0 +1,23 @@
+{
+  "candidates": [
+    {
+      "content": {
+        "role": "model",
+        "parts": [
+          {
+            "text": "{\"title\":\"SQL for analytics: Intermediate Learning Path\",\"summary\":\"A practical route through SQL for analytics for intermediate learners with about 4 hours a week. You'll start with the core ideas, practise them on small exercises and finish by building a project you can show.\",\"steps\":[{\"title\":\"Watch a SQL for analytics crash course\",\"description\":\"Get the big picture first so later details have somewhere to fit.\",\"resource_type\":\"video\",\"resource_url\":\"https://www.youtube.com/results?search_query=SQL+for+analytics+crash+course\",\"estimated_minutes\":60},{\"title\":\"Read the official SQL for analytics documentation\",\"description\":\"Skim the getting-started guide and note the key concepts.\",\"resource_type\":\"docs\",\"resource_url\":\"https://www.google.com/search?q=SQL+for+analytics+official+documentation\",\"estimated_minutes\":90},{\"title\":\"Learn the core concepts\",\"description\":\"Read an in-depth article on the fundamentals and write a one-page summary.\",\"resource_type\":\"article\",\"resource_url\":\"https://dev.to/search?q=SQL+for+analytics\",\"estimated_minutes\":45},{\"title\":\"Do guided exercises\",\"description\":\"Work through small exercises to turn reading into muscle memory.\",\"resource_type\":\"practice\",\"resource_url\":\"https://exercism.org/tracks\",\"estimated_minutes\":120},{\"title\":\"Take a structured course module\",\"description\":\"Follow one free course module end to end without skipping.\",\"resource_type\":\"course\",\"resource_url\":\"https://www.freecodecamp.org/news/search/?query=SQL+for+analytics\",\"estimated_minutes\":180},{\"title\":\"Study common patterns and pitfalls\",\"description\":\"Learn the mistakes people usually make and how to avoid them.\",\"resource_type\":\"article\",\"resource_url\":\"https://roadmap.sh/\",\"estimated_minutes\":45},{\"title\":\"Read real-world SQL for analytics code\",\"description\":\"Explore well-known open-source projects to see how experts structure things.\",\"resource_type\":\"practice\",\"resource_url\":\"https://github.com/search?q=SQL+for+analytics\\u0026type=repositories\",\"estimated_minutes\":90},{\"title\":\"Build and share a small project\",\"description\":\"Combine everything in a small project and publish it on GitHub.\",\"resource_type\":\"practice\",\"resource_url\":\"https://github.com/new\",\"estimated_minutes\":240}]}"
+          }
+        ]
+      },
+      "finishReason": "STOP",
+      "index": 0
+    }
+  ],
+  "usageMetadata": {
+    "promptTokenCount": 412,
+    "candidatesTokenCount": 1180,
+    "thoughtsTokenCount": 655,
+    "totalTokenCount": 2247
+  },
+  "modelVersion": "gemini-2.5-flash"
+}

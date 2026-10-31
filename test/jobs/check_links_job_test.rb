@@ -136,4 +136,24 @@ class CheckLinksJobTest < ActiveJob::TestCase
 
     assert_no_enqueued_jobs(only: CheckLinksJob) { GenerateLearningPathJob.perform_now(learning_paths(:sql)) }
   end
+
+  test "a substitute is metered by the daily cap but doesn't use the owner's monthly quota" do
+    PathGenerator.client = ReplacingClient.new(replacement)
+
+    assert_difference -> { Generation.where(kind: "link_replacement").count }, 1 do
+      CheckLinksJob.perform_now(@path, checker: LinkChecker::Fake.new(broken: [ @step.resource_url ]))
+    end
+    assert_equal 3, @path.user.generations_left_this_month
+  end
+
+  test "once the daily cap is reached, broken links keep their search fallback without an AI call" do
+    PathGenerator.client = client = ReplacingClient.new(replacement)
+
+    with_env("AI_DAILY_GENERATION_LIMIT" => "0") do
+      CheckLinksJob.perform_now(@path, checker: LinkChecker::Fake.new(broken: [ @step.resource_url ]))
+    end
+
+    assert_empty client.asked_for
+    assert @step.reload.link_broken?
+  end
 end

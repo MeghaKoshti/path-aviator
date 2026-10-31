@@ -29,6 +29,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_153844) do
     t.index ["user_id", "name"], name: "index_events_on_user_id_and_name"
   end
 
+  create_table "generations", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "learning_path_id"
+    t.string "kind", default: "path", null: false
+    t.datetime "failed_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["created_at"], name: "index_generations_on_created_at"
+    t.index ["learning_path_id"], name: "index_generations_on_learning_path_id"
+    t.index ["user_id", "created_at"], name: "index_generations_on_user_id_and_created_at"
+  end
+
   create_table "learning_goals", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "topic", null: false
@@ -56,9 +68,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_153844) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "share_token"
+    t.integer "input_tokens"
+    t.integer "output_tokens"
+    t.integer "thinking_tokens"
+    t.json "skills", default: [], null: false
     t.string "certificate_token"
     t.datetime "certificate_issued_at"
-    t.json "skills", default: [], null: false
     t.index ["certificate_token"], name: "index_learning_paths_on_certificate_token", unique: true
     t.index ["learning_goal_id"], name: "index_learning_paths_on_learning_goal_id", unique: true
     t.index ["share_token"], name: "index_learning_paths_on_share_token", unique: true
@@ -77,9 +92,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_153844) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "note"
-    t.string "evidence_url"
     t.string "link_status", default: "unchecked", null: false
     t.datetime "link_checked_at"
+    t.string "evidence_url"
     t.index ["learning_path_id", "position"], name: "index_path_steps_on_learning_path_id_and_position", unique: true
   end
 
@@ -98,6 +113,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_153844) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "name"
+    t.string "plan", default: "free", null: false
     t.string "time_zone", default: "UTC", null: false
     t.boolean "weekly_digest", default: true, null: false
     t.datetime "weekly_digest_sent_at"
@@ -106,6 +122,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_153844) do
 
   add_foreign_key "data_exports", "users"
   add_foreign_key "events", "users", on_delete: :nullify
+  add_foreign_key "generations", "learning_paths", on_delete: :nullify
+  add_foreign_key "generations", "users"
   add_foreign_key "learning_goals", "users"
   add_foreign_key "learning_paths", "learning_goals"
   add_foreign_key "learning_paths", "users"

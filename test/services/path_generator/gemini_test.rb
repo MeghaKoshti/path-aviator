@@ -30,7 +30,7 @@ class PathGenerator::GeminiTest < ActiveSupport::TestCase
     http = FakeHttp.new(body: envelope('{"title":"x"}'))
     client = PathGenerator::Gemini.new(api_key: "secret", model: "gemini-test", http: http)
 
-    assert_equal '{"title":"x"}', client.generate(@goal)
+    assert_equal '{"title":"x"}', client.generate(@goal).text
     assert_equal "https://generativelanguage.googleapis.com/v1beta/models/gemini-test:generateContent", http.url
     assert_equal "secret", http.headers["x-goog-api-key"]
     assert_equal "application/json", http.body.dig("generationConfig", "responseMimeType")
@@ -85,7 +85,7 @@ class PathGenerator::GeminiTest < ActiveSupport::TestCase
                              finishReason: "STOP" } ] }.to_json
     client = PathGenerator::Gemini.new(api_key: "k", http: FakeHttp.new(body: body))
 
-    assert_equal '{"title":"x"}', client.generate(@goal)
+    assert_equal '{"title":"x"}', client.generate(@goal).text
   end
 
   test "raises InvalidOutput naming the reason when the answer was cut off" do
@@ -164,7 +164,7 @@ class PathGenerator::GeminiTest < ActiveSupport::TestCase
     http = FakeHttp.new(body: envelope('{"resource_url":"https://x.example"}'))
     step = path_steps(:rails_models)
 
-    assert_equal '{"resource_url":"https://x.example"}', PathGenerator::Gemini.new(api_key: "k", http: http).replace_step(step)
+    assert_equal '{"resource_url":"https://x.example"}', PathGenerator::Gemini.new(api_key: "k", http: http).replace_step(step).text
 
     prompt = http.body.dig("contents", 0, "parts", 0, "text")
     assert_includes prompt, "Active Record basics"
@@ -184,4 +184,34 @@ class PathGenerator::GeminiTest < ActiveSupport::TestCase
     ensure
       old.each { |key, value| ENV[key] = value }
     end
+
+  test "caps thinking with GEMINI_THINKING_BUDGET, 1024 tokens by default" do
+    http = FakeHttp.new(body: envelope("{}"))
+    with_env("GEMINI_THINKING_BUDGET" => nil) { PathGenerator::Gemini.new(api_key: "k", http: http).generate(@goal) }
+    assert_equal({ "thinkingBudget" => 1024 }, http.body.dig("generationConfig", "thinkingConfig"))
+
+    with_env("GEMINI_THINKING_BUDGET" => "0") { PathGenerator::Gemini.new(api_key: "k", http: http).generate(@goal) }
+    assert_equal 0, http.body.dig("generationConfig", "thinkingConfig", "thinkingBudget")
+  end
+
+  test "a blank thinking budget leaves thinking to the model" do
+    http = FakeHttp.new(body: envelope("{}"))
+    PathGenerator::Gemini.new(api_key: "k", thinking_budget: "", http: http).generate(@goal)
+
+    assert_not http.body["generationConfig"].key?("thinkingConfig")
+  end
+
+  test "returns the token usage Google reports" do
+    http = FakeHttp.new(body: file_fixture("gemini/generate_content.json").read)
+    reply = PathGenerator::Gemini.new(api_key: "k", http: http).generate(@goal)
+
+    assert_equal({ input_tokens: 412, output_tokens: 1180, thinking_tokens: 655 }, reply.usage)
+    assert_match "SQL for analytics", reply.text
+  end
+
+  test "usage is nil when Google leaves it out" do
+    reply = PathGenerator::Gemini.new(api_key: "k", http: FakeHttp.new(body: envelope("{}"))).generate(@goal)
+
+    assert_nil reply.usage
+  end
 end

@@ -61,28 +61,40 @@ class GenerateLearningPathJob < ApplicationJob
           raw_response: result.raw,
           generated_at: Time.current,
           error_message: nil,
-          status: :ready
+          status: :ready,
+          **token_usage(result)
         )
         true
       end
     end
 
+    # Kept on the path so the Gemini bill can be traced back to real usage.
+    def token_usage(result)
+      usage = result.usage || {}
+      { input_tokens: usage[:input_tokens], output_tokens: usage[:output_tokens], thinking_tokens: usage[:thinking_tokens] }
+    end
+
     # Only a path that is still generating is marked failed, so a late failure
-    # can't clobber a path that a newer job already finished.
+    # can't clobber a path that a newer job already finished. A failure is our
+    # fault, so it doesn't use up the user's monthly quota.
     def mark_failed(learning_path, error)
       Rails.logger.error("[GenerateLearningPathJob] path #{learning_path.id} failed: #{error.class}: #{error.message}")
       Event.track(:path_failed, user: User.find_by(id: learning_path.user_id), path_id: learning_path.id, error: "#{error.class.name}: #{error.message.truncate(200)}")
-      LearningPath.where(id: learning_path.id, status: LearningPath.statuses[:generating]).update_all(
+      failed = LearningPath.where(id: learning_path.id, status: LearningPath.statuses[:generating]).update_all(
         status: LearningPath.statuses[:failed],
         error_message: FAILURE_MESSAGE,
         raw_response: error.try(:raw),
         updated_at: Time.current
       )
+      Generation.fail_latest_for(learning_path) if failed.positive?
     end
 
-    # No token counts come back from the generator yet, so the admin page's AI
-    # cost is estimated: about 4 characters a token for the answer, plus the prompt.
+    # Gemini's own counts when it reports them (usageMetadata). Otherwise the
+    # admin page's AI cost is estimated: about 4 characters a token for the
+    # answer, plus the prompt.
     def estimated_tokens(result)
+      return result.usage.values.compact.sum if result.usage.present?
+
       PROMPT_TOKENS + result.raw.to_s.length / 4
     end
 

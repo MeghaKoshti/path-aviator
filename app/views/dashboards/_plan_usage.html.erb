@@ -1,0 +1,19 @@
+<%# Plan and this month's generations. Locals: user: %>
+<% quota = user.generation_quota %>
+<% unless quota.unlimited? %>
+  <section id="plan_usage" aria-label="Your plan"
+           class="flex flex-col gap-3 rounded-panel border border-line bg-surface-raised px-5 py-4 shadow-panel sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex min-w-0 items-center gap-3">
+      <% if user.pro? %>
+        <%= ui_badge "Pro", :brand %>
+      <% end %>
+      <div class="min-w-0">
+        <p class="font-semibold text-ink"><%= generations_left_label(quota) %></p>
+        <p class="text-sm text-ink-subtle">New paths and regenerations both count. Resets on <%= l(quota.resets_on, format: "%-d %b") %>.</p>
+      </div>
+    </div>
+    <% if user.free? %>
+      <%= ui_button "Upgrade to Pro", upgrade_path, variant: quota.remaining.zero? ? :primary : :secondary, size: :sm, class: "shrink-0 self-start sm:self-auto" %>
+    <% end %>
+  </section>
+<% end %>

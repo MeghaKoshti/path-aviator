@@ -112,4 +112,38 @@ class DashboardsControllerTest < ActionDispatch::IntegrationTest
                                 resource_url: "https://example.com/#{i}", estimated_minutes: 30)
       end
     end
+
+  test "free users see how many free paths are left this month and an upgrade button" do
+    users(:one).generations.create!
+    sign_in_as users(:one)
+
+    get dashboard_path
+
+    assert_select "#plan_usage" do
+      assert_select "p", "2 of 3 free paths left this month"
+      assert_select "a", "Upgrade to Pro"
+    end
+  end
+
+  test "pro users see a Pro badge and no upgrade button" do
+    users(:one).update!(plan: :pro)
+    sign_in_as users(:one)
+
+    get dashboard_path
+
+    assert_select "#plan_usage" do
+      assert_select "span", "Pro"
+      assert_select "p", "30 of 30 paths left this month"
+      assert_select "a", text: "Upgrade to Pro", count: 0
+    end
+  end
+
+  test "the demo account has no quota box" do
+    demo = DemoAccount.reset!
+    sign_in_as demo, password: DemoAccount::PASSWORD
+
+    get dashboard_path
+
+    assert_select "#plan_usage", count: 0
+  end
 end

@@ -8,12 +8,17 @@ class User < ApplicationRecord
 
   has_secure_password
   has_many :sessions, dependent: :destroy
+  has_many :generations, dependent: :delete_all
   # Paths are declared first so they are destroyed before the goals they point to.
   has_many :learning_paths, dependent: :destroy
   has_many :learning_goals, dependent: :destroy
   has_many :data_exports, dependent: :destroy
   # Analytics rows outlive the account, but no longer point at anyone.
   has_many :events, dependent: :nullify
+
+  # The plan the user has right now. Billing keeps it in step with the
+  # subscription, so checks like pro? never need to look at payments.
+  enum :plan, { free: "free", pro: "pro" }, default: "free", validate: true
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
   normalizes :name, with: ->(name) { name.strip.presence }
@@ -50,6 +55,19 @@ class User < ApplicationRecord
   # A user without a goal still needs to go through onboarding.
   def onboarded?
     learning_goals.exists?
+  end
+
+  # The Plan catalog entry (limits, prices, features) for the user's plan.
+  def current_plan
+    Plan.find(plan)
+  end
+
+  def generation_quota
+    GenerationQuota.new(self)
+  end
+
+  def generations_left_this_month
+    generation_quota.remaining
   end
 
   # The shared demo account everyone signs in to. Its sign-in details and the

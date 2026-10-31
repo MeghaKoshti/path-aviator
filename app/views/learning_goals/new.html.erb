@@ -50,6 +50,10 @@
         </div>
       <% end %>
     </section>
+  <% elsif @refusal == :limit %>
+    <div class="mt-6"><%= render "shared/upgrade_prompt", reason: :limit %></div>
+  <% elsif @refusal %>
+    <p class="mt-6 rounded-control bg-warning-50 px-4 py-3 font-medium text-warning-700" role="alert"><%= generation_quota.refusal_message(@refusal) %></p>
   <% else %>
     <%= turbo_frame_tag "onboarding", class: "mt-6 block",
           data: { controller: "onboarding", action: "turbo:frame-missing->onboarding#followRedirect" } do %>

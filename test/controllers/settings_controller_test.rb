@@ -180,4 +180,16 @@ class SettingsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to settings_path
     assert_equal "UTC", demo.reload.time_zone
   end
+
+  test "the plan section shows the plan and this month's usage" do
+    users(:one).generations.create!
+
+    get settings_path
+
+    assert_select "section#plan" do
+      assert_select "h2", "Plan & billing"
+      assert_select "span", "Free"
+      assert_select "p", /2 of 3 free paths left this month/
+    end
+  end
 end

@@ -1,0 +1,41 @@
+<%#
+  Call to action shown where a Free limit stops someone.
+  Locals: reason: :limit (monthly paths used up) or any feature name (e.g. :certificates)
+          user: (default Current.user; pass it when rendering outside a request)
+          compact: (default false) a smaller version for sidebars
+%>
+<%
+  user = local_assigns[:user] || Current.user
+  quota = user.generation_quota
+  compact = local_assigns.fetch(:compact, false)
+  if reason.to_sym == :limit
+    title = quota.plan.free? ? "You’ve used this month’s free paths" : "You’ve reached this month’s fair-use limit"
+    body = quota.refusal_message(:limit)
+  else
+    title = "#{reason.to_s.humanize} is a Pro feature"
+    body = "Upgrade to Pro for unlimited paths, checked links, certificates and more."
+  end
+  offer_upgrade = !user.pro? && !user.demo?
+%>
+<section class="<%= class_names("rounded-panel border border-brand-200 bg-brand-50 text-left", compact ? "p-5" : "p-6 sm:p-8") %>"
+         aria-labelledby="upgrade-prompt-heading" data-upgrade-reason="<%= reason %>">
+  <div class="flex items-start gap-4">
+    <svg class="<%= class_names("shrink-0 text-brand-700", compact ? "hidden" : "mt-1 size-8") %>" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <path d="M6 24c5 0 6-8 11-9s5-4 7-8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 3"/>
+      <circle cx="6" cy="24" r="3" class="fill-route"/>
+      <path d="M26 4l-1 8-2.5-3-3.5.8z" fill="currentColor"/>
+    </svg>
+    <div class="min-w-0">
+      <h2 id="upgrade-prompt-heading" class="<%= class_names("font-semibold text-ink", compact ? "text-sm" : "text-lg") %>"><%= title %></h2>
+      <p class="<%= class_names("mt-1 text-pretty text-ink-muted", "text-sm": compact) %>"><%= body %></p>
+      <% if offer_upgrade %>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <%= ui_button "Upgrade to Pro", upgrade_path, size: compact ? :sm : :md %>
+          <% unless compact %>
+            <%= ui_button "Back to dashboard", dashboard_path, variant: :ghost %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</section>

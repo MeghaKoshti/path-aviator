@@ -141,6 +141,7 @@ The demo account is shared, so its name, email and password can't be changed, it
 |---|---|
 | `GEMINI_API_KEY` | Enables real path generation with Google Gemini. Leave it unset to use the built-in sample generator. |
 | `GEMINI_MODEL` | Model name, defaults to `gemini-2.5-flash`. |
+| `GEMINI_THINKING_BUDGET` | Cap on Gemini's thinking tokens (billed as output). Defaults to `1024`; `0` turns thinking off, empty or `-1` lets the model decide. |
 
 ```bash
 GEMINI_API_KEY=your-key bin/dev
@@ -174,6 +175,19 @@ After a path is generated, `CheckLinksJob` opens every step's link with `LinkChe
 | Not http(s), a port other than 80/443, or any hop that resolves to a private, loopback, link-local or metadata address | broken | Blocked before connecting, so a generated link can never reach the server's own network (SSRF) |
 
 Every hop is resolved and checked, then the request goes to that vetted IP (no proxy), with HEAD first and GET as a fallback, a 5-second timeout, at most 16 KB of body read and a `PathAviatorLinkChecker/1.0` user agent. Tests never use the network (`LinkChecker::Fake`).
+
+### Plans and quotas
+
+Plans, prices and limits live in `config/plans.yml` (read through `Plan`). Every AI call is recorded in the `generations` table. A new path or a regeneration (including job-post paths) is checked before a job is queued; copying a shared path or a /learn plan makes no AI call and costs nothing. A broken link's substitute (`CheckLinksJob`) counts only towards the daily cap:
+
+- **Free:** 3 generations per calendar month (UTC). **Pro:** 30 (fair use). A generation that fails on our side doesn't count.
+- **Global daily cap:** once `AI_DAILY_GENERATION_LIMIT` generations (default `500`) have run today, new ones are refused with a "busy, try later" message and a `[AI cost guard]` log line. This also covers the demo account, which has no monthly quota.
+- **Rate limit:** 5 new paths and 5 regenerations per user per 10 minutes.
+- Gemini's token usage (`usageMetadata`) is saved on each path (`input_tokens`, `output_tokens`, `thinking_tokens`).
+
+| Variable | Purpose |
+|---|---|
+| `AI_DAILY_GENERATION_LIMIT` | Most generations the whole app runs in one UTC day. Default `500`. |
 
 ### Run tests and checks
 
@@ -245,6 +259,8 @@ Add an `A` record, for example `pathaviator.example.com → 203.0.113.10`, and w
 | `BACKUP_DIR` | No | app | Folder for the nightly SQLite backup (e.g. a second volume). No backups without it |
 | `BACKUP_KEEP` | No | app | How many nightly backups to keep. Default 7 |
 | `AI_USD_PER_MILLION_TOKENS` | No | app | Price used for the admin page's AI cost estimate. Default 1.5 |
+| `AI_DAILY_GENERATION_LIMIT` | No | app | Global cap on AI generations per UTC day. Default `500` |
+| `GEMINI_THINKING_BUDGET` | No | app | Cap on Gemini thinking tokens. Default `1024` |
 
 Keep them in a file that git ignores (the `/.env*` rule covers `.env.deploy`) and load it before each Kamal command:
 

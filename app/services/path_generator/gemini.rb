@@ -1,12 +1,18 @@
 module PathGenerator
-  # Calls the Google Generative Language API and returns the model's raw JSON text.
+  # Calls the Google Generative Language API and returns the model's raw JSON
+  # text with its token usage (a PathGenerator::Reply).
   class Gemini
     ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/%<model>s:generateContent".freeze
     DEFAULT_MODEL = "gemini-2.5-flash".freeze
+    # Thinking tokens are billed as output, so they are capped. A path needs
+    # little reasoning; "-1" lets the model decide, "0" turns thinking off.
+    DEFAULT_THINKING_BUDGET = 1024
 
-    def initialize(api_key: ENV.fetch("GEMINI_API_KEY"), model: ENV.fetch("GEMINI_MODEL", DEFAULT_MODEL), http: HttpClient.new)
+    def initialize(api_key: ENV.fetch("GEMINI_API_KEY"), model: ENV.fetch("GEMINI_MODEL", DEFAULT_MODEL),
+                   thinking_budget: ENV.fetch("GEMINI_THINKING_BUDGET", DEFAULT_THINKING_BUDGET), http: HttpClient.new)
       @api_key = api_key
       @model = model.presence || DEFAULT_MODEL
+      @thinking_budget = Integer(thinking_budget) if thinking_budget.present?
       @http = http
     end
 
@@ -163,7 +169,7 @@ module PathGenerator
         )
         raise RequestFailed, "Gemini returned HTTP #{response.status}#{api_error(response.body)}" unless response.success?
 
-        extract_text(response.body)
+        Reply.new(text: extract_text(response.body), usage: extract_usage(response.body))
       end
 
       def request_body(prompt, schema)
@@ -174,8 +180,9 @@ module PathGenerator
             responseSchema: schema,
             # Low enough to keep URLs and minutes grounded, high enough that
             # "Regenerate" still gives a different path.
-            temperature: 0.5
-          }
+            temperature: 0.5,
+            thinkingConfig: ({ thinkingBudget: @thinking_budget } if @thinking_budget)
+          }.compact
         }
       end
 
@@ -186,6 +193,18 @@ module PathGenerator
         message.present? ? ": #{message.truncate(200)}" : ""
       rescue JSON::ParserError, TypeError
         ""
+      end
+
+      # usageMetadata counts: prompt (input), candidates (answer) and thoughts.
+      def extract_usage(body)
+        usage = JSON.parse(body)["usageMetadata"]
+        return unless usage.is_a?(Hash)
+
+        {
+          input_tokens: usage["promptTokenCount"],
+          output_tokens: usage["candidatesTokenCount"],
+          thinking_tokens: usage["thoughtsTokenCount"]
+        }
       end
 
       def extract_text(body)

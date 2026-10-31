@@ -76,6 +76,11 @@ env:
     LEGAL_OWNER_NAME: "<%= ENV["LEGAL_OWNER_NAME"] %>"
     SUPPORT_EMAIL: "<%= ENV["SUPPORT_EMAIL"] %>"
 
+    # AI cost guard: at most this many generations per UTC day for the whole
+    # app, and a cap on Gemini's (billed) thinking tokens per request.
+    AI_DAILY_GENERATION_LIMIT: "<%= ENV.fetch("AI_DAILY_GENERATION_LIMIT", "500") %>"
+    GEMINI_THINKING_BUDGET: "<%= ENV.fetch("GEMINI_THINKING_BUDGET", "1024") %>"
+
     # Set number of processes dedicated to Solid Queue (default: 1)
     # JOB_CONCURRENCY: 3
 

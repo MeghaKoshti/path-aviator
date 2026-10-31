@@ -99,4 +99,29 @@ class UserTest < ActiveSupport::TestCase
     assert_equal users(:one), User.find_by_token_for(:unsubscribe, token)
     assert_nil User.find_by_token_for(:unsubscribe, token.reverse)
   end
+
+  test "new users start on the free plan" do
+    user = User.create!(email_address: "new@example.com", password: "long-enough-pw")
+
+    assert user.free?
+    assert_not user.pro?
+    assert_equal Plan.free, user.current_plan
+  end
+
+  test "the plan must be a known one" do
+    user = users(:one)
+    user.plan = "platinum"
+
+    assert_not user.valid?
+    assert user.errors.include?(:plan)
+  end
+
+  test "destroying a user removes their generation history" do
+    user = users(:two)
+    user.generations.create!
+
+    assert_difference "Generation.count", -1 do
+      user.destroy!
+    end
+  end
 end

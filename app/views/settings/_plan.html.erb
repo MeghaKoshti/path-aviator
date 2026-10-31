@@ -1,0 +1,15 @@
+<%# Plan & billing. Locals: user: %>
+<% quota = user.generation_quota %>
+<section id="plan" class="scroll-mt-24 rounded-panel border border-line bg-surface-raised p-6 shadow-panel sm:p-8" aria-labelledby="plan-heading">
+  <div class="flex flex-wrap items-center gap-2">
+    <h2 id="plan-heading" class="text-lg font-semibold text-ink">Plan &amp; billing</h2>
+    <%= ui_badge user.current_plan.name, user.pro? ? :brand : :neutral %>
+  </div>
+  <p class="mt-2 text-pretty text-ink-muted">
+    <% if quota.unlimited? %>
+      The demo account can plan as many paths as it likes.
+    <% else %>
+      <%= generations_left_label(quota) %>. New paths and regenerations both count, and the count resets on <%= l(quota.resets_on, format: "%-d %B") %>.
+    <% end %>
+  </p>
+</section>

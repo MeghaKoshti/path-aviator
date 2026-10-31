@@ -216,4 +216,36 @@ class GenerateLearningPathJobTest < ActiveJob::TestCase
   ensure
     ErrorReporter.adapter = nil
   end
+
+  test "saves Gemini's token usage on the path" do
+    body = file_fixture("gemini/generate_content.json").read
+    http = Struct.new(:body) do
+      def post_json(*, **) = PathGenerator::HttpClient::Response.new(status: 200, body: body)
+    end.new(body)
+    PathGenerator.client = PathGenerator::Gemini.new(api_key: "test-key", http: http)
+
+    GenerateLearningPathJob.perform_now(@path)
+    @path.reload
+
+    assert @path.ready?
+    assert_equal [ 412, 1180, 655 ], [ @path.input_tokens, @path.output_tokens, @path.thinking_tokens ]
+  end
+
+  test "clients without usage data leave the token columns empty" do
+    PathGenerator.client = ScriptedClient.new(valid_json)
+
+    GenerateLearningPathJob.perform_now(@path)
+
+    assert_nil @path.reload.output_tokens
+  end
+
+  test "a failed generation is handed back to the user's quota" do
+    generation = @path.user.generations.create!(learning_path: @path)
+    PathGenerator.client = ScriptedClient.new(PathGenerator::Timeout.new("slow"))
+
+    GenerateLearningPathJob.perform_now(@path)
+
+    assert @path.reload.failed?
+    assert generation.reload.failed_at
+  end
 end
