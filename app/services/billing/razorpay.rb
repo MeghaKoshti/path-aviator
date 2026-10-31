@@ -131,7 +131,9 @@ module Billing
           interval: notes["interval"].presence_in(Billing::INTERVALS),
           currency: notes["currency"].presence_in(Billing::CURRENCIES),
           current_period_end: entity["current_end"] && Time.zone.at(entity["current_end"]),
-          cancel_at_period_end: false
+          # Razorpay doesn't report a cancel-at-cycle-end flag, so nil keeps
+          # the one we set when the subscriber cancelled in settings.
+          cancel_at_period_end: nil
         )
       end
   end

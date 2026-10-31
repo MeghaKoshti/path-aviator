@@ -72,6 +72,18 @@ class RazorpayBillingTest < ActionDispatch::IntegrationTest
     assert_match "/subscriptions/sub_1/cancel", provider.instance_variable_get(:@http).requests.sole[:url]
   end
 
+  test "a webhook after cancelling in settings doesn't undo the cancellation" do
+    travel_to Time.zone.at(1793357000) do
+      deliver "subscription_activated"
+      subscription = @user.current_subscription
+      subscription.update!(cancel_at_period_end: true)
+
+      deliver "subscription_charged"
+      assert_response :ok
+      assert subscription.reload.cancel_at_period_end?
+    end
+  end
+
   test "rupees can go to Razorpay while dollars stay with another provider" do
     with_env("BILLING_PROVIDER_INR" => "razorpay", "BILLING_PROVIDER" => "fake") do
       assert_instance_of Billing::Razorpay, Billing.provider_for("inr")

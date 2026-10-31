@@ -101,6 +101,6 @@ class Subscription < ApplicationRecord
       self.interval = info.interval if info.interval.present?
       self.currency = info.currency if info.currency.present?
       self.current_period_end = info.current_period_end if info.current_period_end
-      self.cancel_at_period_end = info.cancel_at_period_end
+      self.cancel_at_period_end = info.cancel_at_period_end unless info.cancel_at_period_end.nil?
     end
 end
