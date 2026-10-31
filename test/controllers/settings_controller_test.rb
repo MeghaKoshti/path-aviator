@@ -192,4 +192,13 @@ class SettingsControllerTest < ActionDispatch::IntegrationTest
       assert_select "p", /2 of 3 free paths left this month/
     end
   end
+
+  test "changing the email asks for the new address to be confirmed" do
+    assert_enqueued_emails 1 do
+      patch settings_profile_path, params: { user: { name: @user.name, email_address: "riya.new@example.com", password_challenge: "password" } }
+    end
+
+    assert_match "Check riya.new@example.com", flash[:notice]
+    assert_not @user.reload.email_verified?
+  end
 end

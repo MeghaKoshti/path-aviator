@@ -1,4 +1,7 @@
-<p>
-  You can reset your password within the next 15 minutes on
-  <%= link_to "this password reset page", edit_password_url(@user.password_reset_token) %>.
-</p>
+<% content_for :preheader, "Choose a new password for Path Aviator." %>
+<%= email_paragraph do %>Hi <%= @user.name&.split&.first || "there" %>,<% end %>
+<%= email_paragraph do %>Someone asked to reset the password for your Path Aviator account. If it was you, choose a new one:<% end %>
+<p style="margin:24px 0;"><%= email_button "Reset my password", edit_password_url(@user.password_reset_token) %></p>
+<%= email_small do %>
+  The link works for the next 15 minutes. If you didn’t ask for this, you can ignore this email and your password stays the same.
+<% end %>

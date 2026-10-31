@@ -41,6 +41,13 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "Asha Rao", User.last.name
   end
 
+  test "signing up sends an email to confirm the address" do
+    assert_enqueued_email_with AccountMailer, :verify_email, args: ->(args) { args.first.email_address == "asha@example.com" } do
+      post registration_path, params: valid_params
+    end
+    assert_not User.last.email_verified?
+  end
+
   test "name is optional" do
     assert_difference "User.count", 1 do
       post registration_path, params: valid_params(name: "")

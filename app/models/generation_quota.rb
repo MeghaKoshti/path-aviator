@@ -3,7 +3,7 @@
 #
 #   quota = GenerationQuota.new(user)
 #   quota.remaining  # => 2
-#   quota.refusal    # => nil, :busy or :limit
+#   quota.refusal    # => nil, :busy, :unverified or :limit
 #
 # Months are calendar months in the app's time zone (UTC).
 class GenerationQuota
@@ -40,12 +40,21 @@ class GenerationQuota
     @now.next_month.beginning_of_month.to_date
   end
 
+  # An unconfirmed account gets one path, so trying the app stays quick but
+  # throwaway sign-ups can't farm free generations.
+  UNVERIFIED_GENERATIONS = 1
+
   # nil when a generation may start, otherwise the reason it may not.
   def refusal
     return :busy if Generation.daily_limit_reached?(now: @now)
     return if unlimited?
+    return :unverified if awaiting_verification?
 
     :limit if remaining.zero?
+  end
+
+  def awaiting_verification?
+    !user.email_verified? && user.generations.counted.count >= UNVERIFIED_GENERATIONS
   end
 
   def refusal_message(reason = refusal)
@@ -54,6 +63,8 @@ class GenerationQuota
     case reason
     when :busy
       "Path Aviator is very busy right now. Please try again in a little while."
+    when :unverified
+      "Confirm your email address to plan more paths. We sent a link to #{user.email_address}."
     when :limit
       if plan.free?
         "You’ve used your #{limit} free paths this month. Upgrade to Pro for more, or wait until #{reset_date}."

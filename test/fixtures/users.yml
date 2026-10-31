@@ -4,8 +4,16 @@ one:
   name: Riya Sharma
   email_address: one@example.com
   password_digest: <%= password_digest %>
+  email_verified_at: <%= 1.month.ago.to_fs(:db) %>
 
 two:
   name: Arjun Mehta
   email_address: two@example.com
+  password_digest: <%= password_digest %>
+  email_verified_at: <%= 1.month.ago.to_fs(:db) %>
+
+# Signed up, never clicked the link.
+unverified:
+  name: Kabir Singh
+  email_address: kabir@example.com
   password_digest: <%= password_digest %>

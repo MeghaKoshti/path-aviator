@@ -49,6 +49,12 @@ class WeeklyDigestJobTest < ActiveJob::TestCase
     assert_no_enqueued_emails { run_at KOLKATA_SUNDAY_EVENING }
   end
 
+  test "skips addresses that were never confirmed" do
+    @user.update_column(:email_verified_at, nil)
+
+    assert_no_enqueued_emails { run_at KOLKATA_SUNDAY_EVENING }
+  end
+
   test "never emails the shared demo account" do
     demo = DemoAccount.reset!
     demo.update!(time_zone: "Asia/Kolkata")

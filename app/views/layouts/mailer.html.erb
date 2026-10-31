@@ -1,13 +1,41 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <style>
-      /* Email styles need to be inline */
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title><%= message.subject %></title>
   </head>
-
-  <body>
-    <%= yield %>
+  <%# Inline styles only: most email clients drop <style> and classes. %>
+  <body style="margin:0;padding:0;background:#f5f6fa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#15173a;">
+    <% if content_for?(:preheader) %>
+      <div style="display:none;max-height:0;overflow:hidden;opacity:0;"><%= yield :preheader %></div>
+    <% end %>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f6fa;">
+      <tr>
+        <td align="center" style="padding:32px 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;">
+            <tr>
+              <td style="padding:0 4px 20px;">
+                <%= link_to root_url, style: "text-decoration:none;color:#15173a;font-size:18px;font-weight:700;letter-spacing:-0.01em;" do %>
+                  <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#b4277a;margin-right:8px;vertical-align:middle;"></span>Path Aviator
+                <% end %>
+              </td>
+            </tr>
+            <tr>
+              <td style="background:#ffffff;border:1px solid #dde0eb;border-radius:16px;padding:32px 28px;">
+                <%= yield %>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:20px 4px 0;font-size:13px;line-height:1.5;color:#5f6386;">
+                Path Aviator plans step-by-step learning paths with checked links.<br>
+                You’re getting this email because of your account at <%= link_to root_url.delete_suffix("/").delete_prefix("https://").delete_prefix("http://"), root_url, style: "color:#5f6386;" %>.
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>

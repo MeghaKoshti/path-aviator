@@ -16,6 +16,9 @@
 
   <div class="mt-8 space-y-6">
     <%= render "shared/card", title: "Profile" do %>
+      <% unless Current.user.email_verified? %>
+        <div class="mb-6"><%= render "shared/verify_email_prompt" %></div>
+      <% end %>
       <% invalid = first_invalid_field(@profile, %i[name email_address password_challenge]) %>
       <%= form_with model: @profile, url: settings_profile_path, method: :patch, namespace: "profile" do |form| %>
         <%= tag.fieldset(**fieldset) do %>

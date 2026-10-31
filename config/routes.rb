@@ -1,6 +1,8 @@
 Rails.application.routes.draw do
   resource :session
   resource :registration, only: %i[ new create ]
+  resource :email_verification, only: :create
+  get "verify_email/:token", to: "email_verifications#show", as: :verify_email
   resources :learning_goals, only: %i[ new create ]
   resources :learning_paths, only: %i[ show destroy ] do
     post :regenerate, on: :member

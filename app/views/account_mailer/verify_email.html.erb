@@ -1,0 +1,10 @@
+<% content_for :preheader, "One click and you can plan more learning paths." %>
+<%= email_paragraph do %>Hi <%= @user.name&.split&.first || "there" %>,<% end %>
+<%= email_paragraph do %>
+  Please confirm that <strong><%= @user.email_address %></strong> is your email address.
+  Once it’s confirmed you can plan more learning paths, and receipts and reminders will reach you.
+<% end %>
+<p style="margin:24px 0;"><%= email_button "Confirm my email", @url %></p>
+<%= email_small do %>
+  The link works for <%= @expires_in %>. If you didn’t create a Path Aviator account, you can ignore this email.
+<% end %>

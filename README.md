@@ -189,6 +189,12 @@ Plans, prices and limits live in `config/plans.yml` (read through `Plan`). Every
 |---|---|
 | `AI_DAILY_GENERATION_LIMIT` | Most generations the whole app runs in one UTC day. Default `500`. |
 
+### Email
+
+Sign-up sends a link to confirm the address (a signed token from `generates_token_for`, valid for 3 days and void once the email changes). Until it's confirmed, an account can plan **one** path; the dashboard, settings and new-path page offer a rate-limited "Resend the link". Changing the email in settings asks for the new address to be confirmed. The shared demo account counts as confirmed.
+
+Emails use one branded layout (`app/views/layouts/mailer.*`) with HTML and text parts. Preview them at `/rails/mailers` in development (`test/mailers/previews`). In development nothing is sent; in production set the `SMTP_*` variables below.
+
 ### Run tests and checks
 
 ```bash
@@ -248,7 +254,7 @@ Add an `A` record, for example `pathaviator.example.com → 203.0.113.10`, and w
 | `GEMINI_API_KEY` | No | secret | Real AI generation. Without it the built-in sample generator is used |
 | `SEED_DEMO` | No | app | `1` creates the public demo account and resets it on every boot and every night. Default `0`: no demo account in production |
 | `DEMO_EMAIL` | No | app | Sign-in email of the demo account. Defaults to `demo@pathaviator.dev` |
-| `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME` | No | app | Outgoing email for password resets. Port defaults to 587 |
+| `SMTP_ADDRESS`, `SMTP_PORT`, `SMTP_USERNAME` | No | app | Outgoing email for address confirmation and password resets. Port defaults to 587. Without it new accounts can't confirm their email, so they stay at one path |
 | `SMTP_PASSWORD` | No | secret | SMTP password or API key |
 | `MAILER_FROM` | No | app | Sender address. Defaults to `Path Aviator <no-reply@APP_HOST>` |
 | `LEGAL_OWNER_NAME` | Yes, before launch | app | Your legal name, shown as the operator and grievance officer on the policy pages |

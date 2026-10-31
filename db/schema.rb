@@ -114,6 +114,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_31_153844) do
     t.datetime "updated_at", null: false
     t.string "name"
     t.string "plan", default: "free", null: false
+    t.datetime "email_verified_at"
     t.string "time_zone", default: "UTC", null: false
     t.boolean "weekly_digest", default: true, null: false
     t.datetime "weekly_digest_sent_at"

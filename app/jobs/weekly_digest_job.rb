@@ -22,11 +22,11 @@ class WeeklyDigestJob < ApplicationJob
       local.sunday? && local.hour == SEND_HOUR && (user.weekly_digest_sent_at.nil? || user.weekly_digest_sent_at < now - 6.days)
     end
 
-    # Never the shared demo account, never an unverified address (once email
-    # verification exists), and only people who learned something lately.
+    # Never the shared demo account, never an unconfirmed address, and only
+    # people who learned something lately.
     def eligible?(user, now)
       return false if user.demo?
-      return false if user.respond_to?(:email_verified_at) && user.email_verified_at.nil?
+      return false unless user.email_verified?
 
       PathStep.owned_by(user).where(completed_at: (now - ACTIVE_WITHIN)..).exists? ||
         user.learning_goals.where(created_at: (now - ACTIVE_WITHIN)..).exists?

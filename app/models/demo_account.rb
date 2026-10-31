@@ -89,7 +89,7 @@ module DemoAccount
     def reset!
       User.transaction do
         user = User.find_or_initialize_by(email_address: email)
-        user.update!(name: NAME, password: PASSWORD)
+        user.update!(name: NAME, password: PASSWORD, email_verified_at: user.email_verified_at || Time.current)
 
         paths = PATHS.map { |attrs| reset_path(user, **attrs) }
         # Goals and paths that visitors added go too.

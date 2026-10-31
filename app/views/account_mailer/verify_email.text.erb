@@ -1,0 +1,8 @@
+Hi <%= @user.name&.split&.first || "there" %>,
+
+Please confirm that <%= @user.email_address %> is your email address. Once it's confirmed you can plan more learning paths, and receipts and reminders will reach you.
+
+Confirm my email:
+<%= @url %>
+
+The link works for <%= @expires_in %>. If you didn't create a Path Aviator account, you can ignore this email.

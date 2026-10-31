@@ -20,6 +20,16 @@ class User < ApplicationRecord
   # subscription, so checks like pro? never need to look at payments.
   enum :plan, { free: "free", pro: "pro" }, default: "free", validate: true
 
+  EMAIL_VERIFICATION_EXPIRY = 3.days
+
+  # The address is part of the token, so changing the email kills old links.
+  generates_token_for :email_verification, expires_in: EMAIL_VERIFICATION_EXPIRY do
+    email_address
+  end
+
+  # A new address hasn't been confirmed yet, whatever the old one was.
+  before_update -> { self.email_verified_at = nil }, if: :will_save_change_to_email_address?
+
   normalizes :email_address, with: ->(e) { e.strip.downcase }
   normalizes :name, with: ->(name) { name.strip.presence }
   # Stored as an IANA name ("Asia/Kolkata"). Anything unknown becomes UTC
@@ -55,6 +65,20 @@ class User < ApplicationRecord
   # A user without a goal still needs to go through onboarding.
   def onboarded?
     learning_goals.exists?
+  end
+
+  # Everyone shares the demo login, so nobody can confirm its inbox; it is
+  # treated as confirmed so visitors can try everything.
+  def email_verified?
+    email_verified_at.present? || demo?
+  end
+
+  def verify_email!
+    update!(email_verified_at: Time.current) unless email_verified_at
+  end
+
+  def send_email_verification
+    AccountMailer.verify_email(self).deliver_later unless email_verified?
   end
 
   # The Plan catalog entry (limits, prices, features) for the user's plan.
