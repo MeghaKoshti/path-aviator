@@ -2,7 +2,9 @@
 
 [![CI](https://github.com/MeghaKoshti/path-aviator/actions/workflows/ci.yml/badge.svg)](https://github.com/MeghaKoshti/path-aviator/actions/workflows/ci.yml)
 
-**Path Aviator is an AI-powered learning planner built with Ruby on Rails 8.** Tell it what you want to learn, your current level and the hours you have each week. It plans a step-by-step route of courses, docs, videos, articles and practice, then tracks your progress as you tick steps off.
+**Path Aviator is an AI-powered learning planner built with Ruby on Rails 8.** Paste a job post (or name a skill), your current level and the hours you have each week. It plans a week-by-week route of courses, docs, videos, articles and practice with checked links, tracks your progress as you tick steps off, and gives you a public progress page and a certificate for your CV.
+
+It is a freemium product: **Free** plans 3 paths a month; **Pro** is ₹199/month or ₹1,499/year in India and $6/month or $48/year elsewhere, sold through a swappable billing provider (Dodo Payments, Razorpay, or a fake provider for development).
 
 ![A Path Aviator learning path for Ruby on Rails, three of eight steps done, with private notes, progress, time left and a share link](docs/screenshots/path.jpg)
 
@@ -31,6 +33,9 @@
 | CI: tests, system tests, RuboCop, Brakeman, importmap audit | ✅ Done |
 | Privacy, terms, refund and contact pages, sign-up consent | ✅ Done (needs owner review) |
 | Pricing page (INR/USD, monthly/yearly toggle, FAQ) and job-switch landing copy | ✅ Done |
+| Plans and quotas: Free 3 paths a month, Pro 30 (fair use), a global daily AI cap, Gemini thinking budget and token logging | ✅ Done |
+| Email verification before a second path, with rate-limited resend | ✅ Done |
+| Billing: `Billing::Provider` with Dodo Payments, Razorpay and a fake provider; signed, idempotent webhooks; Plan & billing in settings | ✅ Done (needs a payment account) |
 | Shareable proof: link previews, "Copy this path", Pro completion certificate with LinkedIn "Add to profile" | ✅ Done |
 | SEO: 10 curated `/learn` study plans, sitemap.xml, robots.txt, JSON-LD, canonical links | ✅ Done |
 | Google / GitHub sign-in | 📝 Planned |
@@ -43,7 +48,7 @@
     <td width="50%"><b>Dashboard</b><br><img src="docs/screenshots/dashboard.jpg" alt="Dashboard: this week's time against a 6 hour goal, the days learned, a 3-day streak, and two path cards"></td>
   </tr>
   <tr>
-    <td><b>Learning path</b><br><img src="docs/screenshots/path.jpg" alt="Learning path with ticked steps, private notes, progress, the next step highlighted and the share panel"></td>
+    <td><b>Learning path</b><br><img src="docs/screenshots/path.jpg" alt="Learning path with ticked steps, private notes, a Link checked badge on every step, progress and the share panel"></td>
     <td><b>Shared path</b><br><img src="docs/screenshots/share.jpg" alt="Public read-only page of a shared path: title, summary, progress and steps, with no notes or email"></td>
   </tr>
   <tr>
@@ -57,6 +62,18 @@
   <tr>
     <td><b>Sign up</b><br><img src="docs/screenshots/sign-up.jpg" alt="Sign-up form"></td>
     <td><b>Sign in</b><br><img src="docs/screenshots/sign-in.jpg" alt="Sign-in form"></td>
+  </tr>
+  <tr>
+    <td><b>Pricing</b><br><img src="docs/screenshots/pricing.jpg" alt="Pricing page: Free at ₹0 and Pro at ₹199 a month, with monthly/yearly and INR/USD toggles"></td>
+    <td><b>Plan from a job post</b><br><img src="docs/screenshots/onboarding-job-post.jpg" alt="New path from a job post: job title and the pasted post, with a note that emails and phone numbers are removed"></td>
+  </tr>
+  <tr>
+    <td><b>Certificate</b><br><img src="docs/screenshots/certificate.jpg" alt="Public completion certificate for Git and GitHub essentials with the steps, study time, dates, evidence links and an Add to LinkedIn button"></td>
+    <td><b>Study plan (/learn)</b><br><img src="docs/screenshots/learn.jpg" alt="Public Ruby on Rails developer roadmap 2026 study plan, week by week, with a Make this plan mine button"></td>
+  </tr>
+  <tr>
+    <td><b>Admin</b><br><img src="docs/screenshots/admin.jpg" alt="Admin dashboard: users, verified and Pro users, generations, AI cost, paths by status and the activation funnel"></td>
+    <td></td>
   </tr>
   <tr>
     <td colspan="2" align="center"><b>Mobile</b><br><img src="docs/screenshots/mobile.jpg" alt="Learning path on a 375 pixel wide phone screen" width="300"></td>
@@ -128,7 +145,9 @@ Open http://localhost:3000 and sign in with the demo account:
 |---|---|
 | `demo@pathaviator.dev` | `pathaviator-demo` |
 
-The demo account is shared, so its name, email and password can't be changed, it can't be deleted, and password reset emails are never sent for it. Everything else (planning paths, notes, ticking steps, sharing) works as for any account.
+The demo account is shared, so its settings (name, email, password, time zone, data export) are locked, it can't be deleted, it can't buy Pro, and password reset emails are never sent for it. It counts as email-confirmed and has no monthly quota (the global daily AI cap still applies). Everything else (planning paths, notes, ticking steps, sharing) works as for any account.
+
+To try Pro locally, sign up for your own account (the confirmation link is printed in `log/development.log`, see [Email](#email)), click **Upgrade** on `/pricing` and pay on the fake checkout.
 
 ### Background jobs
 
@@ -178,9 +197,19 @@ Every hop is resolved and checked, then the request goes to that vetted IP (no p
 
 ### Plans and quotas
 
-Plans, prices and limits live in `config/plans.yml` (read through `Plan`). Every AI call is recorded in the `generations` table. A new path or a regeneration (including job-post paths) is checked before a job is queued; copying a shared path or a /learn plan makes no AI call and costs nothing. A broken link's substitute (`CheckLinksJob`) counts only towards the daily cap:
+| | Free | Pro |
+|---|---|---|
+| New paths and regenerations | 3 a month | 30 a month (fair use, shown as "unlimited") |
+| Progress, notes, weekly stats, streak, link check when planned, data export | ✅ | ✅ |
+| Public share page | With a "Made with Path Aviator" line | Without branding |
+| Plan from a job post | The first one | ✅ |
+| Weekly link re-check with replacements | | ✅ |
+| Completion certificate with LinkedIn "Add to profile" | | ✅ |
+| Price | ₹0 | ₹199/month or ₹1,499/year (incl. GST); $6/month or $48/year |
 
-- **Free:** 3 generations per calendar month (UTC). **Pro:** 30 (fair use). A generation that fails on our side doesn't count.
+Plans, prices and limits live in `config/plans.yml` (read through `Plan`); the pricing page, checkout and quota checks all read it. Every AI call is recorded in the `generations` table. A new path or a regeneration (including job-post paths) is checked before a job is queued; copying a shared path or a /learn plan makes no AI call and costs nothing. A broken link's substitute (`CheckLinksJob`) counts only towards the daily cap:
+
+- **Free:** 3 generations per calendar month (UTC, whatever the user's own time zone). **Pro:** 30 (fair use). A generation that fails on our side doesn't count.
 - **Global daily cap:** once `AI_DAILY_GENERATION_LIMIT` generations (default `500`) have run today, new ones are refused with a "busy, try later" message and a `[AI cost guard]` log line. This also covers the demo account, which has no monthly quota.
 - **Rate limit:** 5 new paths and 5 regenerations per user per 10 minutes.
 - Gemini's token usage (`usageMetadata`) is saved on each path (`input_tokens`, `output_tokens`, `thinking_tokens`).
@@ -188,12 +217,14 @@ Plans, prices and limits live in `config/plans.yml` (read through `Plan`). Every
 | Variable | Purpose |
 |---|---|
 | `AI_DAILY_GENERATION_LIMIT` | Most generations the whole app runs in one UTC day. Default `500`. |
+| `GEMINI_THINKING_BUDGET` | Cap on Gemini's thinking tokens per request (see [AI generation](#ai-generation-optional)). |
+| `AI_USD_PER_MILLION_TOKENS` | Price used for the admin page's cost estimate. Default `1.5`. |
 
 ### Email
 
 Sign-up sends a link to confirm the address (a signed token from `generates_token_for`, valid for 3 days and void once the email changes). Until it's confirmed, an account can plan **one** path; the dashboard, settings and new-path page offer a rate-limited "Resend the link". Changing the email in settings asks for the new address to be confirmed. The shared demo account counts as confirmed.
 
-Emails use one branded layout (`app/views/layouts/mailer.*`) with HTML and text parts. Preview them at `/rails/mailers` in development (`test/mailers/previews`). In development nothing is sent; in production set the `SMTP_*` variables below.
+Emails use one branded layout (`app/views/layouts/mailer.*`) with HTML and text parts. Preview them at `/rails/mailers` in development (`test/mailers/previews`). In development nothing is delivered: each email, including the confirmation link, is printed in `log/development.log` (search for `verify_email`; links use port 3000, as `bin/dev` does). In production set the `SMTP_*` and `MAILER_FROM` variables (see [Deploy](#3-set-the-environment)).
 
 ### Billing
 
@@ -219,7 +250,7 @@ Set up Dodo: create four **subscription products** (Pro monthly and yearly, in I
 
 | Variable | Purpose |
 |---|---|
-| `BILLING_PROVIDER` | `fake` or `dodo`. Defaults to `dodo` in production and `fake` elsewhere. |
+| `BILLING_PROVIDER` | `fake`, `dodo` or `razorpay`. Defaults to `dodo` in production and `fake` elsewhere (`fake` is refused in production). |
 | `DODO_API_KEY` | Dodo API key (secret). Without it, or any product id, Upgrade buttons are hidden. |
 | `DODO_WEBHOOK_SECRET` | The endpoint's signing secret (`whsec_...`, secret). |
 | `DODO_ENVIRONMENT` | `test_mode` (default, `test.dodopayments.com`) or `live_mode` (`live.dodopayments.com`). |
