@@ -5,13 +5,14 @@
 #   quota.remaining  # => 2
 #   quota.refusal    # => nil, :busy, :unverified or :limit
 #
-# Months are calendar months in the app's time zone (UTC).
+# Months are calendar months in UTC, whatever zone the request runs in (each
+# user's own, see ApplicationController), so everyone's quota resets together.
 class GenerationQuota
   attr_reader :user
 
   def initialize(user, now: Time.current)
     @user = user
-    @now = now
+    @now = now.utc
   end
 
   def plan

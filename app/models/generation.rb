@@ -23,8 +23,10 @@ class Generation < ApplicationRecord
       Integer(ENV.fetch("AI_DAILY_GENERATION_LIMIT", DEFAULT_DAILY_LIMIT))
     end
 
+    # Counted per UTC day: requests run in each user's own time zone, and the
+    # cap must be one shared window, not one per zone.
     def daily_limit_reached?(now: Time.current)
-      where(created_at: now.all_day).count >= daily_limit
+      where(created_at: now.utc.all_day).count >= daily_limit
     end
 
     # Marks the latest generation for a path as failed (see GenerateLearningPathJob).

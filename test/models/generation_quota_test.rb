@@ -36,6 +36,18 @@ class GenerationQuotaTest < ActiveSupport::TestCase
     end
   end
 
+  test "the month is the UTC month even when the request runs in the user's time zone" do
+    # 1 Nov, 02:30 in India is still 31 Oct in UTC.
+    3.times { generate!(at: Time.utc(2026, 10, 31, 12)) }
+
+    travel_to Time.utc(2026, 10, 31, 21) do
+      Time.use_zone("Asia/Kolkata") do
+        assert_equal 0, @user.generations_left_this_month
+        assert_equal Date.new(2026, 11, 1), @user.generation_quota.resets_on
+      end
+    end
+  end
+
   test "failed generations don't use up the quota" do
     travel_to Time.utc(2026, 10, 20) do
       3.times { generate!(at: Time.current) }
@@ -99,6 +111,19 @@ class GenerationQuotaTest < ActiveSupport::TestCase
       generate!(at: Time.current).update!(failed_at: Time.current)
 
       assert Generation.daily_limit_reached?
+    end
+  end
+
+  test "the daily cap is one UTC day for everyone, whatever the request's time zone" do
+    # 22:30 on 31 Oct in India is 17:00 UTC, the same UTC day as 21:00 UTC.
+    generate!(at: Time.utc(2026, 10, 31, 17))
+
+    with_env("AI_DAILY_GENERATION_LIMIT" => "1") do
+      travel_to Time.utc(2026, 10, 31, 21) do
+        assert Generation.daily_limit_reached?
+        Time.use_zone("Asia/Kolkata") { assert Generation.daily_limit_reached? }
+        Time.use_zone("America/New_York") { assert Generation.daily_limit_reached? }
+      end
     end
   end
 
