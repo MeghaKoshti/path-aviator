@@ -31,6 +31,13 @@ Rails.application.routes.draw do
   get "refunds", to: "legal_pages#refunds"
   get "contact", to: "legal_pages#contact"
   get "pricing", to: "pricing#show"
+
+  # Curated public study plans, and the files search engines ask for.
+  resources :learn_topics, path: "learn", only: %i[ index show ] do
+    post :copy, on: :member
+  end
+  get "sitemap.xml", to: "sitemaps#show", as: :sitemap, format: false, defaults: { format: "xml" }
+  get "robots.txt", to: "sitemaps#robots", as: :robots, format: false, defaults: { format: "text" }
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

@@ -1,0 +1,7 @@
+<%# "Make this mine": a form when signed in, sign-up (which then copies) for guests. Locals: topic:, variant: %>
+<% variant = local_assigns.fetch(:variant, :primary) %>
+<% if authenticated? %>
+  <%= ui_button "Make this plan mine", copy_learn_topic_path(topic), method: :post, variant:, size: :lg %>
+<% else %>
+  <%= ui_button "Make this plan mine", new_registration_path(learn: topic.slug), variant:, size: :lg %>
+<% end %>

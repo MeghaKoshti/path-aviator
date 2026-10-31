@@ -28,6 +28,7 @@
 | Privacy, terms, refund and contact pages, sign-up consent | ✅ Done (needs owner review) |
 | Pricing page (INR/USD, monthly/yearly toggle, FAQ) and job-switch landing copy | ✅ Done |
 | Shareable proof: link previews, "Copy this path", Pro completion certificate with LinkedIn "Add to profile" | ✅ Done |
+| SEO: 10 curated `/learn` study plans, sitemap.xml, robots.txt, JSON-LD, canonical links | ✅ Done |
 | Google / GitHub sign-in | 📝 Planned |
 
 ## Screenshots
@@ -94,6 +95,7 @@ flowchart LR
 5. Each step has a private note, edited in place inside a Turbo Frame (Esc cancels). The dashboard's "This week" panel works out time against the weekly goal and the streak from when steps were ticked.
 6. Sharing gives a path a random token and a public, `noindex` page at `/p/:token` with the steps and progress only. "New link" swaps the token and "Stop sharing" clears it, so old links 404. Visitors can "Copy this path": they get the same steps with fresh progress, and no AI call is made (guests sign up first and the copy is made straight after).
 7. When every step is ticked, Pro users can publish a certificate at `/c/:token` with optional evidence links per step and a LinkedIn "Add to profile" link. It goes offline if a step is un-ticked, and the owner can revoke it. Every page carries Open Graph and Twitter tags with one static 1200×630 card (`app/assets/images/og-card.svg`, rendered to PNG).
+8. `/learn/:slug` serves ten curated, link-checked study plans from `config/learn_topics.yml` (long-tail searches such as "system design in 8 weeks" or "DSA in 12 weeks while working"), with `Course`/`ItemList` JSON-LD and a "Make this plan mine" button that copies the plan without an AI call. `/sitemap.xml` lists them with the landing, pricing and policy pages; `/robots.txt` points to it and keeps crawlers out of the signed-in app. To add a plan, add an entry to the YAML, open every link once and update `checked_on`.
 
 Without a `GEMINI_API_KEY` (and always in tests), a built-in fake generator returns a realistic sample path, so the whole flow works offline.
 

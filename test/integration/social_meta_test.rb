@@ -37,3 +37,39 @@ class SocialMetaTest < ActionDispatch::IntegrationTest
     assert_equal [ 1200, 630 ], [ width, height ]
   end
 end
+
+class SeoFoundationsTest < ActionDispatch::IntegrationTest
+  test "the landing page describes the app as a SoftwareApplication with prices from the plan catalog" do
+    get root_path
+
+    data = JSON.parse(css_select("script[type='application/ld+json']").sole.text)
+    assert_equal "SoftwareApplication", data["@type"]
+    prices = data["offers"].map { |offer| [ offer["priceCurrency"], offer["price"] ] }
+    assert_includes prices, [ "INR", "199.00" ]
+    assert_includes prices, [ "USD", "6.00" ]
+  end
+
+  test "public pages each have a unique title and description and a canonical link without query strings" do
+    pages = [ root_path, pricing_path, learn_topics_path, privacy_path, terms_path, refunds_path, contact_path ] +
+            LearnTopic.all.map { |topic| learn_topic_path(topic) }
+
+    seen = pages.map do |page|
+      get page, params: { currency: "inr" }
+      assert_select "link[rel=canonical][href=?]", "http://www.example.com#{page}"
+      [ css_select("title").text, css_select("meta[name=description]").first["content"] ]
+    end
+
+    assert_equal seen.size, seen.map(&:first).uniq.size, "duplicate titles"
+    assert_equal seen.size, seen.map(&:last).uniq.size, "duplicate descriptions"
+  end
+
+  test "private share pages stay noindex" do
+    path = learning_paths(:rails)
+    path.share!
+
+    get shared_path_path(path.share_token)
+
+    assert_select "meta[name=robots][content=noindex]"
+    assert_equal "noindex", response.headers["X-Robots-Tag"]
+  end
+end

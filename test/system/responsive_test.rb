@@ -26,6 +26,16 @@ class ResponsiveTest < ApplicationSystemTestCase
     assert_no_horizontal_scroll
   end
 
+  test "public pages fit a phone screen" do
+    page.current_window.resize_to(375, 800)
+
+    [ root_path, pricing_path, privacy_path, learn_topics_path, learn_topic_path(LearnTopic.all.first) ].each do |path|
+      visit path
+      assert_selector "h1"
+      assert_no_horizontal_scroll
+    end
+  end
+
   private
     def assert_no_horizontal_scroll
       overflow = evaluate_script("document.documentElement.scrollWidth - document.documentElement.clientWidth")

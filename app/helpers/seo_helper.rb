@@ -25,6 +25,40 @@ module SeoHelper
     request.base_url + request.path
   end
 
+  # Structured data for search engines. json_escape keeps "</script>" in
+  # any title from closing the tag early.
+  def json_ld_tag(data)
+    tag.script(ERB::Util.json_escape(data.to_json).html_safe, type: "application/ld+json") # rubocop:disable Rails/OutputSafety
+  end
+
+  def software_application_ld
+    pro = Plan.pro
+    offers = [ { "@type": "Offer", name: Plan.free.name, price: "0", priceCurrency: "USD" } ] +
+      Plan::CURRENCIES.map do |currency|
+        { "@type": "Offer", name: "#{pro.name}, monthly", price: format("%.2f", pro.price_cents(currency:, interval: :month) / 100.0),
+          priceCurrency: currency.to_s.upcase }
+      end
+    { "@context": "https://schema.org", "@type": "SoftwareApplication", name: "Path Aviator", url: root_url,
+      applicationCategory: "EducationalApplication", operatingSystem: "Web", description: SeoHelper::DEFAULT_DESCRIPTION,
+      offers: offers }
+  end
+
+  def learn_topic_ld(topic)
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        { "@type": "Course", name: topic.title, description: topic.description, url: learn_topic_url(topic),
+          educationalLevel: topic.level.capitalize, inLanguage: "en", isAccessibleForFree: true,
+          timeRequired: "PT#{topic.total_minutes / 60}H",
+          provider: { "@type": "Organization", name: "Path Aviator", url: root_url } },
+        { "@type": "ItemList", name: "#{topic.title}: steps", numberOfItems: topic.steps.size,
+          itemListElement: topic.steps.each_with_index.map { |step, index|
+            { "@type": "ListItem", position: index + 1, name: step.title, url: step.url }
+          } }
+      ]
+    }
+  end
+
   def share_image_url
     image_url("og-card.png")
   end

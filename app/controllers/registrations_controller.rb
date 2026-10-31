@@ -15,7 +15,7 @@ class RegistrationsController < ApplicationController
     if @user.save
       start_new_session_for @user
       if (shared = path_to_copy)
-        redirect_to shared.copy_for(@user), notice: "Welcome aboard! The path is copied to your account."
+        redirect_to shared.copy_for(@user), notice: "Welcome aboard! The plan is copied to your account."
       else
         redirect_to new_learning_goal_path, notice: "Welcome aboard! Let’s plan your first path."
       end
@@ -29,9 +29,14 @@ class RegistrationsController < ApplicationController
       params.expect(user: [ :name, :email_address, :password, :password_confirmation ])
     end
 
-    # Set when a guest clicked "Copy this path" on a shared page.
+    # Set when a guest clicked "Copy this path" on a shared page (copy=token)
+    # or "Make this mine" on a /learn study plan (learn=slug).
     def path_to_copy
-      LearningPath.ready.find_by(share_token: params[:copy]) if params[:copy].present?
+      if params[:copy].present?
+        LearningPath.ready.find_by(share_token: params[:copy])
+      elsif params[:learn].present?
+        LearnTopic.all.find { |topic| topic.slug == params[:learn] }
+      end
     end
 
     def redirect_signed_in_user

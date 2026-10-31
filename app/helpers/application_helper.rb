@@ -22,6 +22,7 @@ module ApplicationHelper
   def site_footer_links
     [
       [ "Pricing", pricing_path ],
+      [ "Study plans", learn_topics_path ],
       [ "Privacy", privacy_path ],
       [ "Terms", terms_path ],
       [ "Refunds", refunds_path ],

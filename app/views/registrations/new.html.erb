@@ -3,12 +3,13 @@
 
 <h1 class="type-display text-2xl text-ink sm:text-[1.75rem]">Create your account</h1>
 <p class="mt-2 text-pretty text-ink-muted">
-  <%= params[:copy].present? ? "Then the path you picked is copied to your account, ready to start." : "Next, you’ll tell us what you want to learn and we’ll plan the route." %>
+  <%= params[:copy].present? || params[:learn].present? ? "Then the plan you picked is copied to your account, ready to start." : "Next, you’ll tell us what you want to learn and we’ll plan the route." %>
 </p>
 
 <% invalid = first_invalid_field(@user, %i[name email_address password password_confirmation]) %>
 <%= form_with model: @user, url: registration_path, class: "mt-8 space-y-5" do |form| %>
   <%= hidden_field_tag :copy, params[:copy], id: nil if params[:copy].present? %>
+  <%= hidden_field_tag :learn, params[:learn], id: nil if params[:learn].present? %>
   <% if @user.errors.any? %>
     <p class="rounded-control bg-danger-50 px-4 py-3 text-sm font-medium text-danger-700" role="alert">
       <%= pluralize(@user.errors.count, "thing needs", plural: "things need") %> fixing before we can create your account.
