@@ -1,0 +1,46 @@
+<%#
+  The step's description, link and what the last link check found. CheckLinksJob
+  replaces just this element over a Turbo Stream (a substitute link comes with
+  its own description), so it must not depend on the request. Locals: path_step:
+%>
+<div id="<%= dom_id(path_step, :resource) %>">
+  <% if path_step.description.present? %>
+    <p class="mt-1 max-w-prose text-pretty text-ink-muted"><%= path_step.description %></p>
+  <% end %>
+  <div class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+    <% if path_step.link_broken? %>
+      <p class="flex items-start gap-2 text-sm text-warning-700">
+        <svg class="mt-0.5 size-4 shrink-0" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.6 3.6 2.4 14.4A1.6 1.6 0 0 0 3.8 16.8h12.4a1.6 1.6 0 0 0 1.4-2.4L11.4 3.6a1.6 1.6 0 0 0-2.8 0Z"/><path d="M10 8v3.2M10 14h.01"/></svg>
+        <span>
+          <span class="font-semibold">Link may be broken.</span>
+          <%= link_to path_step.search_url, target: "_blank", rel: "noopener noreferrer",
+                class: "font-semibold text-brand-700 underline underline-offset-4" do %>Search instead<span class="sr-only"> for “<%= path_step.title %>” (opens in a new tab)</span><% end %>
+          or
+          <%= link_to path_step.resource_url, target: "_blank", rel: "noopener noreferrer nofollow",
+                class: "text-ink-muted underline underline-offset-4 hover:text-ink" do %>try the original<span class="sr-only"> link (opens in a new tab)</span><% end %>.
+        </span>
+      </p>
+    <% else %>
+      <%= link_to path_step.resource_url, target: "_blank", rel: "noopener noreferrer",
+            class: "inline-flex items-center gap-1.5 rounded-sm font-semibold text-brand-700 underline-offset-4 hover:underline" do %>
+        <%= resource_action_label(path_step.resource_type) %>
+        <span class="sr-only">for “<%= path_step.title %>” (opens in a new tab)</span>
+        <svg class="size-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4H4.75A.75.75 0 0 0 4 4.75v10.5c0 .41.34.75.75.75h10.5c.41 0 .75-.34.75-.75V12M11 4h5v5M16 4l-7 7"/></svg>
+      <% end %>
+
+      <% if path_step.link_ok? && path_step.link_checked_at %>
+        <span class="inline-flex items-center gap-1 text-xs font-medium text-success-700"
+              title="Path Aviator opened this link on <%= l(path_step.link_checked_at.to_date, format: "%-d %B %Y") %>.">
+          <svg class="size-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="m5.5 8.2 1.7 1.7 3.3-3.6"/></svg>
+          Link checked <%= l(path_step.link_checked_at.to_date, format: "%-d %b") %>
+        </span>
+      <% elsif path_step.link_unverified? %>
+        <span class="inline-flex items-center gap-1 text-xs font-medium text-ink-subtle"
+              title="The site doesn’t let link checkers in, so we couldn’t confirm it. It usually opens fine in a browser.">
+          <svg class="size-3.5" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6.25"/><path d="M8 7.5v3.5M8 5h.01"/></svg>
+          Couldn’t verify link
+      </span>
+    <% end %>
+  <% end %>
+</div>
+</div>

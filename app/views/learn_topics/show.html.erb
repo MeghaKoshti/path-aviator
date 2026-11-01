@@ -1,0 +1,94 @@
+<% content_for :title, @topic.title %>
+<% content_for :meta_description, @topic.description %>
+<% content_for :head, json_ld_tag(learn_topic_ld(@topic)) %>
+<% groups = @topic.steps_by_week.to_a %>
+
+<div class="mx-auto max-w-6xl px-4 pb-20 pt-6 sm:px-6 sm:pt-10">
+  <nav aria-label="Breadcrumb" class="text-sm">
+    <ol class="flex flex-wrap items-center gap-2 text-ink-muted">
+      <li><%= link_to "Study plans", learn_topics_path, class: "font-medium text-brand-700 underline-offset-4 hover:underline" %></li>
+      <li aria-hidden="true">/</li>
+      <li aria-current="page" class="truncate"><%= @topic.title %></li>
+    </ol>
+  </nav>
+
+  <div class="mt-6 grid gap-12 lg:grid-cols-[minmax(0,1fr)_20rem] lg:gap-16">
+    <div class="min-w-0">
+      <header>
+        <h1 class="type-display text-[2.25rem] text-balance text-ink sm:text-5xl"><%= @topic.title %></h1>
+        <p class="mt-5 max-w-2xl text-lg leading-relaxed text-pretty text-ink-muted"><%= @topic.summary %></p>
+        <dl class="mt-8 grid max-w-2xl grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-4">
+          <div><dt class="text-sm text-ink-subtle">Length</dt><dd class="mt-0.5 font-semibold text-ink"><%= pluralize(@topic.weeks, "week") %></dd></div>
+          <div><dt class="text-sm text-ink-subtle">Pace</dt><dd class="mt-0.5 font-semibold text-ink"><%= @topic.hours_per_week %> h a week</dd></div>
+          <div><dt class="text-sm text-ink-subtle">Level</dt><dd class="mt-0.5 font-semibold text-ink"><%= @topic.level.capitalize %></dd></div>
+          <div><dt class="text-sm text-ink-subtle">Study time</dt><dd class="mt-0.5 font-semibold text-ink"><%= format_minutes(@topic.total_minutes) %></dd></div>
+        </dl>
+        <%# On phones the sidebar comes after the plan, so the main action is repeated here. %>
+        <div class="mt-8 lg:hidden [&_a]:w-full [&_button]:w-full [&_form]:w-full"><%= render "learn_topics/make_mine", topic: @topic %></div>
+      </header>
+
+      <section class="mt-14" aria-labelledby="plan-heading">
+        <h2 id="plan-heading" class="type-display text-2xl text-ink">The plan, week by week</h2>
+        <p class="mt-2 text-sm text-ink-muted">Links checked on <time datetime="<%= @topic.checked_on.iso8601 %>"><%= l @topic.checked_on, format: :legal %></time>.</p>
+
+        <ol class="mt-8 space-y-10">
+          <% groups.each_with_index do |(week, steps), group_index| %>
+            <li>
+              <h3 class="flex items-center gap-3 font-semibold text-route">
+                <span class="size-3 rounded-full border-2 border-route bg-surface" aria-hidden="true"></span>
+                <%= learn_week_label(week, groups[group_index + 1]&.first) %>
+              </h3>
+              <ol class="mt-4 space-y-4 border-l-2 border-dashed border-route/40 pl-6 ml-[5px]">
+                <% steps.each do |step| %>
+                  <li class="rounded-panel border border-line bg-surface-raised p-5">
+                    <div class="flex flex-wrap items-center gap-2 text-sm text-ink-subtle">
+                      <%= ui_badge resource_type_label(step.resource_type) %>
+                      <span class="tabular-nums"><%= format_minutes(step.minutes) %></span>
+                    </div>
+                    <h4 class="mt-2 text-lg font-semibold text-pretty text-ink"><%= step.title %></h4>
+                    <p class="mt-1 max-w-prose text-pretty text-ink-muted"><%= step.description %></p>
+                    <%= link_to step.url, target: "_blank", rel: "noopener",
+                          class: "mt-3 inline-flex items-center gap-1.5 rounded-sm font-semibold text-brand-700 underline-offset-4 hover:underline" do %>
+                      <%= resource_action_label(step.resource_type) %>
+                      <span class="sr-only">for “<%= step.title %>” (opens in a new tab)</span>
+                      <svg class="size-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4H4.75A.75.75 0 0 0 4 4.75v10.5c0 .41.34.75.75.75h10.5c.41 0 .75-.34.75-.75V12M11 4h5v5M16 4l-7 7"/></svg>
+                    <% end %>
+                  </li>
+                <% end %>
+              </ol>
+            </li>
+          <% end %>
+        </ol>
+      </section>
+    </div>
+
+    <aside class="lg:row-start-1 lg:col-start-2" aria-label="Use this plan">
+      <div class="space-y-6 lg:sticky lg:top-8">
+        <div class="rounded-panel border border-line bg-surface-raised p-6 shadow-panel">
+          <h2 class="font-semibold text-ink">Follow this plan</h2>
+          <p class="mt-2 text-sm text-pretty text-ink-muted">Copy it into your account to tick steps off, keep a streak and share a progress page. Free, and it doesn’t use your monthly paths.</p>
+          <div class="mt-5 [&_a]:w-full [&_button]:w-full [&_form]:w-full"><%= render "learn_topics/make_mine", topic: @topic %></div>
+        </div>
+        <div class="rounded-panel border border-line p-6">
+          <h2 class="font-semibold text-ink">Who it’s for</h2>
+          <p class="mt-2 text-sm text-pretty text-ink-muted"><%= @topic.audience %></p>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <section class="mt-20 rounded-panel bg-brand-900 p-6 text-white sm:p-10" aria-labelledby="own-plan-heading">
+    <h2 id="own-plan-heading" class="type-display text-2xl text-balance sm:text-3xl">Have a job post in mind?</h2>
+    <p class="mt-3 max-w-2xl text-pretty text-brand-100">Paste it into Path Aviator and get a plan for that exact role, sized to your week, with links we check.</p>
+    <div class="mt-6"><%= ui_button "Plan from a job post", authenticated? ? new_learning_goal_path : new_registration_path, variant: :inverse, size: :lg %></div>
+  </section>
+
+  <nav class="mt-16" aria-labelledby="more-plans">
+    <h2 id="more-plans" class="font-semibold text-ink">More study plans</h2>
+    <ul class="mt-4 grid gap-x-8 gap-y-2 sm:grid-cols-2">
+      <% LearnTopic.all.reject { |topic| topic.slug == @topic.slug }.each do |topic| %>
+        <li><%= link_to topic.title, learn_topic_path(topic), class: "text-brand-700 underline-offset-4 hover:underline" %></li>
+      <% end %>
+    </ul>
+  </nav>
+</div>

@@ -1,22 +1,22 @@
 <%# Hero illustration: an example path drawn as a flight plan. Static sample content. %>
 <%
   legs = [
-    { title: "Ruby basics", kind: "Course", time: "3 h", done: true },
-    { title: "Rails getting started guide", kind: "Docs", time: "2 h", done: true },
-    { title: "Models and Active Record", kind: "Video", time: "90 min", current: true },
-    { title: "Build a blog with Hotwire", kind: "Practice", time: "4 h" },
-    { title: "Testing with Minitest", kind: "Article", time: "1 h" },
-    { title: "Deploy with Kamal", kind: "Docs", time: "1 h" }
+    { title: "SQL indexes and query plans", kind: "Docs", time: "3 h", done: true },
+    { title: "Caching with Redis", kind: "Article", time: "2 h", done: true },
+    { title: "System design: a URL shortener", kind: "Video", time: "90 min", current: true },
+    { title: "Build a rate-limited API", kind: "Practice", time: "4 h" },
+    { title: "Docker for developers", kind: "Docs", time: "2 h" },
+    { title: "Mock system design interview", kind: "Practice", time: "1 h" }
   ]
   waypoints = [ [ 28, 152 ], [ 108, 120 ], [ 184, 134 ], [ 266, 76 ], [ 356, 96 ], [ 452, 30 ] ]
 %>
 <figure class="relative mx-auto w-full max-w-lg rounded-panel border border-line bg-surface-raised shadow-pop lg:max-w-none" aria-labelledby="flight-plan-caption">
-  <figcaption id="flight-plan-caption" class="sr-only">Example learning path: Ruby on Rails for a beginner, six steps, two completed.</figcaption>
+  <figcaption id="flight-plan-caption" class="sr-only">Example learning path planned from a backend developer job post: six steps, two completed.</figcaption>
 
   <div class="flex flex-wrap items-center justify-between gap-3 border-b border-line px-5 py-4 sm:px-6">
-    <p class="font-semibold text-ink">Ruby on Rails, from scratch</p>
+    <p class="font-semibold text-ink">Backend developer, from a job post</p>
     <div class="flex gap-2">
-      <%= ui_badge "Beginner", :brand %>
+      <%= ui_badge "Intermediate", :brand %>
       <%= ui_badge "6 h a week" %>
     </div>
   </div>
@@ -46,7 +46,7 @@
         <% end %>
       <% end %>
       <text x="28" y="174" text-anchor="middle" class="fill-ink-subtle text-[11px] font-semibold">Start</text>
-      <text x="452" y="56" text-anchor="middle" class="fill-brand-700 text-[11px] font-semibold">Shipped</text>
+      <text x="452" y="56" text-anchor="middle" class="fill-brand-700 text-[11px] font-semibold">Interview</text>
     </svg>
   </div>
 
@@ -72,6 +72,6 @@
 
   <div class="flex items-center gap-4 border-t border-line px-5 py-4 sm:px-6">
     <div class="flex-1"><%= render "shared/progress_bar", value: 33, label: "Example path progress" %></div>
-    <p class="shrink-0 text-sm text-ink-muted">7 h 30 m left</p>
+    <p class="shrink-0 text-sm text-ink-muted">8 h 30 min left</p>
   </div>
 </figure>

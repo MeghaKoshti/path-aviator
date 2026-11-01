@@ -8,7 +8,12 @@ class Settings::ProfilesController < SettingsController
       @profile.errors.add(:password_challenge, "is needed to change your email")
       render_settings status: :unprocessable_entity
     elsif @profile.save
-      redirect_to settings_path, notice: "Profile saved.", status: :see_other
+      if @profile.saved_change_to_email_address?
+        @profile.send_email_verification
+        redirect_to settings_path, notice: "Profile saved. Check #{@profile.email_address} for a link to confirm it.", status: :see_other
+      else
+        redirect_to settings_path, notice: "Profile saved.", status: :see_other
+      end
     else
       render_settings status: :unprocessable_entity
     end

@@ -1,0 +1,80 @@
+<% content_for :title, "Admin" %>
+<%
+  cost = @stats.estimated_cost_this_month_usd
+  tiles = [
+    [ "Users", @stats.users, "#{@stats.new_users_this_week} new this week" ],
+    [ "Verified", @stats.verified_users, "email confirmed" ],
+    [ "Pro", @stats.pro_users, "paying users" ],
+    [ "Generations", @stats.generations_today, "today, #{@stats.generations_this_month} this month" ],
+    [ "AI cost (est.)", cost.zero? && @stats.estimated_tokens_this_month.positive? ? "< $0.01" : number_to_currency(cost, unit: "$"), "#{number_with_delimiter(@stats.estimated_tokens_this_month)} tokens this month" ]
+  ]
+  funnel = @stats.funnel
+  funnel_top = [ funnel.values.max, 1 ].max
+  funnel_labels = { "signed_up" => "Signed up", "path_ready" => "Got a path", "first_step_done" => "Ticked a first step",
+                    "returned_week_2" => "Came back in week 2", "upgraded" => "Upgraded to Pro" }
+%>
+
+<div class="flex flex-wrap items-baseline justify-between gap-2">
+  <h1 class="type-display text-3xl text-ink sm:text-4xl">Admin</h1>
+  <p class="text-sm text-ink-subtle">Times in <%= Time.zone.name %>. Visible only to ADMIN_EMAILS.</p>
+</div>
+
+<dl class="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-5">
+  <% tiles.each do |label, value, detail| %>
+    <div class="rounded-panel border border-line bg-surface-raised p-4 shadow-panel">
+      <dt class="text-sm text-ink-subtle"><%= label %></dt>
+      <dd class="mt-1 text-2xl font-semibold tabular-nums text-ink"><%= value %></dd>
+      <dd class="mt-0.5 text-xs text-pretty text-ink-muted"><%= detail %></dd>
+    </div>
+  <% end %>
+</dl>
+
+<div class="mt-6 grid items-start gap-6 lg:grid-cols-2">
+  <%= render "shared/card", title: "Paths by status" do %>
+    <dl class="grid grid-cols-3 gap-4">
+      <% @stats.paths_by_status.each do |status, count| %>
+        <div>
+          <dt class="text-sm text-ink-subtle"><%= status.humanize %></dt>
+          <dd class="mt-0.5 text-xl font-semibold tabular-nums <%= status == "failed" && count.positive? ? "text-danger-700" : "text-ink" %>"><%= count %></dd>
+        </div>
+      <% end %>
+    </dl>
+  <% end %>
+
+  <%= render "shared/card", title: "Activation, last 30 days" do %>
+    <ol class="space-y-3">
+      <% funnel.each do |name, count| %>
+        <li>
+          <div class="flex items-baseline justify-between text-sm">
+            <span class="text-ink-muted"><%= funnel_labels.fetch(name) %></span>
+            <span class="font-semibold tabular-nums text-ink"><%= count %></span>
+          </div>
+          <div class="mt-1" aria-hidden="true">
+            <%= render "shared/progress_bar", value: (count * 100.0 / funnel_top).round, label: funnel_labels.fetch(name), show_value: false %>
+          </div>
+        </li>
+      <% end %>
+    </ol>
+  <% end %>
+</div>
+
+<section class="mt-6 rounded-panel border border-line bg-surface-raised shadow-panel" aria-labelledby="failures-heading">
+  <h2 id="failures-heading" class="px-6 pt-6 text-lg font-semibold text-ink sm:px-8">Last 50 failed generations</h2>
+  <% failures = @stats.recent_failures %>
+  <% if failures.empty? %>
+    <p class="px-6 pb-6 pt-2 text-ink-muted sm:px-8">None so far.</p>
+  <% else %>
+    <ol class="mt-4 divide-y divide-line border-t border-line">
+      <% failures.each do |event| %>
+        <li class="px-6 py-3 sm:px-8">
+          <p class="flex flex-wrap gap-x-3 text-sm">
+            <span class="tabular-nums text-ink-muted"><%= l(event.created_at, format: "%-d %b %H:%M") %></span>
+            <span class="text-ink"><%= event.user&.email_address || "deleted user" %></span>
+            <span class="tabular-nums text-ink-subtle">path #<%= event.properties["path_id"] %></span>
+          </p>
+          <p class="mt-1 font-mono text-xs break-all text-danger-700"><%= event.properties["error"] %></p>
+        </li>
+      <% end %>
+    </ol>
+  <% end %>
+</section>

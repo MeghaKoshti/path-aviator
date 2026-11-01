@@ -22,6 +22,7 @@ class SettingsController < ApplicationController
     def render_settings(status: :ok)
       @profile ||= User.find(Current.user.id)
       @password_change ||= User.find(Current.user.id)
+      @preferences ||= User.find(Current.user.id)
       render "settings/show", status: status
     end
 end

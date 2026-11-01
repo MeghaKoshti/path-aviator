@@ -183,4 +183,69 @@ class GenerateLearningPathJobTest < ActiveJob::TestCase
     assert_nil @path.error_message
     assert_equal "Fresh path", @path.title
   end
+
+  test "saves the skills of a path planned from a job post" do
+    @path.learning_goal.update!(job_post: "Analytics engineer: SQL, PostgreSQL and Python.")
+
+    GenerateLearningPathJob.perform_now(@path)
+
+    assert_equal [ "SQL", "PostgreSQL", "Python" ], @path.reload.skills
+  end
+
+  test "records a ready path with an estimated token count" do
+    raw = valid_json
+    PathGenerator.client = ScriptedClient.new(raw)
+    GenerateLearningPathJob.perform_now(@path)
+
+    event = Event.named(:path_ready).sole
+    assert_equal @path.user, event.user
+    assert_equal GenerateLearningPathJob::PROMPT_TOKENS + raw.length / 4, event.properties["estimated_tokens"]
+  end
+
+  test "records a failure and reports it as a warning" do
+    PathGenerator.client = ScriptedClient.new(PathGenerator::Timeout.new("slow"))
+    reports = []
+    adapter = Object.new
+    adapter.define_singleton_method(:call) { |error, **details| reports << [ error, details ] }
+    ErrorReporter.adapter = adapter
+
+    GenerateLearningPathJob.perform_now(@path)
+
+    assert_equal "PathGenerator::Timeout: slow", Event.named(:path_failed).sole.properties["error"]
+    assert_equal :warning, reports.sole.last[:severity]
+  ensure
+    ErrorReporter.adapter = nil
+  end
+
+  test "saves Gemini's token usage on the path" do
+    body = file_fixture("gemini/generate_content.json").read
+    http = Struct.new(:body) do
+      def post_json(*, **) = PathGenerator::HttpClient::Response.new(status: 200, body: body)
+    end.new(body)
+    PathGenerator.client = PathGenerator::Gemini.new(api_key: "test-key", http: http)
+
+    GenerateLearningPathJob.perform_now(@path)
+    @path.reload
+
+    assert @path.ready?
+    assert_equal [ 412, 1180, 655 ], [ @path.input_tokens, @path.output_tokens, @path.thinking_tokens ]
+  end
+
+  test "clients without usage data leave the token columns empty" do
+    PathGenerator.client = ScriptedClient.new(valid_json)
+
+    GenerateLearningPathJob.perform_now(@path)
+
+    assert_nil @path.reload.output_tokens
+  end
+
+  test "a failed generation is handed back to the user's quota" do
+    generation = @path.user.generations.create!(learning_path: @path)
+    PathGenerator.client = ScriptedClient.new(PathGenerator::Timeout.new("slow"))
+
+    GenerateLearningPathJob.perform_now(@path)
+
+    assert @path.reload.failed?
+    assert generation.reload.failed_at
+  end
 end

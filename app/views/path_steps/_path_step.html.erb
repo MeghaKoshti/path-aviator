@@ -37,16 +37,7 @@
     <h3 id="<%= dom_id(path_step, :title) %>" class="<%= class_names("mt-2 text-lg font-semibold text-pretty", done ? "text-ink-subtle line-through decoration-ink-subtle/50" : "text-ink") %>">
       <%= path_step.title %>
     </h3>
-    <% if path_step.description.present? %>
-      <p class="mt-1 max-w-prose text-pretty text-ink-muted"><%= path_step.description %></p>
-    <% end %>
-
-    <%= link_to path_step.resource_url, target: "_blank", rel: "noopener noreferrer",
-          class: "mt-3 inline-flex items-center gap-1.5 rounded-sm font-semibold text-brand-700 underline-offset-4 hover:underline" do %>
-      <%= resource_action_label(path_step.resource_type) %>
-      <span class="sr-only">for “<%= path_step.title %>” (opens in a new tab)</span>
-      <svg class="size-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 4H4.75A.75.75 0 0 0 4 4.75v10.5c0 .41.34.75.75.75h10.5c.41 0 .75-.34.75-.75V12M11 4h5v5M16 4l-7 7"/></svg>
-    <% end %>
+    <%= render "path_steps/resource", path_step: path_step %>
 
     <%= render "path_steps/notes/note", path_step: path_step unless read_only %>
   </div>

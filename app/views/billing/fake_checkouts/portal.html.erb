@@ -1,0 +1,23 @@
+<% content_for :title, "Test billing portal" %>
+<div class="mx-auto max-w-md">
+  <p class="mb-4 rounded-control border border-warning-600/40 bg-warning-50 px-4 py-3 text-sm font-medium text-warning-700" role="note">
+    Test billing portal: stands in for the payment provider’s page in development.
+  </p>
+  <%= render "shared/card", title: "Your subscription" do %>
+    <% if @subscription %>
+      <p class="text-ink">Pro, <%= @subscription.interval %>ly · <%= @subscription.status.humanize %></p>
+      <% if @subscription.cancel_at_period_end? %>
+        <p class="mt-1 text-sm text-ink-muted">Cancelled; ends <%= l(@subscription.current_period_end.to_date, format: "%-d %B %Y") %>.</p>
+      <% end %>
+      <div class="mt-6 flex flex-col gap-2">
+        <% unless @subscription.cancel_at_period_end? || @subscription.canceled? %>
+          <%= ui_button "Cancel subscription", billing_fake_portal_cancel_path, method: :post, variant: :danger, block: true,
+                data: { turbo_confirm: "Cancel Pro? You keep it until the end of this period." } %>
+        <% end %>
+        <%= ui_button "Back to Path Aviator", settings_path(anchor: "plan"), variant: :ghost, block: true %>
+      </div>
+    <% else %>
+      <p class="text-ink-muted">No test subscription yet.</p>
+    <% end %>
+  <% end %>
+</div>

@@ -17,6 +17,14 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_select "a[href=?]", new_session_path, text: "Sign in"
   end
 
+  test "sign-up shows the consent line with links to the terms and privacy policy" do
+    get new_registration_path
+
+    assert_select "form p", /By creating an account you agree to the\s+Terms\s+and\s+Privacy Policy/
+    assert_select "form a[href=?]", terms_path, text: "Terms"
+    assert_select "form a[href=?]", privacy_path, text: "Privacy Policy"
+  end
+
   test "sign-in page links to sign-up" do
     get new_session_path
 
@@ -31,6 +39,13 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_learning_goal_path
     assert cookies[:session_id].present?
     assert_equal "Asha Rao", User.last.name
+  end
+
+  test "signing up sends an email to confirm the address" do
+    assert_enqueued_email_with AccountMailer, :verify_email, args: ->(args) { args.first.email_address == "asha@example.com" } do
+      post registration_path, params: valid_params
+    end
+    assert_not User.last.email_verified?
   end
 
   test "name is optional" do
@@ -88,5 +103,17 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     get new_registration_path
 
     assert_redirected_to dashboard_path
+  end
+
+  test "sign-up keeps the time zone the browser reported" do
+    post registration_path, params: { user: { email_address: "zone@example.com", password: "long-enough-pw", password_confirmation: "long-enough-pw", time_zone: "Asia/Calcutta" } }
+
+    assert_equal "Asia/Kolkata", User.find_by(email_address: "zone@example.com").time_zone
+  end
+
+  test "sign-up without a time zone uses UTC" do
+    post registration_path, params: { user: { email_address: "nozone@example.com", password: "long-enough-pw", password_confirmation: "long-enough-pw" } }
+
+    assert_equal "UTC", User.find_by(email_address: "nozone@example.com").time_zone
   end
 end

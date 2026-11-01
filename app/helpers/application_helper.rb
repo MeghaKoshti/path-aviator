@@ -18,7 +18,31 @@ module ApplicationHelper
     fields_in_order.find { |field| record.errors.include?(field) }
   end
 
+  # Links every footer carries, so policies are one click from any page.
+  def site_footer_links
+    [
+      [ "Pricing", pricing_path ],
+      [ "Study plans", learn_topics_path ],
+      [ "Privacy", privacy_path ],
+      [ "Terms", terms_path ],
+      [ "Refunds", refunds_path ],
+      [ "Contact", contact_path ],
+      [ "GitHub", "https://github.com/MeghaKoshti/path-aviator" ]
+    ]
+  end
+
   def user_display_name(user)
     user.try(:name).presence || user.email_address
+  end
+
+  # Options for a time zone select, one per IANA zone, e.g.
+  # ["(GMT+05:30) Chennai, Kolkata, Mumbai, New Delhi", "Asia/Kolkata"].
+  # A zone the browser found that Rails has no name for is listed as itself.
+  def time_zone_options(selected)
+    options = ActiveSupport::TimeZone.all.group_by { |zone| zone.tzinfo.name }.map do |iana, zones|
+      [ "(GMT#{zones.first.formatted_offset}) #{zones.map(&:name).join(", ")}", iana ]
+    end
+    options << [ selected, selected ] unless options.any? { |_, iana| iana == selected }
+    options_for_select(options, selected)
   end
 end

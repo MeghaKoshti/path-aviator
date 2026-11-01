@@ -1,0 +1,22 @@
+Hi <%= @user.name.to_s.split.first || "there" %>,
+
+This week (<%= l(@stats.week_start, format: "%-d %b") %> to <%= l(@stats.week_start + 6, format: "%-d %b") %>):
+- Time learned: <%= format_minutes(@stats.minutes_this_week) %><%= " of your #{format_minutes(@stats.weekly_goal_minutes)} goal" if @stats.weekly_goal_minutes.positive? %>
+- Streak: <%= pluralize(@stats.streak, "day") %> in a row
+<% @stats.deadlines.each do |path, pace| %>
+- <%= path.title %>: <%= pace_word(pace) %>. <%= target_date_label(path.target_date) %>. <%= pace_detail(path, today: @stats.today) %>
+<% end %>
+<% if @next_step %>
+
+Next step: <%= @next_step.title %> (<%= format_minutes(@next_step.estimated_minutes) %>, <%= @next_path.title %>)
+<%= learning_path_url(@next_path, anchor: dom_id(@next_step)) %>
+<% else %>
+
+Every path is finished. Plan the next one: <%= new_learning_goal_url %>
+<% end %>
+
+Your dashboard: <%= dashboard_url %>
+
+--
+You get this because the weekly check-in is on for <%= @user.email_address %>.
+Unsubscribe in one click: <%= @unsubscribe_url %>

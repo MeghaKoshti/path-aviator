@@ -32,6 +32,17 @@ class DemoAccountTest < ActiveSupport::TestCase
     assert_equal [ 8, 8, 3 ], [ rails_path.path_steps.count, rails_path.path_steps_count, rails_path.completed_steps_count ]
   end
 
+  test "reset! takes down certificates and evidence links visitors added" do
+    path = DemoAccount.reset!.learning_paths.order(:id).first
+    path.path_steps.each { |step| step.update!(completed_at: Time.current, evidence_url: "https://example.com/spam") }
+    path.reload.publish_certificate!
+
+    DemoAccount.reset!
+
+    assert_not path.reload.certificate_published?
+    assert path.path_steps.all? { |step| step.evidence_url.nil? }
+  end
+
   test "is only enabled in production with SEED_DEMO=1" do
     old = ENV["SEED_DEMO"]
     ENV["SEED_DEMO"] = nil

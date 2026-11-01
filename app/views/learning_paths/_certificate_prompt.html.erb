@@ -1,0 +1,17 @@
+<%#
+  Certificate call to action on a finished path. Part of the progress panel,
+  which background jobs also render, so it checks Pro on the path's owner
+  rather than on Current.user.
+%>
+<% if learning_path.certificate_published? %>
+  <p class="mt-1 text-ink-muted">Your certificate is live.</p>
+  <div class="mt-3"><%= ui_button "View certificate", certificate_path(learning_path.certificate_token), size: :sm %></div>
+<% elsif ProAccess.granted?(learning_path.user) %>
+  <p class="mt-1 text-ink-muted">Publish a certificate you can add to LinkedIn.</p>
+  <div class="mt-3"><%= ui_button "Get your certificate", new_learning_path_certificate_path(learning_path), size: :sm %></div>
+<% else %>
+  <p class="mt-1 text-ink-muted">
+    Show it off with a certificate you can add to LinkedIn. Certificates come with Pro.
+  </p>
+  <div class="mt-3"><%= ui_button "See Pro", pricing_path, variant: :secondary, size: :sm %></div>
+<% end %>

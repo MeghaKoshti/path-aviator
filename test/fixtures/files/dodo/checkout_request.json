@@ -1,0 +1,8 @@
+{
+  "product_cart": [
+    { "product_id": "pdt_pro_monthly_inr", "quantity": 1 }
+  ],
+  "customer": { "email": "two@example.com", "name": "Arjun Mehta" },
+  "return_url": "http://example.com/billing/return",
+  "metadata": { "user_id": "USER_ID", "plan": "pro", "interval": "month", "currency": "inr" }
+}

@@ -4,6 +4,10 @@ class PathStep < ApplicationRecord
 
   belongs_to :learning_path, counter_cache: true
 
+  # Set by CheckLinksJob (see LinkChecker for what each answer means).
+  enum :link_status, { unchecked: "unchecked", ok: "ok", unverified: "unverified", broken: "broken" },
+       prefix: :link, default: :unchecked, validate: true
+
   scope :ordered, -> { order(:position) }
   scope :incomplete, -> { where(completed_at: nil) }
   scope :completed, -> { where.not(completed_at: nil) }
@@ -11,6 +15,7 @@ class PathStep < ApplicationRecord
 
   # A blank note is stored as nil, so saving an empty box removes the note.
   normalizes :note, with: ->(note) { note.strip.presence }
+  normalizes :evidence_url, with: ->(url) { url.strip.presence }
 
   validates :title, presence: true
   validates :position, numericality: { only_integer: true, greater_than: 0 },
@@ -19,6 +24,7 @@ class PathStep < ApplicationRecord
   validates :estimated_minutes, numericality: { only_integer: true, greater_than: 0 }
   validates :note, length: { maximum: NOTE_MAX_LENGTH }
   validate :resource_url_must_be_http
+  validate :evidence_url_must_be_http, if: :evidence_url?
 
   # completed_steps_count is kept in sync by these callbacks, which run inside
   # the same transaction as the step's own save or destroy.
@@ -35,6 +41,11 @@ class PathStep < ApplicationRecord
 
   def completed?
     completed_at.present?
+  end
+
+  # Where "Search instead" goes when a step's link is broken.
+  def search_url
+    "https://www.google.com/search?q=#{CGI.escape("#{title} #{learning_path.learning_goal.topic}")}"
   end
 
   def toggle_completion!
@@ -55,5 +66,9 @@ class PathStep < ApplicationRecord
 
     def resource_url_must_be_http
       errors.add(:resource_url, "must be an http or https link") unless self.class.http_url?(resource_url)
+    end
+
+    def evidence_url_must_be_http
+      errors.add(:evidence_url, "must be a link starting with http:// or https://") unless self.class.http_url?(evidence_url)
     end
 end

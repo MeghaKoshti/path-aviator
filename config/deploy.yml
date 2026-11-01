@@ -52,6 +52,12 @@ env:
     - GEMINI_API_KEY
     # Optional: needed to send password-reset emails (see SMTP_* below).
     - SMTP_PASSWORD
+    # Optional: payments through Dodo (see the DODO_* settings below).
+    - DODO_API_KEY
+    - DODO_WEBHOOK_SECRET
+    # Optional: Razorpay, e.g. for INR (see the RAZORPAY_* settings below).
+    - RAZORPAY_KEY_SECRET
+    - RAZORPAY_WEBHOOK_SECRET
   clear:
     # Used for mailer links and Rails host checks; must match proxy.host.
     APP_HOST: <%= ENV.fetch("APP_HOST") %>
@@ -71,6 +77,30 @@ env:
     SMTP_PORT: "<%= ENV.fetch("SMTP_PORT", "587") %>"
     SMTP_USERNAME: "<%= ENV["SMTP_USERNAME"] %>"
     MAILER_FROM: "<%= ENV.fetch("MAILER_FROM", "Path Aviator <no-reply@#{ENV.fetch("APP_HOST")}>") %>"
+
+    # Operator name and support/grievance email on the policy pages (placeholders when empty).
+    LEGAL_OWNER_NAME: "<%= ENV["LEGAL_OWNER_NAME"] %>"
+    SUPPORT_EMAIL: "<%= ENV["SUPPORT_EMAIL"] %>"
+
+    # AI cost guard: at most this many generations per UTC day for the whole
+    # app, and a cap on Gemini's (billed) thinking tokens per request.
+    AI_DAILY_GENERATION_LIMIT: "<%= ENV.fetch("AI_DAILY_GENERATION_LIMIT", "500") %>"
+    GEMINI_THINKING_BUDGET: "<%= ENV.fetch("GEMINI_THINKING_BUDGET", "1024") %>"
+
+    # Payments (Dodo Payments). Without the key and product ids the Upgrade
+    # buttons stay hidden.
+    BILLING_PROVIDER: "<%= ENV.fetch("BILLING_PROVIDER", "dodo") %>"
+    DODO_ENVIRONMENT: "<%= ENV.fetch("DODO_ENVIRONMENT", "test_mode") %>"
+    DODO_PRODUCT_PRO_MONTHLY_INR: "<%= ENV["DODO_PRODUCT_PRO_MONTHLY_INR"] %>"
+    DODO_PRODUCT_PRO_YEARLY_INR: "<%= ENV["DODO_PRODUCT_PRO_YEARLY_INR"] %>"
+    DODO_PRODUCT_PRO_MONTHLY_USD: "<%= ENV["DODO_PRODUCT_PRO_MONTHLY_USD"] %>"
+    DODO_PRODUCT_PRO_YEARLY_USD: "<%= ENV["DODO_PRODUCT_PRO_YEARLY_USD"] %>"
+    # Razorpay instead of Dodo for one currency, e.g. BILLING_PROVIDER_INR=razorpay.
+    BILLING_PROVIDER_INR: "<%= ENV["BILLING_PROVIDER_INR"] %>"
+    BILLING_PROVIDER_USD: "<%= ENV["BILLING_PROVIDER_USD"] %>"
+    RAZORPAY_KEY_ID: "<%= ENV["RAZORPAY_KEY_ID"] %>"
+    RAZORPAY_PLAN_PRO_MONTHLY_INR: "<%= ENV["RAZORPAY_PLAN_PRO_MONTHLY_INR"] %>"
+    RAZORPAY_PLAN_PRO_YEARLY_INR: "<%= ENV["RAZORPAY_PLAN_PRO_YEARLY_INR"] %>"
 
     # Set number of processes dedicated to Solid Queue (default: 1)
     # JOB_CONCURRENCY: 3

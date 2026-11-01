@@ -1,5 +1,6 @@
 class GenerateLearningPathJob < ApplicationJob
   FAILURE_MESSAGE = "We couldn't build this path. Please try again.".freeze
+  PROMPT_TOKENS = 900
 
   queue_as :default
   # The path may have been deleted before the job ran; nothing left to do.
@@ -9,8 +10,13 @@ class GenerateLearningPathJob < ApplicationJob
     return unless learning_path.generating?
 
     result = generate(learning_path.learning_goal)
-    save_result(learning_path, result)
+    if save_result(learning_path, result)
+      Event.track(:path_ready, user: learning_path.user, path_id: learning_path.id, estimated_tokens: estimated_tokens(result))
+      CheckLinksJob.perform_later(learning_path)
+    end
   rescue PathGenerator::Error => e
+    # Expected now and then (timeouts, bad JSON), so a warning, not an alarm.
+    Rails.error.report(e, handled: true, severity: :warning, context: { learning_path_id: learning_path.id })
     mark_failed(learning_path, e)
   rescue StandardError => e
     # Don't leave the user looking at a spinner forever; re-raise so the error
@@ -37,11 +43,12 @@ class GenerateLearningPathJob < ApplicationJob
 
     # The generator call can take a while, so the path is re-read under a lock
     # first: it may have been deleted, or a newer job (e.g. from a double-clicked
-    # "Regenerate") may already have filled it. Either way this result is dropped.
+    # "Regenerate") may already have filled it. Either way this result is
+    # dropped. Returns true when the steps were saved.
     def save_result(learning_path, result)
       LearningPath.transaction do
         current = LearningPath.lock.find_by(id: learning_path.id)
-        next unless current&.generating?
+        next false unless current&.generating?
 
         current.path_steps.delete_all
         result.steps.each.with_index(1) do |step, position|
@@ -50,24 +57,45 @@ class GenerateLearningPathJob < ApplicationJob
         current.update!(
           title: result.title,
           summary: result.summary,
+          skills: result.skills,
           raw_response: result.raw,
           generated_at: Time.current,
           error_message: nil,
-          status: :ready
+          status: :ready,
+          **token_usage(result)
         )
+        true
       end
     end
 
+    # Kept on the path so the Gemini bill can be traced back to real usage.
+    def token_usage(result)
+      usage = result.usage || {}
+      { input_tokens: usage[:input_tokens], output_tokens: usage[:output_tokens], thinking_tokens: usage[:thinking_tokens] }
+    end
+
     # Only a path that is still generating is marked failed, so a late failure
-    # can't clobber a path that a newer job already finished.
+    # can't clobber a path that a newer job already finished. A failure is our
+    # fault, so it doesn't use up the user's monthly quota.
     def mark_failed(learning_path, error)
       Rails.logger.error("[GenerateLearningPathJob] path #{learning_path.id} failed: #{error.class}: #{error.message}")
-      LearningPath.where(id: learning_path.id, status: LearningPath.statuses[:generating]).update_all(
+      Event.track(:path_failed, user: User.find_by(id: learning_path.user_id), path_id: learning_path.id, error: "#{error.class.name}: #{error.message.truncate(200)}")
+      failed = LearningPath.where(id: learning_path.id, status: LearningPath.statuses[:generating]).update_all(
         status: LearningPath.statuses[:failed],
         error_message: FAILURE_MESSAGE,
         raw_response: error.try(:raw),
         updated_at: Time.current
       )
+      Generation.fail_latest_for(learning_path) if failed.positive?
+    end
+
+    # Gemini's own counts when it reports them (usageMetadata). Otherwise the
+    # admin page's AI cost is estimated: about 4 characters a token for the
+    # answer, plus the prompt.
+    def estimated_tokens(result)
+      return result.usage.values.compact.sum if result.usage.present?
+
+      PROMPT_TOKENS + result.raw.to_s.length / 4
     end
 
     # Reload so the broadcast shows what is really saved, not attributes left

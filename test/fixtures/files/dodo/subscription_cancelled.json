@@ -1,0 +1,49 @@
+{
+  "business_id": "bus_P7mKJ1Jh2kqCcVvG5Z6dE",
+  "type": "subscription.cancelled",
+  "timestamp": "2026-10-24T10:15:02.418Z",
+  "data": {
+    "payload_type": "Subscription",
+    "subscription_id": "sub_2IjvDkPvRcbTQkDB5Lc6s",
+    "status": "cancelled",
+    "product_id": "pdt_pro_monthly_inr",
+    "quantity": 1,
+    "currency": "INR",
+    "recurring_pre_tax_amount": 16864,
+    "tax_inclusive": true,
+    "payment_frequency_interval": "Month",
+    "payment_frequency_count": 1,
+    "subscription_period_interval": "Year",
+    "subscription_period_count": 10,
+    "trial_period_days": 0,
+    "created_at": "2026-10-24T10:14:51.902Z",
+    "previous_billing_date": "2026-10-24T10:14:51.902Z",
+    "next_billing_date": "2026-11-24T10:14:51.902Z",
+    "cancel_at_next_billing_date": true,
+    "cancelled_at": "2026-11-02T08:00:00.000Z",
+    "expires_at": "2036-10-24T10:14:51.902Z",
+    "on_demand": false,
+    "has_payment_method": true,
+    "customer": {
+      "customer_id": "cus_9pRqLJt5mC2wHn8Yx4bKa",
+      "email": "two@example.com",
+      "name": "Arjun Mehta",
+      "phone_number": null
+    },
+    "billing": {
+      "country": "IN",
+      "state": "Madhya Pradesh",
+      "city": "Indore",
+      "street": "",
+      "zipcode": "452001"
+    },
+    "metadata": {
+      "user_id": "USER_ID",
+      "plan": "pro",
+      "interval": "month",
+      "currency": "inr"
+    },
+    "addons": [],
+    "meters": []
+  }
+}

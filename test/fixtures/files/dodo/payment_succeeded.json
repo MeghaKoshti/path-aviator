@@ -1,0 +1,13 @@
+{
+  "business_id": "bus_P7mKJ1Jh2kqCcVvG5Z6dE",
+  "type": "payment.succeeded",
+  "timestamp": "2026-10-24T10:15:02.418Z",
+  "data": {
+    "payload_type": "Payment",
+    "payment_id": "pay_4hYxQ2nV7sLk1Bw9Rz3Tc",
+    "subscription_id": "sub_2IjvDkPvRcbTQkDB5Lc6s",
+    "total_amount": 19900,
+    "currency": "INR",
+    "status": "succeeded"
+  }
+}

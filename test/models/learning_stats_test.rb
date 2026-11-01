@@ -137,4 +137,18 @@ class LearningStatsTest < ActiveSupport::TestCase
     end
     assert_equal 2, queries
   end
+
+  test "uses the user's own time zone unless told otherwise" do
+    @user.update!(time_zone: "Asia/Kolkata")
+    # 23:00 UTC on Sunday is already 04:30 on Monday in Kolkata.
+    finish_step(at: Time.utc(2026, 10, 25, 23, 0), minutes: 40)
+
+    s = LearningStats.new(@user, now: Time.utc(2026, 10, 26, 6, 0))
+    assert_equal Date.new(2026, 10, 26), s.week_start
+    assert_equal 40, s.minutes_this_week
+    assert s.active_today?
+
+    @user.update!(time_zone: "UTC")
+    assert_equal 0, LearningStats.new(@user, now: Time.utc(2026, 10, 26, 6, 0)).minutes_this_week
+  end
 end

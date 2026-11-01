@@ -1,2 +1,6 @@
-You can reset your password within the next 15 minutes on this password reset page:
+Hi <%= @user.name&.split&.first || "there" %>,
+
+Someone asked to reset the password for your Path Aviator account. If it was you, choose a new one within the next 15 minutes on this password reset page:
 <%= edit_password_url(@user.password_reset_token) %>
+
+If you didn't ask for this, you can ignore this email and your password stays the same.

@@ -4,6 +4,7 @@ class PathStepsController < ApplicationController
   def toggle
     @path_step = PathStep.owned_by(Current.user).find(params[:id])
     @path_step.toggle_completion!
+    Event.track_once(:first_step_done, user: Current.user) if @path_step.completed?
     @learning_path = @path_step.learning_path.reload
 
     respond_to do |format|

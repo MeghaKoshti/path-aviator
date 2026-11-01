@@ -1,14 +1,13 @@
 # The numbers behind the dashboard's "This week" panel, worked out from when
 # a user's steps were ticked off.
 #
-# Users don't pick a time zone yet, so "today" and "Monday" use the app's
-# zone (Time.zone) unless one is passed in.
+# "Today" and "Monday" are in the user's own time zone unless one is passed in.
 class LearningStats
   Day = Data.define(:date, :active, :today, :future)
 
   attr_reader :today
 
-  def initialize(user, time_zone: Time.zone, now: Time.current)
+  def initialize(user, time_zone: user.zone, now: Time.current)
     @user = user
     @time_zone = time_zone
     @today = now.in_time_zone(time_zone).to_date
@@ -63,6 +62,15 @@ class LearningStats
 
   def empty?
     completions.empty?
+  end
+
+  # Ready, unfinished paths with a target date, soonest first, each with
+  # whether the learner is on track to finish in time.
+  def deadlines
+    @deadlines ||= @user.learning_paths.ready.joins(:learning_goal).where.not(learning_goals: { target_date: nil })
+      .includes(:learning_goal, :path_steps).order("learning_goals.target_date")
+      .reject(&:completed?)
+      .map { |path| [ path, path.pace(today:) ] }
   end
 
   private

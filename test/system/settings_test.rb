@@ -23,6 +23,22 @@ class SettingsTest < ApplicationSystemTestCase
     assert_field "New password", disabled: true
     assert_button "Save profile", disabled: true
     assert_button "Change password", disabled: true
+    assert_button "Save preferences", disabled: true
+    assert_button "Prepare my data", disabled: true
     assert_button "Delete my account", disabled: true
+  end
+
+  test "changing the time zone and turning off the weekly email" do
+    sign_in_through_ui users(:one)
+    visit settings_path
+
+    select "(GMT+05:30) Chennai, Kolkata, Mumbai, New Delhi", from: "Time zone"
+    uncheck "Weekly check-in email"
+    click_on "Save preferences"
+
+    assert_text "Preferences saved."
+    assert_select "Time zone", selected: "(GMT+05:30) Chennai, Kolkata, Mumbai, New Delhi"
+    assert_equal "Asia/Kolkata", users(:one).reload.time_zone
+    assert_not users(:one).weekly_digest?
   end
 end

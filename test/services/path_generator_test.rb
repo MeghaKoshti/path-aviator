@@ -91,4 +91,61 @@ class PathGeneratorTest < ActiveSupport::TestCase
       assert PathStep.new(step.merge(position:, learning_path: learning_paths(:sql))).valid?, step[:title]
     end
   end
+
+  test "replace_step returns a validated substitute for one step" do
+    step = path_steps(:rails_models)
+    PathGenerator.client = Struct.new(:raw) { def replace_step(_) = raw }.new(
+      { description: " Read the edge guide. ", resource_type: "Docs", resource_url: " https://edgeguides.rubyonrails.org/ " }.to_json
+    )
+
+    replacement = PathGenerator.replace_step(step)
+
+    assert_equal "Read the edge guide.", replacement.description
+    assert_equal "docs", replacement.resource_type
+    assert_equal "https://edgeguides.rubyonrails.org/", replacement.resource_url
+  end
+
+  test "replace_step rejects invalid substitutes and the same broken link" do
+    step = path_steps(:rails_models)
+    [
+      { description: "x", resource_type: "podcast", resource_url: "https://a.example" },
+      { description: "x", resource_type: "docs", resource_url: "ftp://a.example" },
+      { resource_type: "docs", resource_url: "https://a.example" },
+      { description: "x", resource_type: "docs", resource_url: step.resource_url }
+    ].each do |answer|
+      PathGenerator.client = Struct.new(:raw) { def replace_step(_) = raw }.new(answer.to_json)
+      assert_raises(PathGenerator::InvalidOutput, answer.inspect) { PathGenerator.replace_step(step) }
+    end
+  end
+
+  test "the fake generator offers a valid substitute" do
+    step = path_steps(:rails_models)
+    replacement = PathGenerator.replace_step(step)
+
+    assert_match %r{\Ahttps://}, replacement.resource_url
+    assert_not_equal step.resource_url, replacement.resource_url
+  end
+
+  test "the fake generator picks skills out of a job post and fits a target date" do
+    travel_to Date.new(2026, 10, 31) do
+      goal = LearningGoal.new(topic: "Backend developer", current_level: :intermediate, hours_per_week: 2, target_date: Date.new(2026, 11, 21),
+                              job_post: "We ship Ruby on Rails with PostgreSQL, Redis and Sidekiq on AWS. Go-getters welcome!")
+      result = PathGenerator.call(goal)
+
+      assert_equal [ "Ruby on Rails", "Sidekiq", "PostgreSQL", "Redis", "AWS" ], result.skills
+      assert_operator result.steps.sum { |step| step[:estimated_minutes] }, :<=, 3 * 2 * 60 * PathGenerator::Validator::BUDGET_SLACK
+    end
+  end
+
+  test "a topic path has no skills" do
+    assert_equal [], PathGenerator.call(@goal).skills
+  end
+
+  test "a job-post answer without skills is invalid" do
+    goal = LearningGoal.new(topic: "Backend developer", current_level: :beginner, hours_per_week: 4, job_post: "Rails role")
+    PathGenerator.client = ScriptedClient.new(valid_json)
+
+    error = assert_raises(PathGenerator::InvalidOutput) { PathGenerator.call(goal) }
+    assert_match "skills", error.message
+  end
 end

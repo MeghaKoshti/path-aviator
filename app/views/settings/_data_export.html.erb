@@ -1,0 +1,33 @@
+<%#
+  "Download my data". DataExportJob replaces this over a Turbo Stream when
+  the archive is ready, so it must not depend on the request.
+  Locals: data_export: (the latest export, or nil), locked: (demo account)
+%>
+<section id="data_export" class="scroll-mt-24 rounded-panel border border-line bg-surface-raised p-6 shadow-panel sm:p-8" aria-labelledby="data-export-heading">
+  <h2 id="data-export-heading" class="mb-2 text-lg font-semibold text-ink">Your data</h2>
+  <p class="max-w-prose text-pretty text-ink-muted">
+    Download everything Path Aviator keeps about you: your goals, paths, steps, notes and progress,
+    as JSON plus a Markdown file per path.
+  </p>
+
+  <div class="mt-5 flex flex-wrap items-center gap-3" aria-live="polite">
+    <% if data_export&.ready? %>
+      <%= ui_button nil, settings_data_export_path, variant: :primary, data: { turbo: false } do %>
+        Download my data
+        <span class="font-normal opacity-80">(<%= number_to_human_size(data_export.archive.bytesize) %>)</span>
+      <% end %>
+      <p class="text-sm text-ink-subtle">Prepared <%= l(data_export.updated_at, format: "%-d %b, %-l:%M %P") %>.</p>
+    <% elsif data_export&.pending? %>
+      <p class="inline-flex items-center gap-2 text-sm font-medium text-ink-muted">
+        <span class="size-2 animate-pulse rounded-full bg-route" aria-hidden="true"></span>
+        Preparing your data…
+      </p>
+    <% else %>
+      <% if data_export&.failed? %>
+        <p class="w-full text-sm font-medium text-danger-700">The last export didn’t finish. Try again.</p>
+      <% end %>
+      <%= ui_button "Prepare my data", settings_data_export_path, method: :post, variant: :secondary,
+            disabled: local_assigns.fetch(:locked, false) %>
+    <% end %>
+  </div>
+</section>

@@ -81,4 +81,47 @@ class UserTest < ActiveSupport::TestCase
     ensure
       old.each { |key, value| ENV[key] = value }
     end
+
+  test "time zones are stored as IANA names, from browser or Rails names, defaulting to UTC" do
+    assert_equal "UTC", User.new.time_zone
+    assert_equal "Asia/Kolkata", User.new(time_zone: "Asia/Kolkata").time_zone
+    assert_equal "Asia/Kolkata", User.new(time_zone: "Asia/Calcutta").time_zone, "old browser name"
+    assert_equal "Asia/Kolkata", User.new(time_zone: "Mumbai").time_zone, "Rails name"
+    assert_equal "America/Detroit", User.new(time_zone: "America/Detroit").time_zone
+    assert_equal "UTC", User.new(time_zone: "Mars/Olympus_Mons").time_zone
+    assert_equal "UTC", User.new(time_zone: "").time_zone
+    assert_equal "+05:30", User.new(time_zone: "Asia/Kolkata").zone.formatted_offset
+  end
+
+  test "an unsubscribe token finds its user and no one else" do
+    token = users(:one).generate_token_for(:unsubscribe)
+
+    assert_equal users(:one), User.find_by_token_for(:unsubscribe, token)
+    assert_nil User.find_by_token_for(:unsubscribe, token.reverse)
+  end
+
+  test "new users start on the free plan" do
+    user = User.create!(email_address: "new@example.com", password: "long-enough-pw")
+
+    assert user.free?
+    assert_not user.pro?
+    assert_equal Plan.free, user.current_plan
+  end
+
+  test "the plan must be a known one" do
+    user = users(:one)
+    user.plan = "platinum"
+
+    assert_not user.valid?
+    assert user.errors.include?(:plan)
+  end
+
+  test "destroying a user removes their generation history" do
+    user = users(:two)
+    user.generations.create!
+
+    assert_difference "Generation.count", -1 do
+      user.destroy!
+    end
+  end
 end

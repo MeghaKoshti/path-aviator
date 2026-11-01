@@ -1,0 +1,211 @@
+# Curated public study plans served at /learn/:slug.
+# Each is a normal path (6 to 12 steps, the same shape the AI generator makes),
+# so "Make this mine" can copy it into an account. Links point to official docs
+# and long-lived free resources; checked_on is when every link was last opened
+# and answered 200 (GitHub links were checked with git, as its pages block bots).
+# Keep titles under 60 characters and descriptions under 160 for search results.
+
+- slug: system-design-in-8-weeks
+  checked_on: 2026-10-31
+  title: System design in 8 weeks for backend developers
+  description: An 8-week, 6-hours-a-week system design plan for backend developers with 1 to 4 years' experience. Free resources, in order, with practice.
+  topic: System design for backend interviews
+  level: intermediate
+  hours_per_week: 6
+  audience: Backend developers with 1 to 4 years' experience preparing for product-company interviews.
+  summary: Learn the building blocks (caching, databases, queues, consistency), then practise designing real systems out loud, one week at a time.
+  steps:
+    - { week: 1, title: "Read the System Design Primer overview", type: course, minutes: 240, url: "https://github.com/donnemartin/system-design-primer", description: "Scalability basics, performance vs. scalability, latency vs. throughput, and how interviews are run." }
+    - { week: 2, title: "Database indexes and how queries use them", type: docs, minutes: 180, url: "https://use-the-index-luke.com/", description: "Why some queries are slow and how indexes fix them. Most design trade-offs start here." }
+    - { week: 2, title: "Replication and partitioning", type: docs, minutes: 120, url: "https://www.postgresql.org/docs/current/high-availability.html", description: "Primaries, replicas and failover, using PostgreSQL's own docs as the worked example." }
+    - { week: 3, title: "Caching with Redis", type: docs, minutes: 180, url: "https://redis.io/docs/latest/develop/", description: "Cache-aside, expiry and eviction. Know what goes stale and how you'd notice." }
+    - { week: 4, title: "Queues and event streams", type: docs, minutes: 180, url: "https://kafka.apache.org/documentation/#introduction", description: "Topics, partitions and consumer groups: the model behind most async designs." }
+    - { week: 5, title: "Consistency and the CAP theorem", type: article, minutes: 120, url: "https://en.wikipedia.org/wiki/CAP_theorem", description: "What you give up during a network partition, and why most systems choose availability." }
+    - { week: 5, title: "Lessons from the Amazon Builders' Library", type: article, minutes: 180, url: "https://aws.amazon.com/builders-library/", description: "Timeouts, retries with backoff, and avoiding fallback traps, from teams that run huge systems." }
+    - { week: 6, title: "Reliability: SLOs and error budgets", type: course, minutes: 180, url: "https://sre.google/sre-book/service-level-objectives/", description: "How to talk about availability with numbers, from Google's SRE book." }
+    - { week: 7, title: "Design a URL shortener and a rate limiter", type: practice, minutes: 300, url: "https://github.com/donnemartin/system-design-primer#system-design-interview-questions-with-solutions", description: "Work through the solved examples on paper first, then compare with the primer's answers." }
+    - { week: 8, title: "Run timed mock design interviews", type: practice, minutes: 360, url: "https://www.techinterviewhandbook.org/system-design/", description: "Three 45-minute mocks: requirements, estimates, high-level design, then deep dives." }
+
+- slug: rails-developer-roadmap-2026
+  checked_on: 2026-10-31
+  title: Ruby on Rails developer roadmap 2026
+  description: A 10-week Rails 8 roadmap from Ruby basics to a deployed Hotwire app, using the official guides. 6 hours a week, built for job switchers.
+  topic: Ruby on Rails 8
+  level: beginner
+  hours_per_week: 6
+  audience: Developers moving to Rails from another stack, or freshers aiming at Rails product companies.
+  summary: Ruby first, then the Rails guides in the order you'll use them, Hotwire for the front end, tests, background jobs, security and a real deploy.
+  steps:
+    - { week: 1, title: "Ruby in 20 minutes", type: docs, minutes: 60, url: "https://www.ruby-lang.org/en/documentation/quickstart/", description: "Syntax, blocks and classes before touching Rails." }
+    - { week: 1, title: "Practise Ruby on Exercism", type: practice, minutes: 240, url: "https://exercism.org/tracks/ruby", description: "Ten small exercises with mentor feedback. Enumerable will come up in every interview." }
+    - { week: 2, title: "Getting Started with Rails", type: docs, minutes: 300, url: "https://guides.rubyonrails.org/getting_started.html", description: "Build the official store app to see MVC, routing and generators in action." }
+    - { week: 3, title: "Active Record basics and migrations", type: docs, minutes: 180, url: "https://guides.rubyonrails.org/active_record_basics.html", description: "Models, migrations, validations and callbacks." }
+    - { week: 4, title: "Associations", type: docs, minutes: 180, url: "https://guides.rubyonrails.org/association_basics.html", description: "has_many, belongs_to, has_many :through, and how to avoid N+1 queries." }
+    - { week: 5, title: "Hotwire: Turbo Frames and Streams", type: docs, minutes: 240, url: "https://turbo.hotwired.dev/handbook/introduction", description: "Fast, app-like pages without a JavaScript framework." }
+    - { week: 6, title: "Testing Rails applications", type: docs, minutes: 240, url: "https://guides.rubyonrails.org/testing.html", description: "Model, controller and system tests with Minitest." }
+    - { week: 7, title: "Background jobs with Active Job", type: docs, minutes: 120, url: "https://guides.rubyonrails.org/active_job_basics.html", description: "Move slow work out of requests. Rails 8 runs jobs on Solid Queue." }
+    - { week: 7, title: "Securing Rails applications", type: docs, minutes: 120, url: "https://guides.rubyonrails.org/security.html", description: "CSRF, SQL injection, XSS and mass assignment: what Rails covers and what you must." }
+    - { week: 8, title: "Build your own CRUD side project", type: practice, minutes: 600, url: "https://guides.rubyonrails.org/command_line.html", description: "Something you'd use yourself, with auth, one association and a Turbo Stream. This is your interview demo." }
+    - { week: 10, title: "Deploy it with Kamal", type: docs, minutes: 180, url: "https://kamal-deploy.org/docs/installation/", description: "Ship the app to a small VPS and put the live link on your CV." }
+
+- slug: dsa-in-12-weeks-while-working
+  checked_on: 2026-10-31
+  title: DSA in 12 weeks while working full time
+  description: A 12-week data structures and algorithms plan for working developers, 5 hours a week. Patterns first, then timed practice for coding rounds.
+  topic: Data structures and algorithms
+  level: intermediate
+  hours_per_week: 5
+  audience: Working developers who need to clear coding rounds and can study evenings and weekends.
+  summary: Learn complexity and the core patterns, practise them on a fixed problem list, then switch to timed sets that feel like real coding rounds.
+  steps:
+    - { week: 1, title: "Big-O and the study plan", type: article, minutes: 120, url: "https://www.techinterviewhandbook.org/coding-interview-study-plan/", description: "How much to study, which topics matter most and how to practise." }
+    - { week: 1, title: "Big-O cheat sheet", type: article, minutes: 60, url: "https://www.bigocheatsheet.com/", description: "Time and space costs of common data structures and sorts." }
+    - { week: 2, title: "Arrays, hashing and two pointers", type: practice, minutes: 300, url: "https://neetcode.io/roadmap", description: "Start the roadmap's first three groups. Write the pattern down after each problem." }
+    - { week: 4, title: "Linked lists, stacks and queues", type: course, minutes: 300, url: "https://ocw.mit.edu/courses/6-006-introduction-to-algorithms-spring-2020/", description: "MIT 6.006 lectures on sequences and sets, alongside the matching roadmap problems." }
+    - { week: 5, title: "Visualise trees, heaps and graphs", type: practice, minutes: 180, url: "https://visualgo.net/en", description: "Step through BST, heap, BFS and DFS animations before coding them." }
+    - { week: 6, title: "Trees and graphs problem set", type: practice, minutes: 600, url: "https://neetcode.io/roadmap", description: "Trees, tries, heaps and graphs from the roadmap, two problems an evening." }
+    - { week: 8, title: "Dynamic programming patterns", type: article, minutes: 300, url: "https://cp-algorithms.com/dynamic_programming/intro-to-dp.html", description: "Top-down vs. bottom-up and how to spot overlapping subproblems." }
+    - { week: 9, title: "Grind 75 in timed sets", type: practice, minutes: 900, url: "https://www.techinterviewhandbook.org/grind75", description: "Set it to your weeks left and hours a week. Time every problem." }
+    - { week: 12, title: "Mixed best-practice questions", type: practice, minutes: 300, url: "https://www.techinterviewhandbook.org/best-practice-questions/", description: "Problems from every topic, so you learn to spot the pattern without the topic label." }
+
+- slug: react-for-backend-developers
+  checked_on: 2026-10-31
+  title: React for backend developers in 6 weeks
+  description: A 6-week React plan for backend developers who know an API but not the front end. Modern JavaScript, React, TypeScript and data fetching.
+  topic: React for backend developers
+  level: beginner
+  hours_per_week: 5
+  audience: Backend developers (Rails, Java, Go, Node) who want to ship full-stack features or move to full-stack roles.
+  summary: Modern JavaScript you can't skip, then react.dev in order, TypeScript, and a small app that talks to an API you already know how to build.
+  steps:
+    - { week: 1, title: "The JavaScript guide: the parts that matter", type: docs, minutes: 240, url: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide", description: "Functions, objects, modules, promises and async/await." }
+    - { week: 1, title: "Calling APIs with fetch", type: docs, minutes: 60, url: "https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch", description: "Requests, JSON, errors and aborting, from the browser side." }
+    - { week: 2, title: "React quick start", type: docs, minutes: 180, url: "https://react.dev/learn", description: "Components, JSX, props and state." }
+    - { week: 2, title: "Build tic-tac-toe", type: practice, minutes: 120, url: "https://react.dev/learn/tutorial-tic-tac-toe", description: "The official tutorial: lifting state and immutability, hands-on." }
+    - { week: 3, title: "Thinking in React", type: docs, minutes: 90, url: "https://react.dev/learn/thinking-in-react", description: "Break a UI into components and decide where state lives." }
+    - { week: 3, title: "Managing state", type: docs, minutes: 180, url: "https://react.dev/learn/managing-state", description: "Reducers, context and avoiding duplicated state." }
+    - { week: 4, title: "Effects and when you don't need them", type: docs, minutes: 120, url: "https://react.dev/learn/synchronizing-with-effects", description: "The most common source of React bugs for newcomers." }
+    - { week: 4, title: "TypeScript in 5 minutes", type: docs, minutes: 90, url: "https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html", description: "Types for props and API responses. Most React jobs expect it." }
+    - { week: 5, title: "Set up a project with Vite", type: docs, minutes: 60, url: "https://vite.dev/guide/", description: "Fast dev server and build, the default for new React apps." }
+    - { week: 5, title: "Server state with TanStack Query", type: docs, minutes: 180, url: "https://tanstack.com/query/latest/docs/framework/react/overview", description: "Caching, loading and error states for API data." }
+    - { week: 6, title: "Test components with Testing Library", type: practice, minutes: 240, url: "https://testing-library.com/docs/react-testing-library/intro/", description: "Build a small front end for one of your own APIs and test it like a user." }
+
+- slug: go-for-backend-developers
+  checked_on: 2026-10-31
+  title: Go for backend developers in 6 weeks
+  description: Learn Go in 6 weeks as a backend developer. The tour, idiomatic Go, HTTP services, databases, tests and concurrency, with free official resources.
+  topic: Go for backend services
+  level: intermediate
+  hours_per_week: 6
+  audience: Backend developers coming from Java, Python, Node or Ruby who want Go roles.
+  summary: Take the tour, learn what idiomatic Go looks like, then build and test an HTTP service with a database, and finish with concurrency patterns.
+  steps:
+    - { week: 1, title: "A Tour of Go", type: course, minutes: 300, url: "https://go.dev/tour/welcome/1", description: "Syntax, types, methods, interfaces and goroutines in the browser." }
+    - { week: 2, title: "Go by Example", type: article, minutes: 180, url: "https://gobyexample.com/", description: "Short, runnable examples to keep open while you code." }
+    - { week: 2, title: "Effective Go", type: docs, minutes: 180, url: "https://go.dev/doc/effective_go", description: "Naming, errors, interfaces and the conventions reviewers expect." }
+    - { week: 3, title: "Learn Go with tests", type: course, minutes: 360, url: "https://quii.gitbook.io/learn-go-with-tests", description: "Test-first chapters that teach the standard library properly." }
+    - { week: 4, title: "Build a RESTful API", type: practice, minutes: 180, url: "https://go.dev/doc/tutorial/web-service-gin", description: "The official tutorial for a small JSON API." }
+    - { week: 4, title: "The net/http package", type: docs, minutes: 120, url: "https://pkg.go.dev/net/http", description: "Handlers, middleware and servers without a framework." }
+    - { week: 5, title: "Access a relational database", type: practice, minutes: 180, url: "https://go.dev/doc/tutorial/database-access", description: "database/sql, queries and transactions." }
+    - { week: 5, title: "Organise a Go module", type: docs, minutes: 60, url: "https://go.dev/doc/modules/layout", description: "Package layout for a service that will grow." }
+    - { week: 6, title: "Concurrency: pipelines and cancellation", type: article, minutes: 180, url: "https://go.dev/blog/pipelines", description: "Channels, fan-out and fan-in, and stopping work cleanly." }
+
+- slug: docker-and-kubernetes-basics
+  checked_on: 2026-10-31
+  title: Docker and Kubernetes basics in 4 weeks
+  description: A 4-week Docker and Kubernetes plan for application developers. Containers, Compose, Deployments and Services, practised on your own laptop.
+  topic: Docker and Kubernetes basics
+  level: beginner
+  hours_per_week: 5
+  audience: Application developers who deploy to containers at work but have never set them up themselves.
+  summary: Containerise an app, run it with Compose, then learn the Kubernetes objects you'll meet first and run a local cluster.
+  steps:
+    - { week: 1, title: "Docker get started", type: docs, minutes: 120, url: "https://docs.docker.com/get-started/", description: "Images, containers and registries." }
+    - { week: 1, title: "The Docker workshop", type: practice, minutes: 180, url: "https://docs.docker.com/get-started/workshop/", description: "Containerise an app, persist data and use multiple containers." }
+    - { week: 2, title: "Docker Compose", type: docs, minutes: 120, url: "https://docs.docker.com/compose/gettingstarted/", description: "Run your app and its database with one command." }
+    - { week: 2, title: "Dockerfile best practices", type: docs, minutes: 90, url: "https://docs.docker.com/build/building/best-practices/", description: "Smaller, faster, safer images with multi-stage builds." }
+    - { week: 3, title: "Kubernetes overview", type: docs, minutes: 90, url: "https://kubernetes.io/docs/concepts/overview/", description: "What Kubernetes does and the parts of a cluster." }
+    - { week: 3, title: "Kubernetes basics tutorial", type: practice, minutes: 180, url: "https://kubernetes.io/docs/tutorials/kubernetes-basics/", description: "Deploy, expose, scale and update an app." }
+    - { week: 4, title: "Deployments", type: docs, minutes: 60, url: "https://kubernetes.io/docs/concepts/workloads/controllers/deployment/", description: "Rolling updates and rollbacks." }
+    - { week: 4, title: "Services", type: docs, minutes: 60, url: "https://kubernetes.io/docs/concepts/services-networking/service/", description: "How pods find each other and how traffic gets in." }
+    - { week: 4, title: "Run a local cluster with kind", type: practice, minutes: 120, url: "https://kind.sigs.k8s.io/docs/user/quick-start/", description: "Deploy your workshop app to a cluster on your laptop." }
+
+- slug: aws-for-developers
+  checked_on: 2026-10-31
+  title: "AWS for developers: the services you'll use"
+  description: A 6-week AWS plan for developers. IAM, EC2, S3, RDS, Lambda, VPC and CloudWatch from the official docs, with a small project to deploy.
+  topic: AWS for application developers
+  level: beginner
+  hours_per_week: 5
+  audience: Developers who deploy to AWS at work, or see "AWS" on every job post, and want the core services clear.
+  summary: The handful of services most applications use, in the order you'd set them up, plus how to design and watch them.
+  steps:
+    - { week: 1, title: "IAM: users, roles and policies", type: docs, minutes: 120, url: "https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html", description: "Least privilege from day one. Every other service depends on it." }
+    - { week: 1, title: "Set up the AWS CLI", type: practice, minutes: 60, url: "https://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-started.html", description: "Configure credentials and script what you click." }
+    - { week: 2, title: "EC2 concepts", type: docs, minutes: 120, url: "https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html", description: "Instances, AMIs, security groups and key pairs." }
+    - { week: 2, title: "S3 for files and static sites", type: docs, minutes: 120, url: "https://docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html", description: "Buckets, objects, access control and presigned URLs." }
+    - { week: 3, title: "RDS for managed databases", type: docs, minutes: 120, url: "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/Welcome.html", description: "Backups, Multi-AZ and read replicas without running the server yourself." }
+    - { week: 3, title: "VPC basics", type: docs, minutes: 120, url: "https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html", description: "Subnets, route tables and why your database shouldn't be public." }
+    - { week: 4, title: "Lambda for event-driven work", type: docs, minutes: 120, url: "https://docs.aws.amazon.com/lambda/latest/dg/welcome.html", description: "Functions triggered by S3 uploads, queues or HTTP." }
+    - { week: 4, title: "CloudWatch logs and alarms", type: docs, minutes: 90, url: "https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html", description: "Know when something breaks before your users do." }
+    - { week: 5, title: "The Well-Architected Framework", type: article, minutes: 120, url: "https://aws.amazon.com/architecture/well-architected/", description: "The six pillars interviewers use to judge a design." }
+    - { week: 6, title: "Free courses on AWS Skill Builder", type: course, minutes: 300, url: "https://skillbuilder.aws/", description: "Pick the Cloud Practitioner essentials course to tie it all together." }
+
+- slug: sql-for-developers
+  checked_on: 2026-10-31
+  title: SQL for developers in 4 weeks
+  description: A 4-week SQL plan for developers who mostly use an ORM. Joins, window functions, indexes, EXPLAIN and transactions, with hands-on practice.
+  topic: SQL for developers
+  level: beginner
+  hours_per_week: 4
+  audience: Developers who rely on an ORM and freeze when an interviewer asks for raw SQL or a slow query fix.
+  summary: Interactive basics, then the PostgreSQL tutorial for joins and window functions, and finally indexes, query plans and transactions.
+  steps:
+    - { week: 1, title: "SQLBolt interactive lessons", type: practice, minutes: 180, url: "https://sqlbolt.com/", description: "SELECT, filtering, joins and aggregates in the browser." }
+    - { week: 1, title: "The PostgreSQL tutorial", type: docs, minutes: 90, url: "https://www.postgresql.org/docs/current/tutorial.html", description: "Create tables and query them in a real database." }
+    - { week: 2, title: "Joins between tables", type: docs, minutes: 60, url: "https://www.postgresql.org/docs/current/tutorial-join.html", description: "Inner, outer and self joins." }
+    - { week: 2, title: "Mode's SQL tutorial", type: course, minutes: 180, url: "https://mode.com/sql-tutorial/", description: "Intermediate and advanced lessons on realistic data." }
+    - { week: 3, title: "Window functions", type: docs, minutes: 60, url: "https://www.postgresql.org/docs/current/tutorial-window.html", description: "Running totals and rankings, a favourite interview question." }
+    - { week: 3, title: "Use the Index, Luke", type: article, minutes: 180, url: "https://use-the-index-luke.com/", description: "How indexes work and why your query isn't using one." }
+    - { week: 4, title: "Read a query plan with EXPLAIN", type: docs, minutes: 90, url: "https://www.postgresql.org/docs/current/using-explain.html", description: "Find the slow part of a query instead of guessing." }
+    - { week: 4, title: "Transaction isolation", type: docs, minutes: 60, url: "https://www.postgresql.org/docs/current/transaction-iso.html", description: "Read committed vs. repeatable read, and the bugs each allows." }
+    - { week: 4, title: "PostgreSQL Exercises", type: practice, minutes: 180, url: "https://pgexercises.com/", description: "Graded problems on one schema, from simple to recursive queries." }
+
+- slug: git-and-github-workflow
+  checked_on: 2026-10-31
+  title: Git and GitHub workflow for working in a team
+  description: A 3-week Git and GitHub plan for developers joining a product team. Branching, rebasing, pull requests, clean commits, CI and undoing mistakes.
+  topic: Git and GitHub team workflow
+  level: beginner
+  hours_per_week: 4
+  audience: Developers moving from solo or ticket-driven work to a team that reviews every pull request.
+  summary: Understand branches properly, practise them visually, then learn the pull request workflow, readable history and how to recover from mistakes.
+  steps:
+    - { week: 1, title: "Pro Git: Git basics", type: course, minutes: 180, url: "https://git-scm.com/book/en/v2", description: "Chapters 1 to 3: how Git stores snapshots and what a branch really is." }
+    - { week: 1, title: "Learn Git Branching", type: practice, minutes: 120, url: "https://learngitbranching.js.org/", description: "Visual puzzles for merge, rebase and cherry-pick." }
+    - { week: 2, title: "Basic branching and merging", type: docs, minutes: 60, url: "https://git-scm.com/book/en/v2/Git-Branching-Basic-Branching-and-Merging", description: "Resolve your first real merge conflict." }
+    - { week: 2, title: "Rebasing, and when not to", type: docs, minutes: 60, url: "https://git-scm.com/book/en/v2/Git-Branching-Rebasing", description: "Keep history linear without rewriting shared branches." }
+    - { week: 2, title: "GitHub flow", type: docs, minutes: 45, url: "https://docs.github.com/en/get-started/using-github/github-flow", description: "Branch, commit, open a pull request, review, merge." }
+    - { week: 2, title: "About pull requests", type: docs, minutes: 60, url: "https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests", description: "Drafts, reviews and keeping a pull request small." }
+    - { week: 3, title: "Conventional Commits", type: article, minutes: 30, url: "https://www.conventionalcommits.org/en/v1.0.0/", description: "Commit messages your team (and changelog tools) can read." }
+    - { week: 3, title: "Your first GitHub Actions workflow", type: practice, minutes: 90, url: "https://docs.github.com/en/actions/writing-workflows/quickstart", description: "Run your tests on every pull request." }
+    - { week: 3, title: "Find the bad commit with git bisect", type: docs, minutes: 45, url: "https://git-scm.com/docs/git-bisect", description: "Binary-search history to find where a bug came in." }
+
+- slug: service-to-product-company-interview-prep
+  checked_on: 2026-10-31
+  title: "Service to product company: 10-week interview prep"
+  description: A 10-week interview plan for developers moving from an IT services company to a product company. DSA, system design, CV and behavioural rounds.
+  topic: Product company interview prep
+  level: intermediate
+  hours_per_week: 7
+  audience: Developers with 1 to 4 years at an IT services company who are targeting product companies and startups.
+  summary: Fix your CV first, then coding rounds, then system design and behavioural stories, with mock interviews in the last two weeks.
+  steps:
+    - { week: 1, title: "How product company interviews work", type: article, minutes: 120, url: "https://www.techinterviewhandbook.org/software-engineering-interview-guide/", description: "Rounds, what each one tests and how to prepare." }
+    - { week: 1, title: "Rewrite your CV around impact", type: practice, minutes: 180, url: "https://www.techinterviewhandbook.org/resume/", description: "Turn client-project bullets into outcomes a product team cares about." }
+    - { week: 2, title: "DSA patterns roadmap", type: practice, minutes: 900, url: "https://neetcode.io/roadmap", description: "Arrays to graphs, two problems an evening for four weeks." }
+    - { week: 6, title: "Grind 75 in timed sets", type: practice, minutes: 600, url: "https://www.techinterviewhandbook.org/grind75", description: "Timed practice so a 45-minute round feels normal." }
+    - { week: 7, title: "System design fundamentals", type: course, minutes: 420, url: "https://github.com/donnemartin/system-design-primer", description: "Caching, databases and queues, then the solved design questions." }
+    - { week: 8, title: "Behavioural interviews", type: article, minutes: 120, url: "https://www.techinterviewhandbook.org/behavioral-interview/", description: "Write five STAR stories from your projects, including one about a mistake." }
+    - { week: 9, title: "Mock interviews", type: practice, minutes: 360, url: "https://www.techinterviewhandbook.org/mock-interviews/", description: "At least two coding and one design mock with someone who'll be honest." }
+    - { week: 10, title: "Negotiate the offer", type: article, minutes: 90, url: "https://www.techinterviewhandbook.org/negotiation/", description: "Ask for the number you want without risking the offer." }

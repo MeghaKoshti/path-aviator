@@ -1,0 +1,17 @@
+<%#
+  The skills a job post asked for, which this path covers. Also on the public
+  share page (the skill names only; the job post itself is never shown).
+  Locals: learning_path:
+%>
+<% if learning_path.skills.present? %>
+  <section class="mt-6" aria-labelledby="<%= dom_id(learning_path, :skills_heading) %>">
+    <h2 id="<%= dom_id(learning_path, :skills_heading) %>" class="text-sm font-semibold text-ink">Skills this covers</h2>
+    <ul class="mt-2 flex flex-wrap gap-2" role="list">
+      <% learning_path.skills.each do |skill| %>
+        <li class="inline-flex items-center gap-1.5 rounded-full border border-route/25 bg-route-soft/60 px-3 py-1 text-sm font-medium text-ink">
+          <span class="size-1.5 rounded-full bg-route" aria-hidden="true"></span><%= skill %>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+<% end %>

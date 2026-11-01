@@ -32,6 +32,19 @@ class LearningPath < ApplicationRecord
     ready? && path_steps_count.positive? && completed_steps_count >= path_steps_count
   end
 
+  delegate :target_date, to: :learning_goal
+
+  # For a path with a target date: :on_track while the time left fits in the
+  # weeks left at the goal's hours a week, :behind otherwise (or once the date
+  # has passed), :done when every step is ticked. nil without a target date.
+  def pace(today: Date.current)
+    return unless ready? && target_date
+    return :done if completed?
+    return :behind if today > target_date
+
+    remaining_minutes <= learning_goal.minutes_until_target(today:) ? :on_track : :behind
+  end
+
   # Sharing gives the path a read-only public page at /p/:token. A token means
   # shared, nil means private. (has_secure_token would fill one in for every
   # new path, sharing them all by default, so the same generator is used here.)
@@ -48,6 +61,50 @@ class LearningPath < ApplicationRecord
     update!(share_token: nil)
   end
 
+  # Copies the plan for another person: same goal settings, title, skills and
+  # steps (with their link checks), none of the progress, notes or evidence,
+  # and never the job post. No AI call is made.
+  def copy_for(user)
+    transaction do
+      goal = user.learning_goals.create!(learning_goal.slice(:topic, :current_level, :hours_per_week))
+      goal.create_learning_path!(user:, title:, summary:, skills:, status: :ready, generated_at: Time.current).tap do |copy|
+        path_steps.each do |step|
+          copy.path_steps.create!(step.slice(:position, :title, :description, :resource_type, :resource_url, :estimated_minutes, :link_status, :link_checked_at))
+        end
+      end
+    end
+  end
+
+  # A finished path can get a public certificate at /c/:token. Publishing
+  # again keeps the same link (it may be on someone's LinkedIn already).
+  def certificate_published?
+    certificate_token.present?
+  end
+
+  def publish_certificate!
+    raise ArgumentError, "only a finished path gets a certificate" unless completed?
+    return if certificate_published?
+
+    update!(certificate_token: self.class.generate_unique_secure_token, certificate_issued_at: Time.current)
+  end
+
+  def revoke_certificate!
+    update!(certificate_token: nil, certificate_issued_at: nil)
+  end
+
+  def total_minutes
+    path_steps.sum(&:estimated_minutes)
+  end
+
+  # When the learner set off: planning day, or an earlier tick on a copied or re-planned path.
+  def started_at
+    [ created_at, *path_steps.filter_map(&:completed_at) ].min
+  end
+
+  def finished_at
+    path_steps.filter_map(&:completed_at).max
+  end
+
   def owner_first_name
     user.name.to_s.split.first
   end
@@ -56,7 +113,7 @@ class LearningPath < ApplicationRecord
   def regenerate!
     transaction do
       path_steps.delete_all
-      update!(status: :generating, completed_steps_count: 0, error_message: nil, raw_response: nil, generated_at: nil)
+      update!(status: :generating, completed_steps_count: 0, skills: [], error_message: nil, raw_response: nil, generated_at: nil)
     end
     reload
     GenerateLearningPathJob.perform_later(self)
@@ -65,14 +122,17 @@ class LearningPath < ApplicationRecord
   # Both the path page and the dashboard listen on this stream; each page only
   # has one of the two targets, so the other replace is ignored there.
   def broadcast_refresh
-    broadcast_replace_to [ user, :learning_paths ],
-      target: ActionView::RecordIdentifier.dom_id(self),
-      partial: "learning_paths/learning_path",
-      locals: { learning_path: self }
-    broadcast_replace_to [ user, :learning_paths ],
-      target: ActionView::RecordIdentifier.dom_id(self, :card),
-      partial: "learning_paths/card",
-      locals: { learning_path: self }
+    # Jobs run outside a request, so dates are put in the owner's zone here.
+    Time.use_zone(user.zone) do
+      broadcast_replace_to [ user, :learning_paths ],
+        target: ActionView::RecordIdentifier.dom_id(self),
+        partial: "learning_paths/learning_path",
+        locals: { learning_path: self }
+      broadcast_replace_to [ user, :learning_paths ],
+        target: ActionView::RecordIdentifier.dom_id(self, :card),
+        partial: "learning_paths/card",
+        locals: { learning_path: self }
+    end
   end
 
   private

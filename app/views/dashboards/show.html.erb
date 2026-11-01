@@ -3,6 +3,11 @@
 
 <%= render "dashboards/header", learning_paths: @learning_paths %>
 
+<% unless Current.user.email_verified? %>
+  <div class="mt-6"><%= render "shared/verify_email_prompt" %></div>
+<% end %>
+<div class="mt-6"><%= render "dashboards/plan_usage", user: Current.user %></div>
+
 <% if @learning_paths.any? %>
   <div class="mt-8"><%= render "dashboards/learning_stats", stats: @learning_stats %></div>
 <% end %>

@@ -1,0 +1,168 @@
+<% content_for :title, "Pricing" %>
+<% content_for :meta_description, "Path Aviator is free for #{@free.monthly_generations} new learning paths a month. Pro is #{plan_price(@pro, currency: :inr, interval: :month)} or #{plan_price(@pro, currency: :usd, interval: :month)} a month: unlimited paths, plans from job posts, weekly link checks and a certificate." %>
+<%
+  currencies = Plan::CURRENCIES
+  intervals = Plan::INTERVALS
+  current_user = (Current.user if authenticated?) # public page: resume the session if there is one
+%>
+
+<div class="mx-auto max-w-6xl px-4 pb-20 pt-8 sm:px-6 sm:pt-14"
+     data-controller="pricing"
+     data-pricing-interval-value="<%= pricing_interval %>"
+     data-pricing-currency-value="<%= pricing_currency %>"
+     data-pricing-chosen-value="<%= pricing_currency_chosen? %>">
+
+  <header class="max-w-2xl">
+    <h1 class="type-display text-[2.25rem] text-balance text-ink sm:text-5xl">Free to start. Pro when you’re serious about the switch.</h1>
+    <p class="mt-5 text-lg leading-relaxed text-pretty text-ink-muted">
+      Plan your first paths for free. Pro is for the 8 to 12 week push to a new job: unlimited paths,
+      plans built from a job post, links re-checked every week and a certificate you can add to LinkedIn.
+    </p>
+  </header>
+
+  <div class="mt-10 flex flex-wrap items-center gap-3">
+    <%= render "pricing/toggle", label: "Billing period", kind: :interval, current: pricing_interval,
+          options: [
+            [ :month, "Monthly" ],
+            [ :year, safe_join([ "Yearly",
+                tag.span(class: "rounded-full bg-success-50 px-2 py-0.5 text-xs text-success-700") do
+                  safe_join(currencies.map { |c| pricing_variant(currency: c) { "Save #{yearly_savings_percent(@pro, currency: c)}%" } })
+                end ]) ]
+          ] %>
+    <%= render "pricing/toggle", label: "Currency", kind: :currency, current: pricing_currency,
+          options: currencies.map { |c| [ c, PricingHelper::CURRENCY_LABELS[c] ] } %>
+  </div>
+
+  <div class="mt-8 grid gap-6 lg:grid-cols-2">
+    <%# Free %>
+    <section class="flex flex-col rounded-panel border border-line bg-surface-raised p-6 shadow-panel sm:p-8" aria-labelledby="free-plan">
+      <h2 id="free-plan" class="text-lg font-semibold text-ink"><%= @free.name %></h2>
+      <p class="mt-4 flex items-baseline gap-2">
+        <span class="type-display text-5xl text-ink"><%= safe_join(currencies.map { |c| pricing_variant(currency: c) { format_price(0, c) } }) %></span>
+        <span class="text-ink-muted">forever</span>
+      </p>
+      <p class="mt-2 text-sm text-ink-muted">No card needed.</p>
+
+      <ul class="mt-8 space-y-3 text-ink">
+        <% [ "#{@free.monthly_generations} new learning paths a month",
+             "Progress, notes, weekly stats and streak",
+             "Links checked when your path is planned",
+             "A public progress page to share" ].each do |item| %>
+          <li class="flex gap-3"><%= render "pricing/check", value: true %><span><%= item %></span></li>
+        <% end %>
+      </ul>
+
+      <div class="mt-auto pt-8">
+        <% if current_user %>
+          <p class="text-sm font-medium text-ink-muted"><%= pro_user?(current_user) ? "Included in Pro." : "Your current plan." %></p>
+        <% else %>
+          <%= ui_button "Start free", new_registration_path, variant: :secondary, size: :lg, block: true %>
+        <% end %>
+      </div>
+    </section>
+
+    <%# Pro: the one dark panel on the page. %>
+    <section class="relative flex flex-col overflow-hidden rounded-panel bg-brand-900 p-6 text-white shadow-pop sm:p-8" aria-labelledby="pro-plan">
+      <svg class="pointer-events-none absolute right-0 top-0 h-24 w-56 text-route" viewBox="0 0 384 160" preserveAspectRatio="none" fill="none" aria-hidden="true">
+        <path d="M0 150 C 120 150, 150 60, 240 70 S 340 40, 384 4" stroke="currentColor" stroke-width="2" stroke-dasharray="6 9" opacity="0.8"/>
+      </svg>
+      <h2 id="pro-plan" class="relative text-lg font-semibold"><%= @pro.name %></h2>
+
+      <div class="relative mt-4">
+        <% currencies.each do |currency| %>
+          <% intervals.each do |interval| %>
+            <%= pricing_variant(currency:, interval:, tag_name: :div) do %>
+              <p class="flex items-baseline gap-2">
+                <span class="type-display text-5xl"><%= plan_price(@pro, currency:, interval:) %></span>
+                <span class="text-brand-100">per <%= interval %></span>
+              </p>
+              <p class="mt-2 text-sm text-brand-100">
+                <% if interval == :year %>
+                  Billed yearly, about <%= yearly_price_per_month(@pro, currency:) %> a month.
+                <% else %>
+                  Billed monthly.
+                <% end %>
+                Renews until you cancel.
+              </p>
+            <% end %>
+          <% end %>
+        <% end %>
+      </div>
+
+      <ul class="relative mt-8 space-y-3">
+        <% [ "Unlimited learning paths (fair use)",
+             "Plans built from a job post",
+             "Links re-checked weekly, broken ones replaced",
+             "Progress page without branding",
+             "Completion certificate for LinkedIn" ].each do |item| %>
+          <li class="flex gap-3">
+            <svg class="size-5 shrink-0 text-route-soft" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-8 8a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.4L8 12.58l7.3-7.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>
+            <span><%= item %></span>
+          </li>
+        <% end %>
+      </ul>
+
+      <div class="relative mt-auto pt-8">
+        <% if current_user && pro_user?(current_user) %>
+          <p class="font-semibold">You’re on Pro.</p>
+          <p class="mt-1 text-sm text-brand-100">Manage or cancel it in <%= link_to "Settings", settings_path, class: "font-semibold text-white underline underline-offset-4" %>.</p>
+        <% elsif current_user && pro_checkout_available? %>
+          <%= form_with url: billing_checkout_path, method: :post, data: { turbo: false } do %>
+            <%= hidden_field_tag :interval, pricing_interval, id: nil, data: { pricing_target: "intervalField" } %>
+            <%= hidden_field_tag :currency, pricing_currency, id: nil, data: { pricing_target: "currencyField" } %>
+            <%= button_tag "Upgrade to Pro", type: :submit, class: ui_button_classes(variant: :inverse, size: :lg, block: true) %>
+          <% end %>
+        <% elsif current_user %>
+          <p class="font-semibold">Pro checkout opens soon.</p>
+          <p class="mt-1 text-sm text-brand-100">Want it first? Email <%= mail_to Legal.support_email, Legal.support_email, subject: "Pro early access", class: "font-semibold text-white underline underline-offset-4" %>.</p>
+        <% else %>
+          <%= ui_button "Get Pro", new_registration_path, variant: :inverse, size: :lg, block: true %>
+          <p class="mt-3 text-center text-sm text-brand-100">Create your free account first, then upgrade in one step.</p>
+        <% end %>
+        <p class="mt-4 text-center text-xs text-brand-200">Cancel any time. Any GST or VAT is shown at checkout.</p>
+      </div>
+    </section>
+  </div>
+
+  <section class="mt-20" aria-labelledby="compare-heading">
+    <h2 id="compare-heading" class="type-display text-3xl text-ink">Compare plans</h2>
+    <div class="mt-6 overflow-x-auto rounded-panel border border-line bg-surface-raised">
+      <table class="w-full text-left">
+        <thead>
+          <tr class="border-b border-line">
+            <th scope="col" class="w-2/5 px-4 py-4 text-sm sm:w-1/2 sm:px-5 font-semibold text-ink-muted"><span class="sr-only">Feature</span></th>
+            <th scope="col" class="px-4 py-4 font-semibold sm:px-5 text-ink"><%= @free.name %></th>
+            <th scope="col" class="px-4 py-4 font-semibold sm:px-5 text-ink"><%= @pro.name %></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-line">
+          <% plan_comparison_rows(@free, @pro).each do |label, free_value, pro_value| %>
+            <tr>
+              <th scope="row" class="px-4 py-3.5 sm:px-5 font-normal text-ink"><%= label %></th>
+              <td class="px-4 py-3.5 sm:px-5 text-sm"><%= render "pricing/check", value: free_value %></td>
+              <td class="px-4 py-3.5 sm:px-5 text-sm"><%= render "pricing/check", value: pro_value %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="mt-20 grid gap-10 lg:grid-cols-[1fr_2fr]" aria-labelledby="faq-heading">
+    <div>
+      <h2 id="faq-heading" class="type-display text-3xl text-ink">Questions</h2>
+      <p class="mt-4 max-w-sm leading-relaxed text-ink-muted">Something else? Email <%= mail_to Legal.support_email, Legal.support_email, class: "font-medium text-brand-700 underline underline-offset-4" %>.</p>
+    </div>
+    <div class="divide-y divide-line border-y border-line">
+      <% pricing_faqs.each do |question, answer| %>
+        <details class="group py-1">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 rounded-md py-4 text-lg font-semibold text-ink [&::-webkit-details-marker]:hidden">
+            <%= question %>
+            <svg class="size-5 shrink-0 text-ink-subtle transition-transform group-open:rotate-180" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/></svg>
+          </summary>
+          <div class="max-w-prose pb-5 leading-relaxed text-ink-muted"><%= answer %></div>
+        </details>
+      <% end %>
+    </div>
+  </section>
+</div>

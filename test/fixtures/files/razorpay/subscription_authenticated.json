@@ -1,0 +1,44 @@
+{
+  "entity": "event",
+  "account_id": "acc_BFQ7uQEaa7j2z7",
+  "event": "subscription.authenticated",
+  "contains": [
+    "subscription"
+  ],
+  "payload": {
+    "subscription": {
+      "entity": {
+        "id": "sub_00000000000001",
+        "entity": "subscription",
+        "plan_id": "plan_pro_monthly_inr",
+        "status": "authenticated",
+        "current_start": 1793356800,
+        "current_end": 1795948800,
+        "ended_at": null,
+        "quantity": 1,
+        "notes": {
+          "user_id": "USER_ID",
+          "email": "two@example.com",
+          "interval": "month",
+          "currency": "inr"
+        },
+        "charge_at": 1793356800,
+        "start_at": 1793356800,
+        "end_at": 2108889600,
+        "auth_attempts": 0,
+        "total_count": 120,
+        "paid_count": 1,
+        "customer_notify": true,
+        "created_at": 1793356800,
+        "expire_by": null,
+        "short_url": "https://rzp.io/rzp/Dqdqx3h",
+        "has_scheduled_changes": false,
+        "change_scheduled_at": null,
+        "source": "api",
+        "remaining_count": 119,
+        "customer_id": "cust_4xbQrmEoA5WJ0G"
+      }
+    }
+  },
+  "created_at": 1793356850
+}

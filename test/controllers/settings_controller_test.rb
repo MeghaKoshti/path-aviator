@@ -141,4 +141,97 @@ class SettingsControllerTest < ActionDispatch::IntegrationTest
       delete settings_account_path, params: { confirmation: " ONE@example.com " }
     end
   end
+
+  test "time zone and weekly email can be changed" do
+    get settings_path
+    assert_select "form[action=?]", settings_preferences_path do
+      assert_select "select#preferences_user_time_zone option[value='Asia/Kolkata']", /Kolkata/
+      assert_select "input[type=checkbox]#preferences_user_weekly_digest[checked]"
+    end
+
+    patch settings_preferences_path, params: { user: { time_zone: "Asia/Kolkata", weekly_digest: "0" } }
+
+    assert_redirected_to settings_path(anchor: "preferences")
+    @user.reload
+    assert_equal "Asia/Kolkata", @user.time_zone
+    assert_not @user.weekly_digest?
+  end
+
+  test "pages show dates in the user's own zone" do
+    @user.update!(time_zone: "Asia/Kolkata")
+
+    # Sunday 20:00 UTC is Monday 01:30 in Kolkata: a new week has started there.
+    travel_to Time.utc(2026, 11, 1, 20, 0) do
+      get dashboard_path
+      assert_select "#learning_stats", /2 Nov to 8 Nov/
+
+      @user.update!(time_zone: "UTC")
+      get dashboard_path
+      assert_select "#learning_stats", /26 Oct to 1 Nov/
+    end
+  end
+
+  test "the demo account can't change its preferences" do
+    demo = DemoAccount.reset!
+    sign_in_as demo, password: DemoAccount::PASSWORD
+
+    patch settings_preferences_path, params: { user: { time_zone: "Asia/Tokyo" } }
+
+    assert_redirected_to settings_path
+    assert_equal "UTC", demo.reload.time_zone
+  end
+
+  test "the plan section shows the plan and this month's usage" do
+    users(:one).generations.create!
+
+    get settings_path
+
+    assert_select "section#plan" do
+      assert_select "h2", "Plan & billing"
+      assert_select "span", "Free"
+      assert_select "p", /2 of 3 free paths left this month/
+    end
+  end
+
+  test "changing the email asks for the new address to be confirmed" do
+    assert_enqueued_emails 1 do
+      patch settings_profile_path, params: { user: { name: @user.name, email_address: "riya.new@example.com", password_challenge: "password" } }
+    end
+
+    assert_match "Check riya.new@example.com", flash[:notice]
+    assert_not @user.reload.email_verified?
+  end
+
+  test "free users can pick monthly or yearly in rupees or dollars" do
+    get settings_path(currency: "inr")
+
+    assert_select "#plan" do
+      assert_select "form[action=?]", billing_checkout_path(interval: "month", currency: "inr")
+      assert_select "form[action=?] button", billing_checkout_path(interval: "year", currency: "inr"), text: "Upgrade yearly"
+      assert_select "p", /₹199/
+      assert_select "p", /₹1,499/
+      assert_select "p", /incl. GST, save 37%/
+      assert_select "a[aria-current=true]", "INR"
+    end
+
+    get settings_path(currency: "usd")
+    assert_select "#plan p", /\$48/
+    assert_select "#plan p", text: /incl. GST/, count: 0
+  end
+
+  test "subscribers see their renewal date and a manage link instead of upgrade" do
+    travel_to Time.utc(2026, 10, 24) do
+      @user.subscriptions.create!(provider: "fake", external_id: "fake_sub_1", interval: "year", currency: "usd", status: "active", current_period_end: 1.year.from_now)
+      @user.update!(plan: :pro)
+
+      get settings_path
+
+      assert_select "#subscription" do
+        assert_select "p", /Pro, yearly\s+· \$48/
+        assert_select "p", /Renews on 24 October 2027/
+        assert_select "form[action=?] button", billing_portal_path, text: "Manage or cancel"
+      end
+      assert_select "form[action^=?]", billing_checkout_path, count: 0
+    end
+  end
 end

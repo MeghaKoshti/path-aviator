@@ -5,7 +5,7 @@
 
 <div class="mx-auto max-w-2xl">
   <h1 class="type-display text-3xl text-ink sm:text-4xl">Settings</h1>
-  <p class="mt-2 text-ink-muted">Manage how you sign in to Path Aviator.</p>
+  <p class="mt-2 text-ink-muted">Manage your plan, how you sign in, your time zone and emails.</p>
 
   <% if locked %>
     <p id="demo-locked-note" class="mt-6 flex items-start gap-3 rounded-control border border-brand-300 bg-brand-50 p-4 text-pretty text-brand-800">
@@ -16,6 +16,9 @@
 
   <div class="mt-8 space-y-6">
     <%= render "shared/card", title: "Profile" do %>
+      <% unless Current.user.email_verified? %>
+        <div class="mb-6"><%= render "shared/verify_email_prompt" %></div>
+      <% end %>
       <% invalid = first_invalid_field(@profile, %i[name email_address password_challenge]) %>
       <%= form_with model: @profile, url: settings_profile_path, method: :patch, namespace: "profile" do |form| %>
         <%= tag.fieldset(**fieldset) do %>
@@ -47,6 +50,37 @@
         <% end %>
       <% end %>
     <% end %>
+
+    <div id="preferences" class="scroll-mt-24">
+      <%= render "shared/card", title: "Time zone and email" do %>
+        <%= form_with model: @preferences, url: settings_preferences_path, method: :patch, scope: :user, namespace: "preferences" do |form| %>
+          <%= tag.fieldset(**fieldset) do %>
+            <div class="space-y-1.5">
+              <%= form.label :time_zone, "Time zone", class: "block text-sm font-semibold text-ink" %>
+              <%= form.select :time_zone, time_zone_options(@preferences.time_zone), {},
+                    class: ui_input_classes, aria: { describedby: "preferences_user_time_zone_hint" } %>
+              <p id="preferences_user_time_zone_hint" class="text-sm text-ink-subtle">
+                Your week starts on Monday at midnight here, and streaks count your local days.
+                It’s <%= l(Time.current.in_time_zone(@preferences.zone), format: "%-l:%M %P on %A") %> there now.
+              </p>
+            </div>
+            <label class="flex items-start gap-3">
+              <%= form.check_box :weekly_digest, class: "mt-1 size-4 shrink-0 accent-brand-600" %>
+              <span>
+                <span class="block font-semibold text-ink">Weekly check-in email</span>
+                <span class="mt-0.5 block text-sm text-pretty text-ink-muted">On Sunday evening: your hours against your goal, your streak and the next step. Paused after 30 days without learning.</span>
+              </span>
+            </label>
+            <%= form.submit "Save preferences", class: ui_button_classes, data: { turbo_submits_with: "Saving…" } %>
+          <% end %>
+        <% end %>
+      <% end %>
+    </div>
+
+    <%= turbo_stream_from Current.user, :data_exports %>
+    <%= render "settings/data_export", data_export: Current.user.data_exports.order(:created_at).last, locked: locked %>
+
+    <%= render "settings/plan", user: Current.user %>
 
     <section class="rounded-panel border border-danger-600/40 bg-surface-raised p-6 shadow-panel sm:p-8" aria-labelledby="delete-account-heading">
       <h2 id="delete-account-heading" class="mb-2 text-lg font-semibold text-ink">Delete account</h2>

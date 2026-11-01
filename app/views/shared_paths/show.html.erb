@@ -1,12 +1,13 @@
+<% owner = @learning_path.owner_first_name %>
 <% content_for :title, @learning_path.title %>
-<% content_for :meta_description, @learning_path.summary.to_s.truncate(160) %>
+<% content_for :og_title, owner ? "#{owner} is learning: #{@learning_path.title}" : @learning_path.title %>
+<% content_for :meta_description, "#{@learning_path.completed_steps_count} of #{@learning_path.path_steps_count} steps done. #{@learning_path.summary}".strip.truncate(160) %>
 <% content_for :head do %>
   <meta name="robots" content="noindex">
 <% end %>
 <%
   steps = @learning_path.path_steps.to_a
   next_step = @learning_path.next_step
-  owner = @learning_path.owner_first_name
 %>
 
 <div class="mx-auto max-w-3xl px-4 pb-16 pt-6 sm:px-6 sm:pt-10">
@@ -16,6 +17,16 @@
     <% if @learning_path.summary.present? %>
       <p class="mt-4 text-lg leading-relaxed text-pretty text-ink-muted"><%= @learning_path.summary %></p>
     <% end %>
+    <%= render "learning_paths/skills", learning_path: @learning_path %>
+
+    <div class="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center">
+      <% if authenticated? %>
+        <%= ui_button "Copy this path", copy_shared_path_path(@learning_path.share_token), method: :post, class: "shrink-0" %>
+      <% else %>
+        <%= ui_button "Copy this path", new_registration_path(copy: @learning_path.share_token), class: "shrink-0" %>
+      <% end %>
+      <p class="text-sm text-pretty text-ink-muted">Get the same steps with your own progress and notes. It doesn’t count toward your monthly paths.</p>
+    </div>
   </header>
 
   <section class="mt-8 rounded-panel border border-line bg-surface-raised p-5 shadow-panel" aria-label="Progress">
@@ -53,4 +64,8 @@
       <% end %>
     </div>
   </aside>
+
+  <% unless ProAccess.granted?(@learning_path.user) %>
+    <p class="mt-8 text-center text-sm text-ink-subtle">Made with <%= link_to "Path Aviator", root_path, class: "font-medium text-brand-700 underline-offset-4 hover:underline" %></p>
+  <% end %>
 </div>

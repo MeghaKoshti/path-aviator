@@ -1,0 +1,66 @@
+<%
+  goal = @stats.weekly_goal_minutes
+  ink = "#15173a"; muted = "#474b6b"; subtle = "#5f6386"; brand = "#4f3bcb"; route = "#b4277a"; line = "#dde0eb"
+%>
+<div style="background:#f5f6fa;padding:24px 12px;font-family:Archivo,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:<%= ink %>;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid <%= line %>;border-radius:16px;">
+    <tr>
+      <td style="padding:28px 28px 8px;">
+        <p style="margin:0;font-size:14px;color:<%= subtle %>;">Weekly check-in, <%= l(@stats.week_start, format: "%-d %b") %> to <%= l(@stats.week_start + 6, format: "%-d %b") %></p>
+        <h1 style="margin:8px 0 0;font-size:24px;line-height:1.25;">Hi <%= @user.name.to_s.split.first || "there" %>, here’s your week.</h1>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:16px 28px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td width="50%" style="padding:12px 0;vertical-align:top;">
+              <p style="margin:0;font-size:14px;color:<%= subtle %>;">Time learned</p>
+              <p style="margin:4px 0 0;font-size:26px;font-weight:700;"><%= format_minutes(@stats.minutes_this_week) %></p>
+              <p style="margin:2px 0 0;font-size:14px;color:<%= muted %>;"><%= goal.positive? ? "of your #{format_minutes(goal)} goal (#{@stats.goal_percent}%)" : "this week" %></p>
+            </td>
+            <td width="50%" style="padding:12px 0;vertical-align:top;">
+              <p style="margin:0;font-size:14px;color:<%= subtle %>;">Streak</p>
+              <p style="margin:4px 0 0;font-size:26px;font-weight:700;"><%= @stats.streak %></p>
+              <p style="margin:2px 0 0;font-size:14px;color:<%= muted %>;"><%= @stats.streak == 1 ? "day in a row" : "days in a row" %></p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <% if @stats.deadlines.any? %>
+      <tr>
+        <td style="padding:0 28px 8px;">
+          <% @stats.deadlines.each do |path, pace| %>
+            <p style="margin:0 0 8px;font-size:14px;line-height:1.5;color:<%= muted %>;">
+              <strong style="color:<%= pace == :behind ? "#7a4700" : "#105c38" %>;"><%= pace_word(pace).upcase_first %>:</strong>
+              <%= path.title %>. <%= target_date_label(path.target_date) %>. <%= pace_detail(path, today: @stats.today) %>
+            </p>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+    <tr>
+      <td style="padding:8px 28px 28px;">
+        <div style="border-left:3px solid <%= route %>;padding:4px 0 4px 14px;">
+          <% if @next_step %>
+            <p style="margin:0;font-size:14px;color:<%= subtle %>;">Next step, <%= format_minutes(@next_step.estimated_minutes) %></p>
+            <p style="margin:4px 0 0;font-size:17px;font-weight:600;"><%= @next_step.title %></p>
+            <p style="margin:2px 0 0;font-size:14px;color:<%= muted %>;"><%= @next_path.title %></p>
+          <% else %>
+            <p style="margin:0;font-size:17px;font-weight:600;">Every path is finished.</p>
+            <p style="margin:2px 0 0;font-size:14px;color:<%= muted %>;">Where to next?</p>
+          <% end %>
+        </div>
+        <p style="margin:20px 0 0;">
+          <% href = @next_step ? learning_path_url(@next_path, anchor: dom_id(@next_step)) : new_learning_goal_url %>
+          <a href="<%= href %>" style="display:inline-block;background:<%= brand %>;color:#ffffff;text-decoration:none;font-weight:600;padding:11px 18px;border-radius:10px;"><%= @next_step ? "Continue" : "Plan a new path" %></a>
+        </p>
+      </td>
+    </tr>
+  </table>
+  <p style="max-width:560px;margin:16px auto 0;font-size:12px;line-height:1.5;color:<%= subtle %>;text-align:center;">
+    You get this because the weekly check-in is on for <%= @user.email_address %>.
+    <a href="<%= @unsubscribe_url %>" style="color:<%= subtle %>;">Unsubscribe in one click</a>
+  </p>
+</div>

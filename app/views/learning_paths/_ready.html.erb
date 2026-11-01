@@ -7,11 +7,13 @@
     <div class="flex flex-wrap gap-2">
       <%= ui_badge goal_level_label(goal), :brand %>
       <%= ui_badge goal_pace_label(goal) %>
+      <%= ui_badge target_date_label(goal.target_date) if goal.target_date %>
     </div>
     <h1 class="type-display mt-4 text-3xl text-balance text-ink sm:text-[2.5rem]"><%= learning_path.title %></h1>
     <% if learning_path.summary.present? %>
       <p class="mt-4 max-w-2xl text-lg leading-relaxed text-pretty text-ink-muted"><%= learning_path.summary %></p>
     <% end %>
+    <%= render "learning_paths/skills", learning_path: learning_path %>
   </header>
 
   <aside class="lg:col-start-2 lg:row-span-2 lg:row-start-1" aria-label="Progress">

@@ -10,6 +10,7 @@
     <header class="mx-auto flex h-18 w-full max-w-6xl items-center gap-3 px-4 sm:px-6">
       <%= render "shared/logo" %>
       <nav aria-label="Account" class="ml-auto flex items-center gap-1 sm:gap-2">
+        <%= ui_button "Pricing", pricing_path, variant: :ghost, size: :sm, class: "max-sm:hidden", aria: { current: ("page" if current_page?(pricing_path)) } %>
         <% if authenticated? %>
           <%= ui_button "Your dashboard", dashboard_path, size: :sm %>
         <% else %>
@@ -22,14 +23,10 @@
     <%= render "shared/flash" %>
 
     <main id="main" tabindex="-1" class="flex-1 focus:outline-none">
-      <%= yield %>
+      <%# Nested layouts (e.g. layouts/legal) hand over their wrapped page as :page_body. %>
+      <%= content_for?(:page_body) ? yield(:page_body) : yield %>
     </main>
 
-    <footer class="border-t border-line">
-      <div class="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 text-sm text-ink-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
-        <p>Path Aviator, built by Megha Koshti with Ruby on Rails.</p>
-        <%= link_to "Source on GitHub", "https://github.com/MeghaKoshti/path-aviator", class: "font-medium text-brand-700 underline-offset-4 hover:underline" %>
-      </div>
-    </footer>
+    <%= render "shared/site_footer" %>
   </body>
 </html>

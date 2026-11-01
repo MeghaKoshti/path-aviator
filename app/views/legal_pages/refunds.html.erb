@@ -1,0 +1,44 @@
+<% content_for :title, "Refund & Cancellation Policy" %>
+<% content_for :meta_description, "Cancel Path Aviator Pro any time. Pro stays on until the end of the period you paid for, and your first payment is refundable within 7 days." %>
+
+<div class="legal-summary">
+  <p><strong>The short version.</strong> Cancel any time from Settings. You keep Pro until the end of the period you’ve paid for, and you won’t be charged again. If Pro isn’t for you, ask within 7 days of your first payment and we’ll refund it in full.</p>
+</div>
+
+<%= legal_section "How to cancel" do %>
+  <ol>
+    <li>Open <strong>Settings</strong> and go to <strong>Plan &amp; billing</strong>.</li>
+    <li>Choose <strong>Manage subscription</strong> and cancel. This opens the secure billing page run by Dodo Payments, our merchant of record.</li>
+  </ol>
+  <p>If anything goes wrong, email <%= support_mail_link(subject: "Cancel my subscription") %> from your account’s email address and we’ll cancel it for you.</p>
+<% end %>
+
+<%= legal_section "What happens when you cancel" do %>
+  <ul>
+    <li>Your subscription won’t renew, and no further payments are taken.</li>
+    <li>Pro stays on until the end of the monthly or yearly period you’ve paid for. After that your account moves to the Free plan.</li>
+    <li>Your paths, progress and notes stay exactly as they are. Certificates you’ve already published stay online until you remove them.</li>
+  </ul>
+<% end %>
+
+<%= legal_section "Refunds" do %>
+  <ul>
+    <li><strong>First payment:</strong> ask within 7 days of your first Pro payment, monthly or yearly, and we’ll refund it in full. No questions asked.</li>
+    <li><strong>Yearly renewals:</strong> if a yearly plan renewed and you haven’t used Pro since, ask within 7 days of the renewal for a full refund.</li>
+    <li><strong>Billing mistakes:</strong> duplicate charges or charges after you cancelled are always refunded in full.</li>
+    <li><strong>Other cases:</strong> monthly renewals and part-used periods aren’t refunded, because you keep Pro until the period ends.</li>
+  </ul>
+<% end %>
+
+<%= legal_section "How refunds are paid" do %>
+  <p>Refunds go back to the card, UPI account or other method you paid with, through Dodo Payments. Once approved, they usually appear within 5 to 10 working days, depending on your bank. Refunding a payment ends the Pro period it paid for.</p>
+<% end %>
+
+<%= legal_section "Failed payments" do %>
+  <p>If a renewal payment fails, Dodo Payments will try again. Pro stays on for 3 days while you update your payment method, then your account moves to Free until a payment goes through.</p>
+<% end %>
+
+<%= legal_section "Asking for a refund" do %>
+  <p>Email <%= support_mail_link(subject: "Refund request") %> with your account email and, if you have it, the order or invoice ID from your receipt. We reply within 2 working days.</p>
+  <p>Please contact us before opening a dispute with your bank: it’s faster for you, and disputes add fees for a small, independent product.</p>
+<% end %>
